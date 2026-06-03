@@ -7,19 +7,16 @@ import { lightColors, darkColors } from './colors';
 export const storage = new MMKV();
 
 export const useAppTheme = () => {
-  // گرفتن تم سیستم‌عامل
   const systemColorScheme = useColorScheme(); 
   
-  // خواندن تم انتخابی کاربر، مقدار پیش‌فرض سیستم است
-  const [themeMode, setThemeMode] = useMMKVString('app.theme');
+  // حتماً باید storage ساخته شده را به هوک پاس بدهید
+  const [themeMode, setThemeMode] = useMMKVString('app.theme', storage);
   const activeMode = themeMode || 'system';
 
-  // بررسی اینکه آیا تم نهایی باید دارک باشد یا خیر
   const isDark = activeMode === 'system' 
     ? systemColorScheme === 'dark' 
     : activeMode === 'dark';
 
-  // اختصاص رنگ‌های مناسب بر اساس پالت شما
   const colors = isDark ? darkColors : lightColors;
 
   return {
