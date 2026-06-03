@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OPTIONS = [
   { value: 'light', label: '☀️  روشن' },
@@ -70,8 +70,20 @@ function TestScreen() {
 }
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import BootSplash from "react-native-bootsplash";
 
 export default function App() {
+  useEffect(() => {
+    const init = async () => {
+      // در اینجا می‌توانید تنظیمات اولیه، لود کردن دیتابیس یا API را انجام دهید
+    };
+
+    init().finally(async () => {
+      // مخفی کردن اسپلش با انیمیشن
+      await BootSplash.hide({ fade: true });
+      console.log("BootSplash has been hidden successfully");
+    });
+  }, []);
   return (
     <SafeAreaProvider>
       <ThemeProvider>
