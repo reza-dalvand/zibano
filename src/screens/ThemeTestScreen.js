@@ -63,8 +63,10 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    fontFamily: 'Vazir',
   },
   title: {
+    fontFamily: 'Vazir',
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
