@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * scrollable: اگر true، محتوا داخل ScrollView قرار میگیره
