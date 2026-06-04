@@ -4,6 +4,9 @@
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNBootSplashSpec_autolinked_build/CMakeFiles/edit_cache.dir
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNBootSplashSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNImagePickerSpec_autolinked_build/CMakeFiles/edit_cache.dir
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/RNImagePickerSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/NitroModulesSpec_autolinked_build/CMakeFiles/edit_cache.dir
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/armeabi-v7a/NitroModulesSpec_autolinked_build/CMakeFiles/rebuild_cache.dir

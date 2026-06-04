@@ -4,6 +4,12 @@
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/Props.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/ShadowNodes.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/States.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/RNImagePickerSpec-generated.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/ComponentDescriptors.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/EventEmitters.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/Props.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/ShadowNodes.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/States.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir/NitroModulesSpec-generated.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir/react/renderer/components/NitroModulesSpec/ComponentDescriptors.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir/react/renderer/components/NitroModulesSpec/EventEmitters.cpp.o

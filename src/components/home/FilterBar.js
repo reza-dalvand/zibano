@@ -1,6 +1,6 @@
 import React from 'react';
 import {ScrollView, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+import {useTheme} from '../../theme/ThemeContext';
 
 const FilterBar = ({filters = [], selectedId, onSelect}) => {
   const {colors} = useTheme();

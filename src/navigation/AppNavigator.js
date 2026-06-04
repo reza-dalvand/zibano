@@ -5,54 +5,58 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../theme/ThemeContext';
 import ScreenWrapper from '../components/common/ScreenWrapper';
-
+import HomeScreen from '../screens/home/HomeScreen'
+import ExploreScreen from '../screens/explore/ExploreScreen'
+import CreateBusinessScreen from '../screens/createBusiness/CreateBusinessScreen'
+import ManageBusinessScreen from '../screens/createBusiness/ManageBusinessScreen'
+import ProfileScreen from '../screens/profile/ProfileScreen'
 const Tab = createBottomTabNavigator();
 
 // --- ۵ صفحه پایه به عنوان نمونه اولیه ---
-function HomeScreen() {
-  const { colors } = useTheme();
-  return (
-    <ScreenWrapper scrollable padding={20}>
-      <Text style={[styles.title, { color: colors.textMain }]}>صفحه اصلی (هوم)</Text>
-    </ScreenWrapper>
-  );
-}
+// function HomeScreen() {
+//   const { colors } = useTheme();
+//   return (
+//     <ScreenWrapper scrollable padding={20}>
+//       <Text style={[styles.title, { color: colors.textMain }]}>صفحه اصلی (هوم)</Text>
+//     </ScreenWrapper>
+//   );
+// }
 
-function ExploreScreen() {
-  const { colors } = useTheme();
-  return (
-    <ScreenWrapper scrollable padding={20}>
-      <Text style={[styles.title, { color: colors.textMain }]}>اکسپلور (مشابه اینستاگرام)</Text>
-    </ScreenWrapper>
-  );
-}
+// function ExploreScreen() {
+//   const { colors } = useTheme();
+//   return (
+//     <ScreenWrapper scrollable padding={20}>
+//       <Text style={[styles.title, { color: colors.textMain }]}>اکسپلور (مشابه اینستاگرام)</Text>
+//     </ScreenWrapper>
+//   );
+// }
 
-function CreateBusinessScreen() {
-  const { colors } = useTheme();
-  return (
-    <ScreenWrapper scrollable padding={20}>
-      <Text style={[styles.title, { color: colors.textMain }]}>ایجاد کسب و کار جدید</Text>
-    </ScreenWrapper>
-  );
-}
+// function CreateBusinessScreen() {
+//   const { colors } = useTheme();
+//   return (
+//     <ScreenWrapper scrollable padding={20}>
+//       <Text style={[styles.title, { color: colors.textMain }]}>ایجاد کسب و کار جدید</Text>
+//     </ScreenWrapper>
+//   );
+// }
 
-function ManageBusinessScreen() {
-  const { colors } = useTheme();
-  return (
-    <ScreenWrapper scrollable padding={20}>
-      <Text style={[styles.title, { color: colors.textMain }]}>مدیریت کسب و کار</Text>
-    </ScreenWrapper>
-  );
-}
+// function ManageBusinessScreen() {
+//   const { colors } = useTheme();
+//   return (
+//     <ScreenWrapper scrollable padding={20}>
+//       <Text style={[styles.title, { color: colors.textMain }]}>مدیریت کسب و کار</Text>
+//     </ScreenWrapper>
+//   );
+// }
 
-function ProfileScreen() {
-  const { colors } = useTheme();
-  return (
-    <ScreenWrapper scrollable padding={20}>
-      <Text style={[styles.title, { color: colors.textMain }]}>پروفایل کاربری</Text>
-    </ScreenWrapper>
-  );
-}
+// function ProfileScreen() {
+//   const { colors } = useTheme();
+//   return (
+//     <ScreenWrapper scrollable padding={20}>
+//       <Text style={[styles.title, { color: colors.textMain }]}>پروفایل کاربری</Text>
+//     </ScreenWrapper>
+//   );
+// }
 
 // --- کامپوننت اصلی ناوبری ---
 export default function AppNavigator() {

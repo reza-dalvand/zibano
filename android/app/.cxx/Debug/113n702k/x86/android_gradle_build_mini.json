@@ -1,6 +1,7 @@
 {
   "buildFiles": [
     "/home/reza/Documents/zibano/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/home/reza/Documents/zibano/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-nitro-modules/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
@@ -36,6 +37,11 @@
         "/home/reza/.gradle/caches/9.0.0/transforms/ba9920b7a17a1efcfe6a10fee4054b04/transformed/react-android-0.83.3-debug/prefab/modules/jsi/libs/android.x86/libjsi.so",
         "/home/reza/.gradle/caches/9.0.0/transforms/ba9920b7a17a1efcfe6a10fee4054b04/transformed/react-android-0.83.3-debug/prefab/modules/reactnative/libs/android.x86/libreactnative.so"
       ]
+    },
+    "react_codegen_RNImagePickerSpec::@f66ee9a2efecfb28bee4": {
+      "artifactName": "react_codegen_RNImagePickerSpec",
+      "abi": "x86",
+      "runtimeFiles": []
     },
     "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
       "artifactName": "react_codegen_rnscreens",

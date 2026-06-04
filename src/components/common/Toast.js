@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Text, View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * type: 'success' | 'error' | 'warning' | 'info'
