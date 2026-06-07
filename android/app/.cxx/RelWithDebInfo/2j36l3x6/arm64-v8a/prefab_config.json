@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "prefabPath": "/home/reza/.gradle/caches/modules-2/files-2.1/com.google.prefab/cli/2.1.0/aa32fec809c44fa531f01dcfb739b5b3304d3050/cli-2.1.0-all.jar",
+  "packages": [
+    "/home/reza/Documents/zibano/node_modules/react-native-nitro-modules/android/build/intermediates/prefab_package/release/prefab",
+    "/home/reza/.gradle/caches/9.0.0/transforms/f40f91d088793ba92fc0d4f5996598d8/transformed/react-android-0.83.3-release/prefab",
+    "/home/reza/.gradle/caches/9.0.0/transforms/2fcb3d5b403af7b954c534efe6e78c6f/transformed/hermes-android-0.14.1-release/prefab",
+    "/home/reza/.gradle/caches/9.0.0/transforms/b85f62a599074afc3b2ec6cfb7884973/transformed/fbjni-0.7.0/prefab"
+  ]
+}

@@ -1,0 +1,4 @@
+/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

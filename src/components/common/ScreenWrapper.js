@@ -20,6 +20,7 @@ export default function ScreenWrapper({
   scrollable = false,
   keyboardAware = false,
   padding = 20,
+  bottomInset = 100,
   edges = ['top', 'bottom'],
   style,
   contentStyle,
@@ -28,7 +29,14 @@ export default function ScreenWrapper({
 
   const inner = scrollable ? (
     <ScrollView
-      contentContainerStyle={[s.scrollContent, { padding }, contentStyle]}
+      contentContainerStyle={[
+        s.scrollContent,
+        {
+          padding,
+          paddingBottom: padding + bottomInset,
+        },
+        contentStyle,
+      ]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
