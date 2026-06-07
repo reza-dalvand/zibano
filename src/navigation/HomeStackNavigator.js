@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeContext';
 import ScreenWrapper from '../components/common/ScreenWrapper';
 import HomeScreen from '../screens/home/HomeScreen';
+import CategoryBusinessesScreen from '../screens/home/CategoryBusinessesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,10 @@ export default function HomeStackNavigator() {
       }}
     >
       <Stack.Screen name="HomeMain" component={HomeScreen} />
+      <Stack.Screen
+        name="CategoryBusinesses"
+        component={CategoryBusinessesScreen}
+      />
     </Stack.Navigator>
   );
 }

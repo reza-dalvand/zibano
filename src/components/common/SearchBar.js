@@ -1,19 +1,14 @@
 // src/components/common/SearchBar.js
 
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function SearchBar({
   value,
   onChangeText,
-  placeholder = 'جستجو...',
+  placeholder = 'جستجوی خدمات و کسب‌وکارها...',
   onSubmit,
   onClear,
   autoFocus = false,
@@ -38,8 +33,8 @@ export default function SearchBar({
         style,
       ]}
     >
-      {/* آیکون جستجو */}
-      <Text style={[s.searchIcon, { color: colors.textSecondary }]}>🔍</Text>
+      {/* آیکون جستجو — به خاطر RTL خودکار در سمت راست باکس می‌نشیند */}
+      <Icon name="search" size={22} color={focused ? colors.primary : colors.textSecondary} />
 
       <TextInput
         value={value}
@@ -49,19 +44,19 @@ export default function SearchBar({
         returnKeyType="search"
         onSubmitEditing={onSubmit}
         autoFocus={autoFocus}
-        textAlign="right"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        style={[
-          s.input,
-          { color: colors.textMain, fontFamily: 'Vazir' },
-        ]}
+        style={[s.input, { color: colors.textMain }]}
       />
 
-      {/* دکمه پاک‌کردن */}
+      {/* دکمه پاک‌کردن متن — به خاطر RTL خودکار در سمت چپ قرار می‌گیرد */}
       {value?.length > 0 && (
-        <TouchableOpacity onPress={handleClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={[s.clearIcon, { color: colors.textSecondary }]}>✕</Text>
+        <TouchableOpacity 
+          onPress={handleClear} 
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={s.clearBtn}
+        >
+          <Icon name="close" size={16} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
     </View>
@@ -70,24 +65,24 @@ export default function SearchBar({
 
 const s = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: 'row', // هماهنگ با سیستم خودکار RTL
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 48,
-    gap: 8,
-  },
-  searchIcon: {
-    fontSize: 16,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 52,
+    gap: 12,
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
+    fontFamily: 'Vazir',
     paddingVertical: 0,
+    textAlign: 'right', // برای تضمین راست‌چین بودن متن در حین تایپ
   },
-  clearIcon: {
-    fontSize: 13,
-    fontWeight: '600',
+  clearBtn: {
+    padding: 4,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
   },
 });

@@ -72,10 +72,15 @@ export default function HomeScreen({ navigation }) {
         <CategoryGrid
           categories={MOCK_CATEGORIES}
           selectedId={selectedCategory}
-          onSelect={(cat) => {
-            setSelectedCategory(cat.id);
-            navigation?.navigate('SearchFilter', { categoryId: cat.id });
-          }}
+          onSelect={(item) =>
+            navigation.navigate(
+              'CategoryBusinesses',
+              {
+                categoryId: item.id,
+                categoryName: item.name,
+              },
+            )
+          }
         />
 
         {/* ۳. پیشنهاد خدمات (محبوب‌ترین‌ها / بیشترین رزرو) */}

@@ -1,15 +1,18 @@
-import React from 'react';
-import {ScrollView, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {useTheme} from '../../theme/ThemeContext';
+// src/components/home/FilterBar.js
 
-const FilterBar = ({filters = [], selectedId, onSelect}) => {
-  const {colors} = useTheme();
+import React from 'react';
+import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTheme } from '../../theme/ThemeContext';
+
+const FilterBar = ({ filters = [], selectedId, onSelect }) => {
+  const { colors } = useTheme();
 
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}>
+      contentContainerStyle={styles.container} // لیست به طور خودکار به خاطر RTL از راست شروع می‌شود
+    >
       {filters.map(item => {
         const active = item.id === selectedId;
         return (
@@ -22,15 +25,17 @@ const FilterBar = ({filters = [], selectedId, onSelect}) => {
                 backgroundColor: active ? colors.primary : colors.cardBackground,
                 borderColor: active ? colors.primary : colors.border,
               },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 styles.label,
                 {
-                  color: active ? '#fff' : colors.textMain,
-                  fontFamily: active ? 'Vazir-Medium' : 'Vazir',
+                  color: active ? '#ffffff' : colors.textMain,
+                  fontFamily: active ? 'Vazir-Bold' : 'Vazir',
                 },
-              ]}>
+              ]}
+            >
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -41,14 +46,23 @@ const FilterBar = ({filters = [], selectedId, onSelect}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {paddingHorizontal: 12, paddingVertical: 8, gap: 8},
-  chip: {
+  container: {
+    flexDirection: 'row', // واگذاری چیدمان راست‌چین به موتور سیستم عامل
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
+    paddingVertical: 10,
+    gap: 10,
   },
-  label: {fontSize: 13},
+  chip: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 24, // استایل کپسولی ملایم و مدرن
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 13,
+  },
 });
 
 export default FilterBar;
