@@ -18,52 +18,67 @@ export default function Header({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const bg = variant === 'transparent' ? 'transparent' : colors.background;
+  const isTransparent = variant === 'transparent';
 
   return (
     <View
       style={[
         s.container,
         {
-          backgroundColor: bg,
-          borderBottomColor: variant === 'transparent' ? 'transparent' : colors.border,
-          paddingTop: insets.top + 12,
+          backgroundColor: isTransparent ? 'transparent' : colors.background,
+          paddingTop: insets.top + 10,
         },
+        // اگر ترنسپرنت نباشد، یک سایه بسیار ملایم و لوکس جایگزین خط مرزی ضخیم می‌شود
+        !isTransparent && s.shadowEffect,
+        !isTransparent && { borderBottomColor: colors.border + '40', shadowColor: colors.textMain },
         style,
       ]}
     >
-      {/* دکمه بازگشت — به خاطر RTL به صورت خودکار در سمت راست قرار می‌گیرد */}
-      <View style={s.side}>
+      {/* سمت راست (در حالت RTL خودکار معکوس می‌شود) — دکمه بازگشت پریمیوم */}
+      <View style={s.sideSlot}>
         {onBackPress && (
           <TouchableOpacity
+            activeOpacity={0.7}
             onPress={onBackPress}
-            style={[s.iconBtn, { backgroundColor: colors.cardBackground }]}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={[
+              s.backButton,
+              { 
+                backgroundColor: isTransparent ? 'rgba(255,255,255,0.85)' : colors.cardBackground,
+                borderColor: colors.border + '60'
+              }
+            ]}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
             {backIcon ?? (
-              <Icon name="chevron-right" size={26} color={colors.textMain} />
+              <Icon name="chevron-right" size={24} color={colors.textMain} />
             )}
           </TouchableOpacity>
         )}
       </View>
 
-      {/* وسط — عنوان و زیرعنوان */}
-      <View style={s.center}>
+      {/* وسط — بخش متون هدر با تایپوگرافی کشیده و لوکس */}
+      <View style={s.centerSlot}>
         {title && (
-          <Text numberOfLines={1} style={[s.title, { color: colors.textMain }]}>
+          <Text 
+            numberOfLines={1} 
+            style={[s.mainTitle, { color: colors.textMain }]}
+          >
             {title}
           </Text>
         )}
         {subtitle && (
-          <Text numberOfLines={1} style={[s.subtitle, { color: colors.textSecondary }]}>
+          <Text 
+            numberOfLines={1} 
+            style={[s.subTitle, { color: colors.textSecondary }]}
+          >
             {subtitle}
           </Text>
         )}
       </View>
 
-      {/* سمت چپ — اکشن اختیاری یا پلیس‌هولدر برای حفظ تقارن عنوان */}
-      <View style={s.side}>
-        {rightAction ?? <View style={s.placeholder} />}
+      {/* سمت چپ — اکشن سفارشی یا نگهدارنده تقارن */}
+      <View style={[s.sideSlot, s.leftAlign]}>
+        {rightAction ?? <View style={s.emptyPlaceholder} />}
       </View>
     </View>
   );
@@ -71,45 +86,63 @@ export default function Header({
 
 const s = StyleSheet.create({
   container: {
-    flexDirection: 'row', // سیستم RTL خودش این رو راست‌چین می‌کنه
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 14,
+    zIndex: 100,
+  },
+  shadowEffect: {
     borderBottomWidth: 1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  side: {
-    width: 44,
-    alignItems: 'center',
+  sideSlot: {
+    minWidth: 44,
+    height: 44,
     justifyContent: 'center',
+    alignItems: 'flex-start',
   },
-  center: {
+  leftAlign: {
+    alignItems: 'flex-end',
+  },
+  centerSlot: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
-  title: {
+  mainTitle: {
     fontFamily: 'Vazir-Bold',
-    fontSize: 18,
+    fontSize: 17,
+    letterSpacing: -0.3,
     textAlign: 'center',
   },
-  subtitle: {
-    fontFamily: 'Vazir',
-    fontSize: 12,
-    marginTop: 2,
+  subTitle: {
+    fontFamily: 'Vazir-Medium',
+    fontSize: 11,
+    marginTop: 3,
+    opacity: 0.8,
     textAlign: 'center',
   },
-  iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21, // دایره‌ای کامل و مینی‌مال
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  placeholder: {
-    width: 40,
+  emptyPlaceholder: {
+    width: 42,
+    height: 42,
   },
 });

@@ -1,27 +1,43 @@
+// App.js
 import React, { useEffect } from 'react';
-import { ThemeProvider } from './src/theme/ThemeContext';
+import BootSplash from 'react-native-bootsplash';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import BootSplash from "react-native-bootsplash";
-import AppNavigator from './src/navigation/AppNavigator'; // اضافه شدن ناوبری اصلی
+import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from './src/theme/ThemeContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import AppNavigator from './src/navigation/AppNavigator';
+import AuthNavigator from './src/navigation/AuthNavigator';
+
+// ✅ RootNavigator بدون Stack — فقط conditional render
+// این روش توصیه‌شده React Navigation برای auth flow است
+function RootNavigator() {
+  const { isAuthenticated } = useAuth();
+  console.log('🔐 RootNavigator — isAuthenticated:', isAuthenticated);
+
+  // وقتی isAuthenticated تغییر میکنه، React کامپوننت جدید mount و قدیم unmount میشه
+  // NavigationContainer این switch رو مدیریت میکنه بدون هیچ مشکلی
+  if (isAuthenticated) {
+    return <AppNavigator />;
+  }
+  return <AuthNavigator />;
+}
 
 export default function App() {
   useEffect(() => {
-    const init = async () => {
-      // در اینجا می‌توانید تنظیمات اولیه، لود کردن دیتابیس یا API را انجام دهید
-    };
-
+    const init = async () => {};
     init().finally(async () => {
-      // مخفی کردن اسپلش با انیمیشن
       await BootSplash.hide({ fade: true });
-      console.log("BootSplash has been hidden successfully");
     });
   }, []);
 
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        {/* رندر ناوبری ۵ صفحه‌ای به همراه تم و سِیف‌اریا */}
-        <AppNavigator />
+        <AuthProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

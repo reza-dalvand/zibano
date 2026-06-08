@@ -9,14 +9,16 @@ import Header from '../../components/common/Header';
 import Avatar from '../../components/common/Avatar';
 import Divider from '../../components/common/Divider';
 import Button from '../../components/common/Button';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ProfileScreen({ navigation }) {
   // استفاده از کانتکست تم پروژه شما
   const { colors, resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+  const { user, logout } = useAuth();
 
   // داده‌های تستی (Mock) کاربر
-  const user = {
+  const user1 = {
     name: 'مریم حسینی',
     phone: '۰۹۱۲۳۴۵۶۷۸۹',
     avatarUrl: 'https://i.pravatar.cc/150?img=5',
@@ -35,15 +37,18 @@ export default function ProfileScreen({ navigation }) {
     setTheme(isDark ? 'light' : 'dark');
   };
 
-  // هندلر خروج
+
+  // جایگزین هندلر logout فعلی شود
   const handleLogout = () => {
-    console.log('User logged out');
+    logout();
+    // پس از logout چون isAuthenticated false می‌شود،
+    // اپلیکیشن به طور خودکار به LoginScreen برمی‌گردد
   };
 
   // رندر کردن هر آیتم منو
   const renderMenuItem = (item) => (
-    <TouchableOpacity 
-      key={item.id} 
+    <TouchableOpacity
+      key={item.id}
       style={[styles.menuItem, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
       onPress={() => navigation.navigate(item.route)}
     >
@@ -61,17 +66,17 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.headerContainer}>
         <Text style={[styles.headerText, { color: colors.textMain }]}>پروفایل من</Text>
       </View>
-      
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
+
         {/* بخش اطلاعات کاربر */}
         <View style={styles.userInfoContainer}>
-          <Avatar 
-            source={{ uri: user.avatarUrl }} 
-            size={80} 
+          <Avatar
+            source={{ uri: user1.avatarUrl }}
+            size={80}
           />
-          <Text style={[styles.userName, { color: colors.textMain }]}>{user.name}</Text>
-          <Text style={[styles.userPhone, { color: colors.textSecondary }]}>{user.phone}</Text>
+          <Text style={[styles.userName, { color: colors.textMain }]}>{user1.name}</Text>
+          <Text style={[styles.userPhone, { color: colors.textSecondary }]}>{user1.phone}</Text>
         </View>
 
         <Divider style={styles.divider} />
@@ -86,8 +91,8 @@ export default function ProfileScreen({ navigation }) {
         {/* بخش تنظیمات اپلیکیشن (تم) */}
         <View style={styles.settingsContainer}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>تنظیمات</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[styles.menuItem, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
             onPress={toggleTheme}
           >
@@ -103,8 +108,8 @@ export default function ProfileScreen({ navigation }) {
 
         {/* دکمه خروج */}
         <View style={styles.logoutContainer}>
-          <TouchableOpacity 
-            style={[styles.logoutButton, { borderColor: '#E1306C' }]} 
+          <TouchableOpacity
+            style={[styles.logoutButton, { borderColor: '#E1306C' }]}
             onPress={handleLogout}
           >
             <Text style={styles.logoutButtonText}>خروج از حساب کاربری</Text>
@@ -117,14 +122,14 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  headerContainer: { 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    paddingVertical: 16 
+  headerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16
   },
-  headerText: { 
-    fontSize: 18, 
-    fontFamily: 'Vazir-Bold' 
+  headerText: {
+    fontSize: 18,
+    fontFamily: 'Vazir-Bold'
   },
   scrollContent: {
     paddingBottom: 40,
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 15,
     fontFamily: 'Vazir',
-    marginLeft: 12, 
+    marginLeft: 12,
   },
   themeText: {
     fontSize: 14,
@@ -187,16 +192,16 @@ const styles = StyleSheet.create({
     marginTop: 30,
     paddingHorizontal: 20,
   },
-  logoutButton: { 
-    height: 50, 
-    borderRadius: 12, 
+  logoutButton: {
+    height: 50,
+    borderRadius: 12,
     borderWidth: 1,
-    justifyContent: 'center', 
-    alignItems: 'center' 
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  logoutButtonText: { 
-    color: '#E1306C', 
-    fontSize: 16, 
-    fontFamily: 'Vazir-Bold' 
+  logoutButtonText: {
+    color: '#E1306C',
+    fontSize: 16,
+    fontFamily: 'Vazir-Bold'
   },
 });
