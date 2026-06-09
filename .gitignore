@@ -1,30 +1,55 @@
-# Node
+# ==========================================
+# Node.js & Dependency Directories
+# ==========================================
 node_modules/
-npm-debug.log
-yarn-error.log
-yarn-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnp.*
 
-# macOS
-.DS_Store
-*.swp
+# ==========================================
+# React Native & Metro Bundler
+# ==========================================
+*.jsbundle
+*.jsbundle.meta
+# Metro cache
+.metro-cache/
 
-# Android
+# ==========================================
+# Expo (اگر از اکپو استفاده می‌کنید)
+# ==========================================
+.expo/
+dist/
+web-build/
+*.jks
+
+# ==========================================
+# Android & Gradle
+# ==========================================
 android/.gradle/
-android/app/build/
 android/build/
-android/local.properties
+android/app/build/
+android/app/.cxx/
+.gradle/
+# فایل‌های بیلد شده (خروجی‌ها)
 *.apk
 *.aab
 *.ap_
-*.dex
-*.class
-*.so
+# مسیر SDK اندروید سیستم شما (هرگز نباید کامیت شود)
+local.properties
+# کلیدهای امنیتی (به جز کلید دیباگ پیش‌فرض)
+android/app/src/release/*.keystore
+!android/app/debug.keystore
 
-# iOS
-ios/Pods/
+# ==========================================
+# iOS & Xcode & CocoaPods
+# ==========================================
 ios/build/
-ios/Index/
+ios/Pods/
 ios/DerivedData/
+ios/Index/
+# فایل‌های شخصی Xcode (تنظیمات پنجره‌ها و کاربر)
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -36,23 +61,66 @@ ios/DerivedData/
 xcuserdata/
 *.xccheckout
 *.moved-aside
-DerivedData
+*.xcuserstate
+*.xcscmblueprint
 *.hmap
 *.ipa
-*.xcuserstate
 
-# React Native & Metro
-.expo/
-.rncache
-.eslintcache
-metro.config.local.js
+# ==========================================
+# Environment Variables (متغیرهای محیطی)
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
 
-# IDEs and Editors
+# ==========================================
+# IDEs & Editors
+# ==========================================
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+# IntelliJ / WebStorm / Android Studio
 .idea/
-.vscode/
 *.iml
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.iws
+*.ipr
+# فایل‌های موقت ویرایشگرها
+*.swp
+*.swo
+*~
+
+# ==========================================
+# OS Generated Files (سیستم‌عامل‌ها)
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==========================================
+# Testing, Coverage & E2E (Detox/Jest)
+# ==========================================
+coverage/
+.nyc_output/
+artifacts/
+
+# ==========================================
+# Fastlane (ابزار انتشار خودکار)
+# ==========================================
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots/**/*.png
+*/fastlane/test_output

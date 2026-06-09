@@ -1,3 +1,9 @@
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/RNDateTimePickerCGen-generated.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/ComponentDescriptors.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/EventEmitters.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/Props.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/ShadowNodes.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/States.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/RNBootSplashSpec-generated.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/ComponentDescriptors.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/arm64-v8a/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/EventEmitters.cpp.o

@@ -1,3 +1,4 @@
+/home/reza/Documents/zibano/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt
 /home/reza/Documents/zibano/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt
 /home/reza/Documents/zibano/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt
 /home/reza/Documents/zibano/node_modules/react-native-nitro-modules/android/build/generated/source/codegen/jni/CMakeLists.txt
