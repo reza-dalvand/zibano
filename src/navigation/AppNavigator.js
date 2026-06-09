@@ -66,9 +66,9 @@ export default function AppNavigator() {
           let iconName;
 
           if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Profile') iconName = 'person-outline';
+          else if (route.name === 'Profile') iconName = 'person';
           else if (route.name === 'CreateBusiness') iconName = 'add-circle-outline';
-          else if (route.name === 'Explore') iconName = 'explore';
+          else if (route.name === 'Explore') iconName = 'collections';
           else if (route.name === 'ManageBusiness') iconName = 'dashboard';
 
           return (
@@ -99,7 +99,7 @@ export default function AppNavigator() {
       <Tab.Screen
         name="Explore"
         component={ExploreScreen}
-        options={{ tabBarLabel: 'اکسپلور' }}
+        options={{ tabBarLabel: 'ویترین' }}
       />
       <Tab.Screen
         name="Home"
