@@ -7,7 +7,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import CategoryBusinessesScreen from '../screens/home/CategoryBusinessesScreen';
 // ۱. امپورت کردن صفحه جزئیات کسب و کار که ساختیم
 import BusinessDetailsScreen from '../screens/home/BusinessDetailsScreen'; 
-import BookingScreen from '../screens/home/BookingScreen';
+// import BookingScreen from '../screens/home/BookingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,10 +34,10 @@ export default function HomeStackNavigator() {
         component={BusinessDetailsScreen} 
       />
       {/* ۲. اضافه کردن صفحه رزرو نوبت*/}
-      <Stack.Screen 
+      {/* <Stack.Screen 
         name="Booking" 
         component={BookingScreen} 
-      />
+      /> */}
     </Stack.Navigator>
   );
 }

@@ -7,6 +7,7 @@ import { ThemeProvider } from './src/theme/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
+import ErrorBoundary from './src/components/common/ErrorBoundary';
 
 // ✅ RootNavigator بدون Stack — فقط conditional render
 // این روش توصیه‌شده React Navigation برای auth flow است
@@ -19,7 +20,8 @@ function RootNavigator() {
   if (isAuthenticated) {
     return <AppNavigator />;
   }
-  return <AuthNavigator />;
+  return <AppNavigator />;
+  // return <AuthNavigator />;
 }
 
 export default function App() {
@@ -31,6 +33,7 @@ export default function App() {
   }, []);
 
   return (
+  <ErrorBoundary>
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
@@ -40,5 +43,6 @@ export default function App() {
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
+  </ErrorBoundary>
   );
 }

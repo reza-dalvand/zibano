@@ -14,6 +14,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import BookingModal from './BookingScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -42,9 +43,16 @@ const MOCK_BUSINESS_DETAILS = {
 export default function BusinessDetailsScreen({ navigation, route }) {
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('services'); // 'services' یا 'about'
-
+  const [bookingModalVisible, setBookingModalVisible] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
   // در آینده businessId را از route.params می‌گیرید و دیتای واقعی را لود می‌کنید
   const biz = MOCK_BUSINESS_DETAILS;
+
+  // ۳. تابع باز کردن مودال
+  const openBooking = (service) => {
+    setSelectedService(service);
+    setBookingModalVisible(true);
+  };
 
   return (
     <ScreenWrapper padding={0} edges={['bottom']}>
@@ -54,7 +62,7 @@ export default function BusinessDetailsScreen({ navigation, route }) {
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContainer}
       >
@@ -93,7 +101,7 @@ export default function BusinessDetailsScreen({ navigation, route }) {
 
         {/* ۳. سوئیچر تب‌ها (تب بار دستی و بسیار روان) */}
         <View style={[s.tabBar, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[s.tabButton, activeTab === 'services' && { borderBottomColor: colors.primary }]}
             onPress={() => setActiveTab('services')}
           >
@@ -102,7 +110,7 @@ export default function BusinessDetailsScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[s.tabButton, activeTab === 'about' && { borderBottomColor: colors.primary }]}
             onPress={() => setActiveTab('about')}
           >
@@ -117,31 +125,30 @@ export default function BusinessDetailsScreen({ navigation, route }) {
           {activeTab === 'services' ? (
             // لیست خدمات سالن
             biz.services.map((service) => (
-              <View 
-                key={service.id} 
+              <View
+                key={service.id}
                 style={[s.serviceCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
               >
                 <View style={s.serviceMainInfo}>
                   <Text style={[s.serviceName, { color: colors.textMain }]}>{service.name}</Text>
-                  
+
                   <View style={s.serviceMetaRow}>
                     <Icon name="access-time" size={14} color={colors.textSecondary} />
                     <Text style={[s.durationText, { color: colors.textSecondary }]}>{service.duration}</Text>
-                    
+
                     {service.discount > 0 && (
                       <View style={[s.discountBadge, { backgroundColor: colors.primary + '15' }]}>
                         <Text style={[s.discountText, { color: colors.primary }]}>{service.discount}٪ تخفیف</Text>
                       </View>
                     )}
                   </View>
-                  
+
                   <Text style={[s.servicePrice, { color: colors.primary }]}>{service.price}</Text>
                 </View>
 
-                {/* دکمه رزرو مستقیم */}
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[s.bookButton, { backgroundColor: colors.primary }]}
-                  onPress={() => navigation.navigate('Booking')}
+                  onPress={() => openBooking(service)}
                 >
                   <Text style={s.bookButtonText}>رزرو</Text>
                 </TouchableOpacity>
@@ -152,7 +159,7 @@ export default function BusinessDetailsScreen({ navigation, route }) {
             <View style={s.aboutWrapper}>
               <Text style={[s.aboutTitle, { color: colors.textMain }]}>درباره کسب‌وکار</Text>
               <Text style={[s.aboutText, { color: colors.textSecondary }]}>{biz.about}</Text>
-              
+
               <View style={[s.divider, { backgroundColor: colors.border }]} />
 
               <View style={s.infoDetailRow}>
@@ -183,6 +190,12 @@ export default function BusinessDetailsScreen({ navigation, route }) {
         </View>
 
       </ScrollView>
+
+      <BookingModal
+        visible={bookingModalVisible}
+        onClose={() => setBookingModalVisible(false)}
+        service={selectedService}
+      />
     </ScreenWrapper>
   );
 }
