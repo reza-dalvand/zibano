@@ -58,11 +58,11 @@ const AppointmentManagerCard = ({appointment, onStatusChange}) => {
 
 const styles = StyleSheet.create({
   card: {borderRadius: 12, padding: 14, borderWidth: 0.5, marginBottom: 10},
-  header: {flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6},
+  header: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6},
   name: {fontSize: 15},
   badge: {flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20},
   badgeText: {fontSize: 12},
-  meta: {fontSize: 12, textAlign: 'right', marginBottom: 10},
+  meta: {fontSize: 12, textAlign: 'left', marginBottom: 10},
   actions: {flexDirection: 'row-reverse', gap: 8},
   btn: {paddingHorizontal: 16, paddingVertical: 6, borderRadius: 8},
   btnText: {fontSize: 13},
