@@ -1,5 +1,4 @@
 // src/components/common/ScreenWrapper.js
-
 import React from 'react';
 import {
   View,
@@ -12,8 +11,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 
 /**
- * scrollable: اگر true، محتوا داخل ScrollView قرار میگیره
- * keyboardAware: اگر true، از KeyboardAvoidingView استفاده میکنه
+ * کامپوننت wrapper استاندارد برای تمام صفحات اپلیکیشن
+ *
+ * ⚠️ نکته مهم:
+ * این کامپوننت به طور پیش‌فرض فقط لبه‌های پایین و چپ/راست را مدیریت می‌کند.
+ * لبه بالا (top) توسط Header کامپوننت مدیریت می‌شود تا تداخل ایجاد نشود.
+ *
+ * @param {boolean} scrollable - اگر true، محتوا داخل ScrollView قرار می‌گیرد
+ * @param {boolean} keyboardAware - اگر true، از KeyboardAvoidingView استفاده می‌کند
+ * @param {number} padding - فاصله داخلی از لبه‌ها (پیش‌فرض: 20)
+ * @param {number} bottomInset - فاصله اضافی از پایین برای تب‌بار شناور (پیش‌فرض: 100)
+ * @param {string[]} edges - لبه‌های SafeArea که باید مدیریت شوند
+ * @param {boolean} safeAreaTop - اگر true، لبه بالا هم مدیریت می‌شود (فقط برای صفحات بدون Header)
  */
 export default function ScreenWrapper({
   children,
@@ -21,12 +30,25 @@ export default function ScreenWrapper({
   keyboardAware = false,
   padding = 20,
   bottomInset = 100,
-  edges = ['top', 'bottom'],
+  edges = null, // ⚠️ تغییر: پیش‌فرض null است و پایین محاسبه می‌شود
+  safeAreaTop = false, // 🆕 برای صفحات بدون Header مثل Login
   style,
   contentStyle,
+  showsVerticalScrollIndicator = false,
+  bounces = true,
 }) {
   const { colors } = useTheme();
 
+  // 🎯 محاسبه هوشمند لبه‌های SafeArea
+  // اگر edges مستقیماً پاس داده نشده، بر اساس safeAreaTop تصمیم می‌گیریم
+  const computedEdges = edges ?? [
+    ...(safeAreaTop ? ['top'] : []), // فقط وقتی safeAreaTop=true باشد top اضافه می‌شود
+    'bottom',
+    'left',
+    'right',
+  ];
+
+  // 📦 محتوای داخلی (ScrollView یا View ساده)
   const inner = scrollable ? (
     <ScrollView
       contentContainerStyle={[
@@ -38,7 +60,8 @@ export default function ScreenWrapper({
         contentStyle,
       ]}
       keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+      bounces={bounces}
     >
       {children}
     </ScrollView>
@@ -46,10 +69,12 @@ export default function ScreenWrapper({
     <View style={[s.flat, { padding }, contentStyle]}>{children}</View>
   );
 
+  // ⌨️ پیچیدن در KeyboardAvoidingView در صورت نیاز
   const wrapped = keyboardAware ? (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={s.flex}
+      keyboardVerticalOffset={0}
     >
       {inner}
     </KeyboardAvoidingView>
@@ -59,7 +84,7 @@ export default function ScreenWrapper({
 
   return (
     <SafeAreaView
-      edges={edges}
+      edges={computedEdges}
       style={[s.root, { backgroundColor: colors.background }, style]}
     >
       {wrapped}

@@ -26,7 +26,9 @@ export default function Header({
         s.container,
         {
           backgroundColor: isTransparent ? 'transparent' : colors.background,
-          paddingTop: insets.top + 10,
+          paddingTop: insets.top,
+          marginBottom: insets.bottom,
+
         },
         // اگر ترنسپرنت نباشد، یک سایه بسیار ملایم و لوکس جایگزین خط مرزی ضخیم می‌شود
         !isTransparent && s.shadowEffect,
