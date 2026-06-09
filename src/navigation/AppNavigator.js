@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../theme/ThemeContext';
 import ExploreScreen from '../screens/explore/ExploreScreen'
 import CreateBusinessScreen from '../screens/createBusiness/CreateBusinessScreen'
-import ManageBusinessScreen from '../screens/createBusiness/ManageBusinessScreen'
+import ManageBusinessScreen from '../screens/manageBusiness/ManageBusinessScreen'
 import ProfileScreen from '../screens/profile/ProfileScreen'
 import HomeStackNavigator from './HomeStackNavigator'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

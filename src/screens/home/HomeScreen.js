@@ -1,275 +1,184 @@
-// src/screens/HomeScreen.js
-
+// src/screens/home/HomeScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import SearchBar from '../../components/common/SearchBar';
 import AdSlider from '../../components/home/AdSlider';
 import CategoryGrid from '../../components/home/CategoryGrid';
+import HomeHeader from '../../components/home/HomeHeader';
+import ServiceListCard from '../../components/home/ServiceListCard';
+import BusinessListCard from '../../components/home/BusinessListCard';
+import { useAuth } from '../../context/AuthContext';
 
-// دیتای موقت برای نمایش اولیه (بعداً با API جایگزین می‌شود)
+// ============ دیتای موقت ============
 const MOCK_ADS = [
   { id: 1, imageUrl: 'https://picsum.photos/800/400?random=1', title: 'جشنواره تخفیف‌های بهار کلینیک رُز', subtitle: 'تا ۳۰٪ تخفیف خدمات پوست' },
   { id: 2, imageUrl: 'https://picsum.photos/800/400?random=2', title: 'افتتاحیه سالن زیبایی لاویا', subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی' },
 ];
 
 const MOCK_CATEGORIES = [
-  { id: 1, name: 'میکاپ', icon: 'face' },
-  { id: 2, name: 'کاشت ناخن', icon: 'brush' },
-  { id: 3, name: 'لیزر مو', icon: 'flash-on' },
-  { id: 4, name: 'پاکسازی', icon: 'spa' },
+  { id: 1, name: 'میکاپ', icon: 'face', color: '#E91E63' },
+  { id: 2, name: 'کاشت ناخن', icon: 'brush', color: '#9C27B0' },
+  { id: 3, name: 'لیزر مو', icon: 'flash-on', color: '#2196F3' },
+  { id: 4, name: 'پاکسازی', icon: 'spa', color: '#4CAF50' },
+  { id: 5, name: 'رنگ مو', icon: 'palette', color: '#FF9800' },
+  { id: 6, name: 'کراتین', icon: 'auto-awesome', color: '#00BCD4' },
+  { id: 7, name: 'مژه', icon: 'visibility', color: '#795548' },
+  { id: 8, name: 'ماساژ', icon: 'self-improvement', color: '#607D8B' },
 ];
 
 const MOCK_SERVICES = [
-  { id: 1, name: 'فیشیال تخصصی پوست', business: 'کلینیک صدف', price: '۷۵۰,۰۰۰ تومان', rating: '۴.۸', image: 'https://picsum.photos/150?random=11' },
-  { id: 2, name: 'کاشت مژه هالیوودی', business: 'سالن زیبایی افرا', price: '۵۸۰,۰۰۰ تومان', rating: '۴.۹', image: 'https://picsum.photos/150?random=12' },
+  { id: 1, name: 'فیشیال تخصصی پوست', business: 'کلینیک صدف', price: '۷۵۰,۰۰۰', originalPrice: '۹۵۰,۰۰۰', rating: '۴.۸', image: 'https://picsum.photos/300/300?random=11', discount: 20, duration: '۶۰ دقیقه' },
+  { id: 2, name: 'کاشت مژه هالیوودی', business: 'سالن زیبایی افرا', price: '۵۸۰,۰۰۰', originalPrice: '۵۸۰,۰۰۰', rating: '۴.۹', image: 'https://picsum.photos/300/300?random=12', discount: 0, duration: '۹۰ دقیقه' },
+  { id: 3, name: 'لیزر فول بادی', business: 'مرکز لیزر رویال', price: '۲,۵۰۰,۰۰۰', originalPrice: '۳,۲۰۰,۰۰۰', rating: '۴.۷', image: 'https://picsum.photos/300/300?random=13', discount: 22, duration: '۱۲۰ دقیقه' },
 ];
 
 const MOCK_BUSINESSES = [
-  { id: 1, name: 'مجموعه زیبایی و سلامت نیلارام', address: 'تهران، سعادت آباد', rating: '۵.۰', VIP: true, logo: 'https://picsum.photos/100?random=21' },
-  { id: 2, name: 'سالن تخصصی کراتین و رنگ موی النا', address: 'تهران، نیاوران', rating: '۴.۷', VIP: false, logo: 'https://picsum.photos/100?random=22' },
+  { id: 1, name: 'مجموعه زیبایی و سلامت نیلارام', address: 'تهران، سعادت آباد', rating: '۵.۰', reviewsCount: 142, VIP: true, logo: 'https://picsum.photos/200?random=21', servicesCount: 24, category: 'کلینیک پوست و مو' },
+  { id: 2, name: 'سالن تخصصی کراتین و رنگ موی النا', address: 'تهران، نیاوران', rating: '۴.۷', reviewsCount: 89, VIP: false, logo: 'https://picsum.photos/200?random=22', servicesCount: 18, category: 'سالن زیبایی' },
 ];
+// =================================
+
+// کامپوننت سکشن با عنوان و "مشاهده همه"
+function SectionHeader({ title, onSeeAll, colors }) {
+  return (
+    <View style={s.sectionHeader}>
+      <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+        {title}
+      </Text>
+      {onSeeAll && (
+        <TouchableOpacity onPress={onSeeAll}>
+          <Text style={[s.seeAll, { color: colors.primary }]}>مشاهده همه</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   return (
     <ScreenWrapper scrollable padding={0} edges={['top']}>
-      
-      {/* هدر و بخش جستجو */}
-      <View style={s.headerContainer}>
-        <View style={s.welcomeRow}>
-          <Text style={[s.welcomeText, { color: colors.textSecondary }]}>سلام، وقت بخیر 👋</Text>
-          <Text style={[s.appName, { color: colors.primary }]}>زیبانو</Text>
-        </View>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="جستجوی خدمات، سالن‌ها و کلینیک‌ها..."
-          onSubmit={() => {
-            // هدایت به صفحه SearchFilterScreen همراه با کوئری
-            navigation?.navigate('SearchFilter', { query: searchQuery });
-          }}
-        />
-      </View>
-
-      {/* ۱. اسلایدر تبلیغات کسب‌وکارها */}
-      <AdSlider 
-        ads={MOCK_ADS} 
-        onPress={(ad) => console.log('Ad pressed:', ad.id)} 
+      {/* هدر مدرن */}
+      <HomeHeader
+        userName={user?.name}
+        userAvatar={user?.avatar}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearchSubmit={() =>
+          navigation?.navigate('SearchFilter', { query: searchQuery })
+        }
+        onNotificationPress={() => console.log('Notifications')}
+        notificationCount={3}
       />
 
-      {/* کانتینر داخلی برای بخش‌هایی که نیاز به پدینگ افقی دارند */}
       <View style={s.bodyContainer}>
-        
-        {/* ۲. دسته‌بندی خدمات */}
-        <View style={s.sectionHeader}>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>دسته‌بندی خدمات</Text>
+        {/* ۱. اسلایدر تبلیغات */}
+        <View style={s.section}>
+          <AdSlider
+            ads={MOCK_ADS}
+            onPress={(ad) => console.log('Ad pressed:', ad.id)}
+          />
         </View>
-        <CategoryGrid
-          categories={MOCK_CATEGORIES}
-          selectedId={selectedCategory}
-          onSelect={(item) =>
-            navigation.navigate(
-              'CategoryBusinesses',
-              {
+
+        {/* ۲. دسته‌بندی خدمات */}
+        <View style={s.section}>
+          <SectionHeader
+            title="دسته‌بندی خدمات"
+            colors={colors}
+          />
+          <CategoryGrid
+            categories={MOCK_CATEGORIES}
+            selectedId={selectedCategory}
+            onSelect={(item) => {
+              setSelectedCategory(item.id);
+              navigation.navigate('CategoryBusinesses', {
                 categoryId: item.id,
                 categoryName: item.name,
-              },
-            )
-          }
-        />
-
-        {/* ۳. پیشنهاد خدمات (محبوب‌ترین‌ها / بیشترین رزرو) */}
-        <View style={s.sectionHeader}>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>پیشنهاد خدمات زیبایی</Text>
-          <TouchableOpacity>
-            <Text style={[s.seeAll, { color: colors.primary }]}>مشاهده همه</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {MOCK_SERVICES.map((service) => (
-          <TouchableOpacity 
-            key={service.id} 
-            style={[s.serviceCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
-            onPress={() => navigation?.navigate('ServiceDetail', { id: service.id })}
-          >
-            <Image source={{ uri: service.image }} style={s.serviceImage} />
-            <View style={s.serviceInfo}>
-              <Text style={[s.serviceName, { color: colors.textMain }]}>{service.name}</Text>
-              <Text style={[s.serviceBusiness, { color: colors.textSecondary }]}>{service.business}</Text>
-              <View style={s.priceRow}>
-                <Text style={[s.servicePrice, { color: colors.primary }]}>{service.price}</Text>
-                <Text style={[s.rating, { color: colors.textMain }]}>⭐ {service.rating}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        {/* ۴. پیشنهاد کسب‌وکارها (برتر و پربازدید) */}
-        <View style={s.sectionHeader}>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>سالن‌ها و کلینیک‌های برتر</Text>
-          <TouchableOpacity>
-            <Text style={[s.seeAll, { color: colors.primary }]}>مشاهده همه</Text>
-          </TouchableOpacity>
+              });
+            }}
+          />
         </View>
 
-        {MOCK_BUSINESSES.map((biz) => (
-          <TouchableOpacity 
-            key={biz.id} 
-            style={[s.bizCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
-            onPress={() => navigation?.navigate('BusinessDetail', { id: biz.id })}
-          >
-            <Image source={{ uri: biz.logo }} style={s.bizLogo} />
-            <View style={s.bizInfo}>
-              <View style={s.titleRow}>
-                <Text style={[s.bizName, { color: colors.textMain }]}>{biz.name}</Text>
-                {biz.VIP && (
-                  <View style={[s.vipBadge, { backgroundColor: colors.primary }]}>
-                    <Text style={s.vipText}>ویژه</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={[s.bizAddress, { color: colors.textSecondary }]}>📍 {biz.address}</Text>
-              <Text style={[s.bizRating, { color: colors.textMain }]}>امتیاز: {biz.rating} از ۵</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {/* ۳. محبوب‌ترین خدمات */}
+        <View style={s.section}>
+          <SectionHeader
+            title="🔥 محبوب‌ترین خدمات"
+            onSeeAll={() => console.log('See all services')}
+            colors={colors}
+          />
 
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={s.servicesScroll}
+          >
+            {MOCK_SERVICES.map((service) => (
+              <ServiceListCard
+                key={service.id}
+                service={service}
+                onPress={() =>
+                  navigation?.navigate('ServiceDetail', { id: service.id })
+                }
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* ۴. سالن‌های برتر */}
+        <View style={[s.section, s.lastSection]}>
+          <SectionHeader
+            title="⭐ سالن‌ها و کلینیک‌های برتر"
+            onSeeAll={() => console.log('See all businesses')}
+            colors={colors}
+          />
+
+          {MOCK_BUSINESSES.map((biz) => (
+            <BusinessListCard
+              key={biz.id}
+              business={biz}
+              onPress={() =>
+                navigation?.navigate('BusinessDetails', { id: biz.id })
+              }
+            />
+          ))}
+        </View>
       </View>
     </ScreenWrapper>
   );
 }
 
 const s = StyleSheet.create({
-  headerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 20,
-    gap: 16,
-  },
-  welcomeRow: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  welcomeText: {
-    fontSize: 14,
-    fontFamily: 'Vazir',
-  },
-  appName: {
-    fontSize: 22,
-    fontFamily: 'Vazir-Bold',
-  },
   bodyContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 120,
+  },
+  section: {
+    marginTop: 24,
+  },
+  lastSection: {
+    marginBottom: 40,
   },
   sectionHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: 'Vazir-Bold',
   },
   seeAll: {
     fontSize: 13,
     fontFamily: 'Vazir-Medium',
   },
-  // استایل کارت‌های خدمات
-  serviceCard: {
-    flexDirection: 'row-reverse',
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
+  servicesScroll: {
     gap: 12,
-  },
-  serviceImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 12,
-  },
-  serviceInfo: {
-    flex: 1,
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  serviceName: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-  },
-  serviceBusiness: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  priceRow: {
-    flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 4,
-  },
-  servicePrice: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Medium',
-  },
-  rating: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  // استایل کارت‌های کسب‌وکار
-  bizCard: {
-    flexDirection: 'row-reverse',
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    marginBottom: 12,
-    alignItems: 'center',
-    gap: 14,
-  },
-  bizLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  bizInfo: {
-    flex: 1,
-    alignItems: 'flex-end',
-    gap: 6,
-  },
-  titleRow: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 8,
-  },
-  bizName: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-  },
-  vipBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  vipText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: 'Vazir-Bold',
-  },
-  bizAddress: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  bizRating: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Medium',
+    paddingRight: 4,
   },
 });
