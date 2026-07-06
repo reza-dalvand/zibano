@@ -44,7 +44,10 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/rnclipboard_autolinked_build/cmake_install.cmake")
+  include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/RNDateTimePickerCGen_autolinked_build/cmake_install.cmake")
   include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/RNBootSplashSpec_autolinked_build/cmake_install.cmake")
+  include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/HtmlToPdfSpec_autolinked_build/cmake_install.cmake")
   include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/RNImagePickerSpec_autolinked_build/cmake_install.cmake")
   include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/NitroModulesSpec_autolinked_build/cmake_install.cmake")
   include("/home/reza/Documents/zibano/android/app/.cxx/RelWithDebInfo/2j36l3x6/x86/safeareacontext_autolinked_build/cmake_install.cmake")

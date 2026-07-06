@@ -16,7 +16,6 @@ export default function ProfileScreen({ navigation }) {
   const isDark = resolvedTheme === 'dark';
   const { logout } = useAuth();
 
-  // 🎯 داده‌های موقت (بعداً از API گرفته می‌شود)
   const mockUser = {
     name: 'مریم حسینی',
     phone: '۰۹۱۲۳۴۵۶۷۸۹',
@@ -24,17 +23,16 @@ export default function ProfileScreen({ navigation }) {
     memberSince: 'از فروردین ۱۴۰۳',
   };
 
-  // 📊 آمار کاربر
+  // 📊 آمار کاربر - بدون گزینه نظرات
   const userStats = [
     { id: 1, label: 'نوبت‌ها', value: 12, icon: 'event-note', color: '#2196F3' },
     { id: 2, label: 'علاقه‌مندی', value: 28, icon: 'favorite', color: '#E91E63' },
-    { id: 3, label: 'نظرات', value: 8, icon: 'rate-review', color: '#4CAF50' },
   ];
 
-  // 📋 منوهای دسترسی سریع
+  // 📋 منوهای دسترسی سریع (بدون گزینه نظرات)
   const quickMenuItems = [
     {
-      id: 1,
+      id: 'appointments',
       title: 'نوبت‌های من',
       subtitle: 'نوبت‌های آینده و گذشته',
       icon: 'event-note',
@@ -43,15 +41,15 @@ export default function ProfileScreen({ navigation }) {
       badge: 2,
     },
     {
-      id: 2,
+      id: 'favorites',
       title: 'علاقه‌مندی‌های من',
-      subtitle: 'سالن‌ها و خدمات ذخیره‌شده',
+      subtitle: 'سالن‌ها، خدمات و پست‌های ویترین',
       icon: 'favorite-border',
       route: 'Favorites',
       color: '#E91E63',
     },
     {
-      id: 3,
+      id: 'payments',
       title: 'تاریخچه پرداخت‌ها',
       subtitle: 'سوابق مالی و بیعانه‌ها',
       icon: 'payment',
@@ -59,29 +57,28 @@ export default function ProfileScreen({ navigation }) {
       color: '#4CAF50',
     },
     {
-      id: 4,
-      title: 'نظرات ثبت‌شده',
-      subtitle: 'امتیازها و نظرات شما',
-      icon: 'chat-bubble-outline',
-      route: 'MyReviews',
+      id: 'edit',
+      title: 'ویرایش پروفایل',
+      subtitle: 'نام، عکس و اطلاعات شخصی',
+      icon: 'edit',
+      route: 'EditProfile',
       color: '#FF9800',
     },
     {
-      id: 5,
+      id: 'invite',
       title: 'دعوت از دوستان',
-      subtitle: 'کسب امتیاز با معرفی زیبانو',
+      subtitle: 'زیبانو را به دوستانتان معرفی کنید',
       icon: 'people',
       route: 'InviteFriends',
       color: '#9C27B0',
     },
   ];
 
-  // ⚙️ منوهای تنظیمات
   const settingsMenuItems = [
     {
       id: 'support',
       title: 'پشتیبانی و راهنما',
-      subtitle: 'سوالات متداول و تماس با ما',
+      subtitle: 'سوالات متداول، چت و تماس با ما',
       icon: 'help-outline',
       route: 'Support',
       color: '#607D8B',
@@ -94,35 +91,26 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <ScreenWrapper scrollable={false} padding={0} edges={['top']}>
-      {/* هدر گرادیانی با Avatar */}
       <ProfileHeader user={mockUser} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        {/* کارت آماری */}
         <ProfileStatsCard stats={userStats} />
 
-        {/* منوهای دسترسی سریع */}
         <ProfileMenuList
           title="دسترسی سریع"
           items={quickMenuItems}
           onItemPress={handleMenuPress}
         />
 
-        {/* تنظیمات */}
         <View style={s.section}>
           <Text style={[s.sectionTitle, { color: colors.textMain }]}>
             تنظیمات
           </Text>
-
-          {/* آیتم تغییر تم (با کامپوننت اختصاصی و سوئیچ انیمیشنی) */}
           <View style={{ marginBottom: 10 }}>
             <ThemeToggleItem isDark={isDark} onToggle={toggleTheme} />
           </View>
-
-          {/* منوهای تنظیمات (همان استایل معمولی) */}
           <ProfileMenuList
             title=""
             items={settingsMenuItems}
@@ -130,7 +118,6 @@ export default function ProfileScreen({ navigation }) {
           />
         </View>
 
-        {/* دکمه خروج */}
         <View style={s.logoutContainer}>
           <Button
             title="خروج از حساب کاربری"
@@ -143,7 +130,6 @@ export default function ProfileScreen({ navigation }) {
             style={s.logoutButton}
             textStyle={{ color: '#E53935' }}
           />
-
           <Text style={[s.versionText, { color: colors.textSecondary }]}>
             نسخه ۱.۰.۰ - زیبانو
           </Text>

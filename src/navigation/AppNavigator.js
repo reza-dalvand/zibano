@@ -1,16 +1,14 @@
 // src/navigation/AppNavigator.js
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../theme/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import CreateBusinessScreen from '../screens/createBusiness/CreateBusinessScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
+import ProfileStackNavigator from './ProfileStackNavigator'; // 🆕 تغییر
 import HomeStackNavigator from './HomeStackNavigator';
-import ManageStackNavigator from './ManageStackNavigator'; // 🆕 تغییر مهم
+import ManageStackNavigator from './ManageStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,12 +58,12 @@ export default function AppNavigator() {
     >
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStackNavigator}
         options={{ tabBarLabel: 'پروفایل' }}
       />
       <Tab.Screen
         name="ManageBusiness"
-        component={ManageStackNavigator} // 🆕 تغییر: از Stack استفاده شد
+        component={ManageStackNavigator}
         options={{ tabBarLabel: 'مدیریت من' }}
       />
       <Tab.Screen

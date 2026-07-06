@@ -1,6 +1,9 @@
 {
   "buildFiles": [
+    "/home/reza/Documents/zibano/node_modules/@react-native-clipboard/clipboard/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/home/reza/Documents/zibano/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-bootsplash/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/home/reza/Documents/zibano/node_modules/react-native-html-to-pdf/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-nitro-modules/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/reza/Documents/zibano/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
@@ -36,6 +39,11 @@
         "/home/reza/.gradle/caches/9.0.0/transforms/f40f91d088793ba92fc0d4f5996598d8/transformed/react-android-0.83.3-release/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so"
       ]
     },
+    "react_codegen_HtmlToPdfSpec::@b8e1cdd07144a1c1daf8": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_HtmlToPdfSpec"
+    },
     "react_codegen_NitroModulesSpec::@472a82f9c57d3d3b8644": {
       "toolchain": "toolchain",
       "abi": "x86_64",
@@ -46,6 +54,11 @@
       "abi": "x86_64",
       "artifactName": "react_codegen_RNBootSplashSpec"
     },
+    "react_codegen_RNDateTimePickerCGen::@59b70ddc31ba2f8ef1d2": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNDateTimePickerCGen"
+    },
     "react_codegen_RNImagePickerSpec::@f66ee9a2efecfb28bee4": {
       "toolchain": "toolchain",
       "abi": "x86_64",
@@ -55,6 +68,11 @@
       "toolchain": "toolchain",
       "abi": "x86_64",
       "artifactName": "react_codegen_RNVectorIconsSpec"
+    },
+    "react_codegen_rnclipboard::@6385240493dfcaf22ab7": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnclipboard"
     },
     "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
       "toolchain": "toolchain",

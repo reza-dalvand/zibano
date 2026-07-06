@@ -1,6 +1,6 @@
 // src/components/profile/ThemeToggleItem.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -34,7 +34,7 @@ export default function ThemeToggleItem({ isDark, onToggle }) {
         </View>
       </View>
 
-      {/* سوئیچ تم با انیمیشن */}
+      {/* ✅ سوئیچ تم با alignSelf به جای transform */}
       <View
         style={[
           s.themeSwitch,
@@ -45,7 +45,7 @@ export default function ThemeToggleItem({ isDark, onToggle }) {
           style={[
             s.themeSwitchKnob,
             {
-              transform: [{ translateX: isDark ? 20 : 0 }],
+              alignSelf: isDark ? 'flex-start' : 'flex-end',
               backgroundColor: '#fff',
             },
           ]}
@@ -93,8 +93,8 @@ const s = StyleSheet.create({
     width: 44,
     height: 24,
     borderRadius: 12,
-    justifyContent: 'center',
     paddingHorizontal: 2,
+    justifyContent: 'center',
   },
   themeSwitchKnob: {
     width: 20,

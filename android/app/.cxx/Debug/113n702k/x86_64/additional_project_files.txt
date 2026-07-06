@@ -1,3 +1,9 @@
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/ComponentDescriptors.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/EventEmitters.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/Props.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/ShadowNodes.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/States.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/rnclipboard-generated.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/RNDateTimePickerCGen-generated.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/ComponentDescriptors.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNDateTimePickerCGen_autolinked_build/CMakeFiles/react_codegen_RNDateTimePickerCGen.dir/react/renderer/components/RNDateTimePickerCGen/EventEmitters.cpp.o
@@ -10,6 +16,12 @@
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/Props.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/ShadowNodes.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNBootSplashSpec_autolinked_build/CMakeFiles/react_codegen_RNBootSplashSpec.dir/react/renderer/components/RNBootSplashSpec/States.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/HtmlToPdfSpec-generated.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/react/renderer/components/HtmlToPdfSpec/ComponentDescriptors.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/react/renderer/components/HtmlToPdfSpec/EventEmitters.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/react/renderer/components/HtmlToPdfSpec/Props.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/react/renderer/components/HtmlToPdfSpec/ShadowNodes.cpp.o
+/home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/HtmlToPdfSpec_autolinked_build/CMakeFiles/react_codegen_HtmlToPdfSpec.dir/react/renderer/components/HtmlToPdfSpec/States.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/RNImagePickerSpec-generated.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/ComponentDescriptors.cpp.o
 /home/reza/Documents/zibano/android/app/.cxx/Debug/113n702k/x86_64/RNImagePickerSpec_autolinked_build/CMakeFiles/react_codegen_RNImagePickerSpec.dir/react/renderer/components/RNImagePickerSpec/EventEmitters.cpp.o

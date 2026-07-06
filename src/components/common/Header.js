@@ -1,5 +1,4 @@
 // src/components/common/Header.js
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +7,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function Header({
   title,
+  options, // 🆕 برای دریافت title از navigator
+  navigation, // 🆕 برای goBack خودکار
+  route,
   subtitle,
   onBackPress,
   backIcon = null,
@@ -17,8 +19,13 @@ export default function Header({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-
   const isTransparent = variant === 'transparent';
+  
+  // 🎯 اولویت: title مستقیم > options.title
+  const displayTitle = title || options?.title || route?.name;
+  
+  // 🎯 اگر onBackPress داده نشده و navigation داریم، به صورت پیش‌فرض goBack کن
+  const handleBack = onBackPress || (navigation ? () => navigation.goBack() : null);
 
   return (
     <View
@@ -27,24 +34,21 @@ export default function Header({
         {
           backgroundColor: isTransparent ? 'transparent' : colors.background,
           paddingTop: insets.top,
-          marginBottom: insets.bottom,
-
         },
-        // اگر ترنسپرنت نباشد، یک سایه بسیار ملایم و لوکس جایگزین خط مرزی ضخیم می‌شود
         !isTransparent && s.shadowEffect,
         !isTransparent && { borderBottomColor: colors.border + '40', shadowColor: colors.textMain },
         style,
       ]}
     >
-      {/* سمت راست (در حالت RTL خودکار معکوس می‌شود) — دکمه بازگشت پریمیوم */}
+      {/* سمت راست - دکمه بازگشت */}
       <View style={s.sideSlot}>
-        {onBackPress && (
+        {handleBack && (
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={onBackPress}
+            onPress={handleBack}
             style={[
               s.backButton,
-              { 
+              {
                 backgroundColor: isTransparent ? 'rgba(255,255,255,0.85)' : colors.cardBackground,
                 borderColor: colors.border + '60'
               }
@@ -58,19 +62,19 @@ export default function Header({
         )}
       </View>
 
-      {/* وسط — بخش متون هدر با تایپوگرافی کشیده و لوکس */}
+      {/* وسط - عنوان */}
       <View style={s.centerSlot}>
-        {title && (
-          <Text 
-            numberOfLines={1} 
+        {displayTitle && (
+          <Text
+            numberOfLines={1}
             style={[s.mainTitle, { color: colors.textMain }]}
           >
-            {title}
+            {displayTitle}
           </Text>
         )}
         {subtitle && (
-          <Text 
-            numberOfLines={1} 
+          <Text
+            numberOfLines={1}
             style={[s.subTitle, { color: colors.textSecondary }]}
           >
             {subtitle}
@@ -78,7 +82,7 @@ export default function Header({
         )}
       </View>
 
-      {/* سمت چپ — اکشن سفارشی یا نگهدارنده تقارن */}
+      {/* سمت چپ - اکشن سفارشی */}
       <View style={[s.sideSlot, s.leftAlign]}>
         {rightAction ?? <View style={s.emptyPlaceholder} />}
       </View>
@@ -133,7 +137,7 @@ const s = StyleSheet.create({
   backButton: {
     width: 42,
     height: 42,
-    borderRadius: 21, // دایره‌ای کامل و مینی‌مال
+    borderRadius: 21,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
