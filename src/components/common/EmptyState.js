@@ -37,7 +37,7 @@ export default function EmptyState({
         </Text>
       )}
 
-      {actionLabel && onAction && (
+      {/* {actionLabel && onAction && (
         <Button
           title={actionLabel}
           onPress={onAction}
@@ -45,7 +45,7 @@ export default function EmptyState({
           size="md"
           style={s.action}
         />
-      )}
+      )} */}
     </View>
   );
 }

@@ -1,35 +1,95 @@
-// src/components/manager/StepProgress.js
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+// src/components/createbusiness/StepProgress.js
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
+
+const STEPS = [
+  { id: 1, label: 'قوانین', icon: 'gavel' },
+  { id: 2, label: 'اطلاعات', icon: 'store' },
+  { id: 3, label: 'خدمات', icon: 'spa' },
+  { id: 4, label: 'تیم', icon: 'people' },
+  { id: 5, label: 'ارتباطات', icon: 'share' },
+  { id: 6, label: 'احراز هویت', icon: 'verified-user' },
+];
+
+const toPersianDigit = (str) =>
+  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function StepProgress({ currentStep, totalSteps }) {
   const { colors } = useTheme();
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: (currentStep - 1) / (totalSteps - 1),
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, totalSteps]);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
 
   return (
     <View style={s.container}>
-      {/* نوار پیشرفت */}
-      <View style={s.progressContainer}>
-        {[...Array(totalSteps)].map((_, index) => (
-          <View
-            key={index}
-            style={[
-              s.progressDot,
-              {
-                backgroundColor:
-                  index + 1 <= currentStep ? colors.primary : colors.border,
-              },
-              index + 1 === currentStep && s.activeDot,
-            ]}
-          />
-        ))}
+      {/* نوار پیشرفت لاکچری */}
+      <View style={s.progressBarWrapper}>
+        <View style={[s.progressBarBg, { backgroundColor: colors.border }]} />
+        <Animated.View
+          style={[
+            s.progressBarFill,
+            {
+              backgroundColor: colors.primary,
+              width: progressWidth,
+            },
+          ]}
+        />
       </View>
 
-      {/* نشانگر مرحله */}
-      <View style={s.stepIndicator}>
-        <Text style={[s.stepNumber, { color: colors.primary }]}>
-          مرحله {currentStep} از {totalSteps}
+      {/* عنوان مرحله فعلی */}
+      <View style={s.currentStepInfo}>
+        <View style={[s.stepBadge, { backgroundColor: colors.primary + '20' }]}>
+          <Icon
+            name={STEPS[currentStep - 1]?.icon || 'star'}
+            size={14}
+            color={colors.primary}
+          />
+          <Text style={[s.stepBadgeText, { color: colors.primary }]}>
+            مرحله {toPersianDigit(currentStep)} از {toPersianDigit(totalSteps)}
+          </Text>
+        </View>
+        <Text style={[s.currentStepTitle, { color: colors.textMain }]}>
+          {STEPS[currentStep - 1]?.label}
         </Text>
+      </View>
+
+      {/* دایره‌های مراحل (مینی‌مال) */}
+      <View style={s.dotsRow}>
+        {STEPS.map((step) => {
+          const isCompleted = currentStep > step.id;
+          const isActive = currentStep === step.id;
+          return (
+            <View
+              key={step.id}
+              style={[
+                s.dot,
+                {
+                  backgroundColor: isCompleted
+                    ? colors.primary
+                    : isActive
+                    ? colors.primary
+                    : colors.border,
+                  width: isActive ? 24 : isCompleted ? 10 : 8,
+                  height: isActive ? 10 : isCompleted ? 10 : 8,
+                  opacity: isActive || isCompleted ? 1 : 0.5,
+                },
+              ]}
+            />
+          );
+        })}
       </View>
     </View>
   );
@@ -37,28 +97,59 @@ export default function StepProgress({ currentStep, totalSteps }) {
 
 const s = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 0,
+    gap: 20,
   },
-  progressContainer: {
+  progressBarWrapper: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  progressBarBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  progressBarFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    borderRadius: 2,
+  },
+  currentStepInfo: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  stepBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  stepBadgeText: {
+    fontSize: 11,
+    fontFamily: 'Vazir-Bold',
+  },
+  currentStepTitle: {
+    fontSize: 16,
+    fontFamily: 'Vazir-Bold',
+  },
+  dotsRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 6,
   },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  activeDot: {
-    width: 28,
-  },
-  stepIndicator: {
-    alignItems: 'center',
-  },
-  stepNumber: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Medium',
+  dot: {
+    borderRadius: 5,
   },
 });

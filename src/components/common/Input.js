@@ -33,6 +33,7 @@ export default function Input({
   style,
   inputStyle,
   autoCapitalize = 'none',
+  onBlur,  // 🆕 اضافه شد
 }) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
@@ -91,7 +92,7 @@ export default function Input({
           autoCapitalize={autoCapitalize}
           textAlign="right"
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onBlur={onBlur}  // 🆕 این خط را اضافه کنید
           style={[
             s.input,
             {
