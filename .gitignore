@@ -1,126 +1,53 @@
 # ==========================================
-# Node.js & Dependency Directories
-# ==========================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnp.*
-
-# ==========================================
-# React Native & Metro Bundler
-# ==========================================
-*.jsbundle
-*.jsbundle.meta
-# Metro cache
-.metro-cache/
-
-# ==========================================
-# Expo (اگر از اکپو استفاده می‌کنید)
-# ==========================================
-.expo/
-dist/
-web-build/
-*.jks
-
-# ==========================================
 # Android & Gradle
 # ==========================================
+.gradle/
 android/.gradle/
+
+# Build folders
 android/build/
 android/app/build/
+
+# Native/CMake build files
+android/.cxx/
 android/app/.cxx/
-.gradle/
-# فایل‌های بیلد شده (خروجی‌ها)
+**/.cxx/
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+compile_commands.json.bin
+build.ninja
+build_file_index.txt
+android_gradle_build.json
+android_gradle_build_mini.json
+additional_project_files.txt
+TargetDirectories.txt
+VerifyGlobs.cmake
+.ninja_log
+.ninja_deps
+*.o
+*.obj
+*.so
+
+# Generated APK/AAB
 *.apk
 *.aab
 *.ap_
-# مسیر SDK اندروید سیستم شما (هرگز نباید کامیت شود)
+
+# Android SDK
 local.properties
-# کلیدهای امنیتی (به جز کلید دیباگ پیش‌فرض)
-android/app/src/release/*.keystore
+
+# Keystore
+*.keystore
+*.jks
 !android/app/debug.keystore
-
 # ==========================================
-# iOS & Xcode & CocoaPods
+# Logs & Cache
 # ==========================================
-ios/build/
-ios/Pods/
-ios/DerivedData/
-ios/Index/
-# فایل‌های شخصی Xcode (تنظیمات پنجره‌ها و کاربر)
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata/
-*.xccheckout
-*.moved-aside
-*.xcuserstate
-*.xcscmblueprint
-*.hmap
-*.ipa
-
-# ==========================================
-# Environment Variables (متغیرهای محیطی)
-# ==========================================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.pem
-
-# ==========================================
-# IDEs & Editors
-# ==========================================
-# VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-# IntelliJ / WebStorm / Android Studio
-.idea/
-*.iml
-*.iws
-*.ipr
-# فایل‌های موقت ویرایشگرها
-*.swp
-*.swo
-*~
-
-# ==========================================
-# OS Generated Files (سیستم‌عامل‌ها)
-# ==========================================
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# ==========================================
-# Testing, Coverage & E2E (Detox/Jest)
-# ==========================================
-coverage/
-.nyc_output/
-artifacts/
-
-# ==========================================
-# Fastlane (ابزار انتشار خودکار)
-# ==========================================
-*/fastlane/report.xml
-*/fastlane/Preview.html
-*/fastlane/screenshots/**/*.png
-*/fastlane/test_output
+*.log
+.cache/
+.tmp/
+tmp/
+temp/
