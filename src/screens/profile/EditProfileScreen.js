@@ -171,7 +171,7 @@ export default function EditProfileScreen({ navigation }) {
             <Icon name="info-outline" size={12} color={colors.textSecondary} />
             <Text style={[s.avatarHint, { color: colors.textSecondary }]}>
               {formData.avatarUrl
-                ? 'برای تغییر عکس، روی آن تپ کنید'
+                ? 'برای تغییر عکس، روی آن ضربه بزنید'
                 : 'عکس پروفایلی انتخاب نشده'}
             </Text>
           </View>
