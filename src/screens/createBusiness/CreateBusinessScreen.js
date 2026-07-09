@@ -1,6 +1,6 @@
 // src/screens/createBusiness/CreateBusinessScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -10,43 +10,32 @@ import Header from '../../components/common/Header';
 import Button from '../../components/common/Button';
 import StepProgress from '../../components/createbusiness/StepProgress';
 import BasicInfoStep from '../../components/createbusiness/BasicInfoStep';
-import ServicesManagement from '../../components/createbusiness/ServicesManagement';
-import TeamManagement from '../../components/createbusiness/TeamManagement';
-import SocialMediaStep from '../../components/createbusiness/SocialMediaStep';
 import NationalIdVerificationStep from '../../components/createbusiness/NationalIdVerificationStep';
 import TermsAndConditionsStep from '../../components/createbusiness/TermsAndConditionsStep';
 import SuccessModal from '../../components/common/SuccessModal';
 
+// 🎯 ارتفاع تقریبی نوبار شناور (Tab Bar)
+const NAVBAR_HEIGHT = 90;
+
 export default function CreateBusinessScreen({ navigation }) {
   const { colors } = useTheme();
   const { user } = useAuth();
-  const insets = useSafeAreaInsets(); // 🎯 برای هدر لاکچری
+  const insets = useSafeAreaInsets();
 
-  // 🆕 state قوانین
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(2);
-  const totalSteps = 6;
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 2;
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-
-  // 🆕 state اعتبارسنجی هر مرحله
   const [isStepValid, setIsStepValid] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
-    categoryId: null,
     provinceId: null,
     cityId: null,
     address: '',
     location: null,
     mapAddress: '',
     coverUrl: null,
-    instagram: '',
-    telegram: '',
-    whatsapp: '',
-    bale: '',
-    eitaa: '',
-    team: [],
-    services: [],
     nationalId: '',
     isNationalIdVerified: false,
     verifiedName: '',
@@ -60,7 +49,7 @@ export default function CreateBusinessScreen({ navigation }) {
 
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 2:
+      case 1:
         return (
           <BasicInfoStep
             formData={formData}
@@ -68,34 +57,13 @@ export default function CreateBusinessScreen({ navigation }) {
             onValidationChange={(valid) => setIsStepValid(valid)}
           />
         );
-      case 3:
+      case 2:
         return (
-          <ServicesManagement
-            services={formData.services}
-            onChange={(val) => updateForm('services', val)}
+          <NationalIdVerificationStep
+            formData={formData}
+            onUpdate={updateForm}
+            registeredPhone={registeredPhone}
           />
-        );
-      case 4:
-        return (
-          <View style={s.stepContainer}>
-            <TeamManagement
-              team={formData.team}
-              services={formData.services}
-              onChange={(val) => updateForm('team', val)}
-            />
-          </View>
-        );
-      case 5:
-        return <SocialMediaStep formData={formData} onUpdate={updateForm} />;
-      case 6:
-        return (
-          <View style={s.stepContainer}>
-            <NationalIdVerificationStep
-              formData={formData}
-              onUpdate={updateForm}
-              registeredPhone={registeredPhone}
-            />
-          </View>
         );
       default:
         return null;
@@ -103,24 +71,20 @@ export default function CreateBusinessScreen({ navigation }) {
   };
 
   const isLastStep = currentStep === totalSteps;
-  const isFirstStep = currentStep === 2;
+  const isFirstStep = currentStep === 1;
   const canFinalSubmit = formData.isNationalIdVerified === true;
 
   const canGoNext = () => {
-    if (currentStep === 2) return isStepValid;
-    if (currentStep === 3) return formData.services.length > 0;
-    if (currentStep === 4) return true;
-    if (currentStep === 5) return true;
-    if (currentStep === 6) return canFinalSubmit;
+    if (currentStep === 1) return isStepValid;
+    if (currentStep === 2) return canFinalSubmit;
     return true;
   };
 
   const handleNextStep = () => {
     if (!canGoNext()) {
       const messages = {
-        2: 'لطفاً تمام فیلدهای الزامی را تکمیل کنید',
-        3: 'حداقل یک خدمت به لیست اضافه کنید',
-        6: 'ابتدا کد ملی خود را استعلام و تایید کنید',
+        1: 'لطفاً تمام فیلدهای الزامی را تکمیل کنید',
+        2: 'ابتدا کد ملی خود را استعلام و تایید کنید',
       };
       Alert.alert('تکمیل اطلاعات', messages[currentStep] || 'لطفاً اطلاعات لازم را تکمیل کنید');
       return;
@@ -135,10 +99,7 @@ export default function CreateBusinessScreen({ navigation }) {
 
   const handleFinalSubmit = () => {
     if (!canFinalSubmit) {
-      Alert.alert(
-        'احراز هویت لازم است',
-        'برای ثبت نهایی کسب‌وکار، ابتدا باید کد ملی خود را با شماره ثبت‌نام شده تطبیق دهید'
-      );
+      Alert.alert('احراز هویت لازم است', 'برای ثبت نهایی کسب‌وکار، ابتدا باید کد ملی خود را با شماره ثبت‌نام شده تطبیق دهید');
       return;
     }
 
@@ -151,20 +112,12 @@ export default function CreateBusinessScreen({ navigation }) {
       longitude: formData.location?.longitude,
       map_address: formData.mapAddress,
       cover_image: formData.coverUrl,
-      instagram: formData.instagram,
-      telegram: formData.telegram,
-      whatsapp: formData.whatsapp,
-      bale: formData.bale,
-      eitaa: formData.eitaa,
-      services: formData.services,
-      team: formData.team,
       national_id: formData.nationalId,
       verified_name: formData.verifiedName,
       owner_phone: registeredPhone,
     };
-    console.log('✅ Final Data Ready for API:', submitData);
 
-    // 🎉 نمایش مدال موفقیت زیبا
+    console.log('✅ Final Data Ready for API:', submitData);
     setSuccessModalVisible(true);
   };
 
@@ -174,25 +127,23 @@ export default function CreateBusinessScreen({ navigation }) {
   };
 
   const handleBackFromWizard = () => {
-    if (currentStep > 2) {
+    if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
       setTermsAccepted(false);
     }
   };
 
-  // 🎯 صفحه قوانین (قبل از wizard)
+  // 🎯 صفحه قوانین
   if (!termsAccepted) {
     return (
       <ScreenWrapper padding={0} edges={['bottom']}>
-        <Header
-          title="ثبت کسب‌وکار جدید"
-          onBackPress={() => navigation.goBack()}
-        />
+        <Header title="ثبت کسب‌وکار جدید" onBackPress={() => navigation.goBack()} />
         <TermsAndConditionsStep
+          navbarHeight={NAVBAR_HEIGHT}
           onAccept={() => {
             setTermsAccepted(true);
-            setCurrentStep(2);
+            setCurrentStep(1);
           }}
           onDecline={() => navigation.goBack()}
         />
@@ -200,101 +151,94 @@ export default function CreateBusinessScreen({ navigation }) {
     );
   }
 
-  // 🎯 Wizard (بعد از پذیرش قوانین)
+  // 🎯 Wizard
   return (
-    <ScreenWrapper padding={0} keyboardAware>
-      {/* هدر لاکچری - 🎯 با insets.top برای جلوگیری از Notch */}
+    <ScreenWrapper padding={0} edges={['bottom']}>
+      {/* 🎯 هدر لاکچری - جمع‌وجور و کوچک */}
       <View
         style={[
           s.luxuryHeader,
           {
             backgroundColor: colors.primary,
-            paddingTop: insets.top + 10,
+            paddingTop: insets.top + 8,
           },
         ]}
       >
-        <View style={s.headerInner}>
-          <View style={s.headerTop}>
-            <Button
-              title=""
-              onPress={handleBackFromWizard}
-              variant="ghost"
-              size="sm"
-              icon={<Icon name="arrow-forward" size={22} color="#fff" />}
-              style={s.headerBackBtn}
-            />
-            <Text style={s.headerTitle}>ثبت کسب‌وکار جدید</Text>
-            <View style={{ width: 44 }} />
-          </View>
+        <View style={s.headerTop}>
+          {/* 🎯 دکمه بازگشت واضح و مشخص */}
+          <TouchableOpacity
+            onPress={handleBackFromWizard}
+            style={s.headerBackBtn}
+            activeOpacity={0.7}
+          >
+            <Icon name="arrow-forward" size={22} color="#fff" />
+          </TouchableOpacity>
+
+          <Text style={s.headerTitle}>ثبت کسب‌وکار جدید</Text>
+
+          <View style={{ width: 36 }} />
         </View>
       </View>
 
-      {/* Step Progress */}
-      <StepProgress currentStep={currentStep} totalSteps={totalSteps} />
-
-      {/* محتوای مرحله */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={s.stepContentWrapper}
+      {/* 🎯 اسکرول‌ویو اصلی با key={currentStep} برای scroll to top خودکار */}
+      <ScrollView
+        key={currentStep}  // ⬅️ تغییر کلیدی! با تغییر step، صفحه از بالا شروع می‌شود
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + NAVBAR_HEIGHT + 20,
+        }}
+        keyboardShouldPersistTaps="handled"
       >
+        {/* Step Progress */}
+        <StepProgress currentStep={currentStep} totalSteps={totalSteps} />
+
+        {/* محتوای مرحله */}
         {renderCurrentStep()}
-      </KeyboardAvoidingView>
 
-      {/* فوتر با دکمه‌های ناوبری */}
-      <View
-        style={[
-          s.footerControls,
-          {
-            backgroundColor: colors.background,
-            borderTopColor: colors.border,
-            paddingBottom: insets.bottom + 12,
-          },
-        ]}
-      >
-        <View style={s.footerRow}>
-          {!isFirstStep && (
+        {/* 🎯 فوتر با دکمه‌های ناوبری */}
+        <View style={s.footerControls}>
+          <View style={s.footerRow}>
+            {!isFirstStep && (
+              <Button
+                title="مرحله قبل"
+                onPress={handleBackFromWizard}
+                variant="outline"
+                size="md"
+                style={s.halfButton}
+                icon={<Icon name="arrow-forward" size={18} color={colors.primary} />}
+                iconPosition="right"
+              />
+            )}
             <Button
-              title="مرحله قبل"
-              onPress={handleBackFromWizard}
-              variant="outline"
+              title={isLastStep ? 'ثبت نهایی' : 'مرحله بعد'}
+              onPress={handleNextStep}
+              variant="primary"
               size="md"
-              style={s.halfButton}
-              icon={<Icon name="arrow-forward" size={18} color={colors.primary} />}
-              iconPosition="right"
+              style={isFirstStep ? s.fullButton : s.halfButton}
+              disabled={!canGoNext()}
+              icon={
+                isLastStep ? (
+                  <Icon name="check-circle" size={18} color="#fff" />
+                ) : (
+                  <Icon name="arrow-back" size={18} color="#fff" />
+                )
+              }
+              iconPosition={isLastStep ? 'right' : 'left'}
             />
-          )}
-          <Button
-            title={isLastStep ? 'ثبت نهایی' : 'مرحله بعد'}
-            onPress={handleNextStep}
-            variant="primary"
-            size="md"
-            style={isFirstStep ? s.fullButton : s.halfButton}
-            disabled={!canGoNext()}
-            icon={
-              isLastStep ? (
-                <Icon name="check-circle" size={18} color="#fff" />
-              ) : (
-                <Icon name="arrow-back" size={18} color="#fff" />
-              )
-            }
-            iconPosition={isLastStep ? 'right' : 'left'}
-          />
-        </View>
-
-        {/* 🆕 پیام‌های راهنما برای دکمه غیرفعال */}
-        {!canGoNext() && (
-          <View style={s.warningBox}>
-            <Icon name="info-outline" size={14} color="#FFA000" />
-            <Text style={[s.warningText, { color: colors.textSecondary }]}>
-              {currentStep === 2 && 'برای فعال‌سازی دکمه «مرحله بعد»، تمام فیلدهای الزامی را تکمیل کنید'}
-              {currentStep === 3 && 'حداقل یک خدمت به لیست اضافه کنید'}
-              {currentStep === 6 && 'برای فعال‌سازی دکمه ثبت نهایی، ابتدا کد ملی خود را استعلام و تایید کنید'}
-            </Text>
           </View>
-        )}
-      </View>
 
-      {/* 🎉 مدال موفقیت زیبا */}
+          {!canGoNext() && (
+            <View style={s.warningBox}>
+              <Icon name="info-outline" size={14} color="#FFA000" />
+              <Text style={[s.warningText, { color: colors.textSecondary }]}>
+                {currentStep === 1 && 'برای فعال‌سازی دکمه «مرحله بعد»، تمام فیلدهای الزامی را تکمیل کنید'}
+                {currentStep === 2 && 'برای فعال‌سازی دکمه ثبت نهایی، ابتدا کد ملی خود را استعلام و تایید کنید'}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
       <SuccessModal
         visible={successModalVisible}
         onClose={handleSuccessClose}
@@ -308,49 +252,40 @@ export default function CreateBusinessScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
+  // 🎯 هدر لوکس - کوچک و جمع‌وجور
   luxuryHeader: {
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 10,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  headerInner: {
-    gap: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 40,
   },
   headerBackBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
-  stepContainer: {
-    paddingHorizontal: 20,
-    flex: 1,
-  },
-  stepContentWrapper: {
-    flex: 1,
-  },
   footerControls: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    borderTopWidth: 1,
+    paddingTop: 24,
     gap: 8,
   },
   footerRow: {

@@ -1,8 +1,7 @@
 // src/components/createbusiness/TermsAndConditionsStep.js
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import Button from '../common/Button';
 import Card from '../common/Card';
@@ -52,28 +51,33 @@ const TERMS_SECTIONS = [
   },
 ];
 
-export default function TermsAndConditionsStep({ onAccept, onDecline }) {
+export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeight = 90 }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const [accepted, setAccepted] = useState(false);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const handleScroll = (event) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const progress = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
-    setScrollProgress(Math.min(progress, 1));
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 50) {
+    
+    // 🎯 محاسبه دقیق پیشرفت
+    const currentProgress = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
+    setScrollProgress(Math.min(currentProgress, 1));
+    
+    // 🎯 فاصله تا انتهای صفحه
+    const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    
+    // 🎯 آستانه تشخیص: 150 پیکسل قبل از انتها
+    if (distanceFromBottom <= 150 && !scrolledToBottom) {
+      console.log('✅ Reached bottom!');
       setScrolledToBottom(true);
     }
   };
 
   const canProceed = accepted && scrolledToBottom;
 
-  const NAVBAR_HEIGHT = 80;
-  const footerBottomPadding = insets.bottom + NAVBAR_HEIGHT + 10;
+  const footerBottomPadding = navbarHeight + 40;
 
-  // 🎯 تعیین پیام راهنما بر اساس وضعیت فعلی
   const getHintMessage = () => {
     if (!scrolledToBottom) {
       return `📖 ${Math.round(scrollProgress * 100)}٪ مطالعه شده - ادامه دهید`;
@@ -116,9 +120,9 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
 
       {/* لیست قوانین در اسکرول */}
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
         onScroll={handleScroll}
-        scrollEventThrottle={100}
+        scrollEventThrottle={50}
         contentContainerStyle={s.scrollContent}
       >
         {TERMS_SECTIONS.map((section, index) => (
@@ -130,15 +134,11 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
             style={[s.termCard, { borderColor: colors.border }]}
           >
             <View style={s.termRow}>
-              <View
-                style={[s.termIconBox, { backgroundColor: section.iconColor + '15' }]}
-              >
+              <View style={[s.termIconBox, { backgroundColor: section.iconColor + '15' }]}>
                 <Icon name={section.icon} size={20} color={section.iconColor} />
               </View>
               <View style={s.termTextCol}>
-                <Text style={[s.termTitle, { color: colors.textMain }]}>
-                  {section.title}
-                </Text>
+                <Text style={[s.termTitle, { color: colors.textMain }]}>{section.title}</Text>
                 <Text style={[s.termDescription, { color: colors.textSecondary }]}>
                   {section.description}
                 </Text>
@@ -152,7 +152,7 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
           <View style={[s.endMessage, { backgroundColor: '#4CAF5015', borderColor: '#4CAF5040' }]}>
             <Icon name="check-circle" size={20} color="#4CAF50" />
             <Text style={[s.endMessageText, { color: '#4CAF50' }]}>
-              تمام قوانین را مطالعه کردید 
+              تمام قوانین را مطالعه کردید
             </Text>
           </View>
         )}
@@ -166,7 +166,7 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
           </View>
         )}
 
-        {/* فضای خالی برای فوتر شناور + Navbar */}
+        {/* فضای خالی برای فوتر شناور */}
         <View style={{ height: footerBottomPadding + 120 }} />
       </ScrollView>
 
@@ -181,7 +181,7 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
           },
         ]}
       >
-        {/* 🎯 چک‌باکس قوانین - بالای دکمه‌ها */}
+        {/* چک‌باکس قوانین */}
         <TouchableOpacity
           onPress={() => setAccepted(!accepted)}
           activeOpacity={0.8}
@@ -235,9 +235,7 @@ export default function TermsAndConditionsStep({ onAccept, onDecline }) {
 
         {/* پیام راهنما */}
         {!canProceed && getHintMessage() !== '' && (
-          <Text style={[s.footerHint, { color: colors.textSecondary }]}>
-            {getHintMessage()}
-          </Text>
+          <Text style={[s.footerHint, { color: colors.textSecondary }]}>{getHintMessage()}</Text>
         )}
       </View>
     </View>

@@ -5,12 +5,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 
 const STEPS = [
-  { id: 1, label: 'قوانین', icon: 'gavel' },
-  { id: 2, label: 'اطلاعات', icon: 'store' },
-  { id: 3, label: 'خدمات', icon: 'spa' },
-  { id: 4, label: 'تیم', icon: 'people' },
-  { id: 5, label: 'ارتباطات', icon: 'share' },
-  { id: 6, label: 'احراز هویت', icon: 'verified-user' },
+  { id: 1, label: 'اطلاعات', icon: 'store' },
+  { id: 2, label: 'احراز هویت', icon: 'verified-user' },
 ];
 
 const toPersianDigit = (str) =>
@@ -22,7 +18,7 @@ export default function StepProgress({ currentStep, totalSteps }) {
 
   useEffect(() => {
     Animated.timing(progressAnim, {
-      toValue: (currentStep - 1) / (totalSteps - 1),
+      toValue: (currentStep - 1) / (totalSteps - 1 || 1),
       duration: 400,
       useNativeDriver: false,
     }).start();
@@ -35,7 +31,6 @@ export default function StepProgress({ currentStep, totalSteps }) {
 
   return (
     <View style={s.container}>
-      {/* نوار پیشرفت لاکچری */}
       <View style={s.progressBarWrapper}>
         <View style={[s.progressBarBg, { backgroundColor: colors.border }]} />
         <Animated.View
@@ -49,7 +44,6 @@ export default function StepProgress({ currentStep, totalSteps }) {
         />
       </View>
 
-      {/* عنوان مرحله فعلی */}
       <View style={s.currentStepInfo}>
         <View style={[s.stepBadge, { backgroundColor: colors.primary + '20' }]}>
           <Icon
@@ -66,7 +60,6 @@ export default function StepProgress({ currentStep, totalSteps }) {
         </Text>
       </View>
 
-      {/* دایره‌های مراحل (مینی‌مال) */}
       <View style={s.dotsRow}>
         {STEPS.map((step) => {
           const isCompleted = currentStep > step.id;
@@ -96,60 +89,14 @@ export default function StepProgress({ currentStep, totalSteps }) {
 }
 
 const s = StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 0,
-    gap: 20,
-  },
-  progressBarWrapper: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  progressBarBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  progressBarFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    borderRadius: 2,
-  },
-  currentStepInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  stepBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  stepBadgeText: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
-  },
-  currentStepTitle: {
-    fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-  },
-  dotsRow: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  dot: {
-    borderRadius: 5,
-  },
+  container: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16, gap: 16 },
+  progressBarWrapper: { height: 4, borderRadius: 2, overflow: 'hidden', position: 'relative' },
+  progressBarBg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  progressBarFill: { position: 'absolute', top: 0, left: 0, bottom: 0, borderRadius: 2 },
+  currentStepInfo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  stepBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  stepBadgeText: { fontSize: 11, fontFamily: 'Vazir-Bold' },
+  currentStepTitle: { fontSize: 16, fontFamily: 'Vazir-Bold' },
+  dotsRow: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  dot: { borderRadius: 5 },
 });

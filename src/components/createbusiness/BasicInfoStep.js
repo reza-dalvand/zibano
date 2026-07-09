@@ -1,7 +1,6 @@
 // src/components/createbusiness/BasicInfoStep.js
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useTheme } from '../../theme/ThemeContext';
@@ -59,22 +58,17 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     return { newErrors, isValid: !hasError };
   }, [formData, validateField]);
 
-  // 🎯 اصلاح: به‌روزرسانی همزمان errors و isValid
   useEffect(() => {
     const { newErrors, isValid: currentValid } = validateAll();
     setIsValid(currentValid);
     
-    // 🎯 فقط خطاهای فیلدهایی که لمس شده‌اند را نگه دار
-    // فیلدهایی که هنوز لمس نشده‌اند نباید خطا نشان دهند
     const filteredErrors = {};
     Object.keys(newErrors).forEach((field) => {
       if (touched[field]) {
         filteredErrors[field] = newErrors[field];
       }
     });
-    
     setErrors(filteredErrors);
-    
     if (onValidationChange) {
       onValidationChange(currentValid);
     }
@@ -92,7 +86,7 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
 
   const handleFieldChange = (field, value) => {
     onUpdate(field, value);
-    // 🎯 خطا را فوراً پاک کن اگر فیلد مقدار معتبر دارد
+    
     const error = validateField(field, value);
     if (!error) {
       setErrors((prev) => {
@@ -148,8 +142,9 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     markTouched('location');
   };
 
+  // 🎯 تغییر اصلی: ScrollView به View تبدیل شد چون ScrollView اصلی در CreateBusinessScreen وجود دارد
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
+    <View style={s.scrollContent}>
       {/* هدر بخش */}
       <View style={s.sectionHeader}>
         <View style={[s.headerIconBox, { backgroundColor: colors.primary + '15' }]}>
@@ -239,7 +234,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
         <Text style={[s.sectionHint, { color: colors.textSecondary }]}>
           استان و شهر را انتخاب کنید و موقعیت دقیق سالن را روی نقشه مشخص کنید
         </Text>
-        
         <Dropdown
           label="استان *"
           placeholder="انتخاب استان"
@@ -253,7 +247,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
             <Text style={[s.errorText, { color: '#E53935' }]}>{errors.provinceId}</Text>
           </View>
         )}
-        
         <Dropdown
           label="شهر *"
           placeholder={formData.provinceId ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
@@ -268,7 +261,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
             <Text style={[s.errorText, { color: '#E53935' }]}>{errors.cityId}</Text>
           </View>
         )}
-        
         <Input
           label="آدرس دقیق سالن *"
           placeholder="خیابان، کوچه، پلاک، واحد..."
@@ -284,7 +276,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
             </View>
           }
         />
-        
         <Card
           variant="default"
           padding={0}
@@ -350,13 +341,18 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
           پس از تکمیل همه فیلدها، دکمه «مرحله بعد» فعال می‌شود.
         </Text>
       </Card>
-      <View style={{ height: 40 }} />
-    </ScrollView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, gap: 20 },
+  // 🎯 flex: 1 اضافه شد تا تمام فضا را پر کند
+  scrollContent: { 
+    // flex: 1,
+    paddingHorizontal: 20, 
+    paddingTop: 8, 
+    gap: 20 
+  },
   sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   headerIconBox: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   headerTextCol: { flex: 1, gap: 4 },

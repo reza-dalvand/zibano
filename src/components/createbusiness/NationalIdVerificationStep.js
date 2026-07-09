@@ -1,6 +1,6 @@
 // src/components/createbusiness/NationalIdVerificationStep.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import Input from '../common/Input';
@@ -15,7 +15,7 @@ const toEnglishDigits = (str) =>
 const toPersianDigits = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-// 🎯 کد ملی ۱۰ رقمی برای تست (معتبر از نظر الگوریتم)
+// 🎯 کد ملی ۱۰ رقمی برای تست
 const TEST_NATIONAL_ID = '0012345679';
 
 const validateNationalId = (code) => {
@@ -36,8 +36,8 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const cleanedId = toEnglishDigits(nationalId).replace(/[^0-9]/g, '');
     const cleanedPhone = toEnglishDigits(phone || '').replace(/[^0-9]/g, '');
-
-    // 🎯 اولویت ۱: کد تست - همیشه موفق است (بدون نیاز به phone)
+    
+    // 🎯 اولویت ۱: کد تست - همیشه موفق است
     if (cleanedId === TEST_NATIONAL_ID) {
       return {
         success: true,
@@ -45,7 +45,7 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
         message: 'کد ملی با شماره ثبت‌نام شده تطابق دارد',
       };
     }
-
+    
     // 🎯 اولویت ۲: اعتبارسنجی الگوریتم
     if (!validateNationalId(cleanedId)) {
       return {
@@ -53,7 +53,7 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
         message: 'فرمت کد ملی صحیح نیست',
       };
     }
-
+    
     // 🎯 اولویت ۳: شبیه‌سازی استعلام
     if (Math.random() > 0.3 && cleanedPhone.startsWith('09')) {
       return {
@@ -62,7 +62,7 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
         message: 'کد ملی با شماره ثبت‌نام شده تطابق دارد',
       };
     }
-
+    
     return {
       success: false,
       message: 'کد ملی وارد شده با شماره موبایل ثبت‌نام شده شما تطابق ندارد',
@@ -113,20 +113,16 @@ export default function NationalIdVerificationStep({
       setError('کد ملی باید دقیقاً ۱۰ رقم باشد');
       return;
     }
-
     setLoading(true);
     setError('');
     setVerificationResult(null);
-
-    // 🎯 اگر registeredPhone خالی بود، از یک fallback استفاده کن
+    
     const phoneToVerify = registeredPhone || '09123456789';
-
     const result = await verifyNationalIdWithPhone(nationalId, phoneToVerify);
-
+    
     if (result.success) {
       setVerificationResult('success');
       setVerifiedName(result.name);
-      // 🎯 آپدیت مستقیم فرم والد
       onUpdate('nationalId', nationalId);
       onUpdate('isNationalIdVerified', true);
       onUpdate('verifiedName', result.name);
@@ -138,12 +134,12 @@ export default function NationalIdVerificationStep({
     setLoading(false);
   };
 
-  // 🎯 بررسی برای فعال/غیرفعال بودن دکمه استعلام
   const canVerify = nationalId.length === 10 && !loading;
   const isTestMode = nationalId === TEST_NATIONAL_ID;
 
+  // 🎯 تغییر اصلی: ScrollView به View تبدیل شد
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
+    <View style={s.scrollContent}>
       {/* هدر بخش */}
       <View style={s.sectionHeader}>
         <View style={[s.headerIconBox, { backgroundColor: '#4CAF5015' }]}>
@@ -233,7 +229,7 @@ export default function NationalIdVerificationStep({
         />
       </View>
 
-      {/* دکمه استعلام - 🎯 فقط بر اساس طول nationalId فعال می‌شود */}
+      {/* دکمه استعلام */}
       <Button
         title={loading ? 'در حال استعلام...' : 'استعلام کد ملی'}
         onPress={handleVerify}
@@ -321,14 +317,18 @@ export default function NationalIdVerificationStep({
           استفاده کنید. این کد همیشه با هر شماره ثبت‌نام شده‌ای تطابق پیدا می‌کند.
         </Text>
       </Card>
-
-      <View style={{ height: 40 }} />
-    </ScrollView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  scrollContent: { paddingHorizontal: 20, paddingTop: 8, gap: 16 },
+  // 🎯 flex: 1 اضافه شد
+  scrollContent: { 
+    // flex: 1,
+    paddingHorizontal: 20, 
+    paddingTop: 8, 
+    gap: 16 
+  },
   sectionHeader: {
     flexDirection: 'row',
     gap: 12,
