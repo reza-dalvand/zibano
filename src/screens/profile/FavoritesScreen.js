@@ -1,12 +1,11 @@
 // src/screens/profile/FavoritesScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import EmptyState from '../../components/common/EmptyState';
-import { PostModal } from '../../components/explore';
 
 const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -14,11 +13,11 @@ const toPersianDigit = (str) =>
 const formatPrice = (num) =>
   `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
-// 🎯 اضافه شدن businessId برای ناوبری به پروفایل کسب‌وکار
+// 🎯 داده‌های کسب‌وکارهای مورد علاقه
 const MOCK_FAVORITE_BUSINESSES = [
   {
     id: 'b1',
-    businessId: '1', // 🆕 برای ناوبری
+    businessId: '1',
     name: 'سالن زیبایی نیلارام',
     category: 'کلینیک پوست و مو',
     city: 'تهران، سعادت‌آباد',
@@ -51,11 +50,7 @@ const MOCK_FAVORITE_BUSINESSES = [
   },
 ];
 
-const MOCK_FAVORITE_SERVICES = [
-  { id: 's1', name: 'فیشیال تخصصی پوست', business: 'سالن نیلارام', price: 675000, duration: 60, image: 'https://picsum.photos/300/300?random=11' },
-  { id: 's2', name: 'کاشت مژه هالیوودی', business: 'سالن افرا', price: 580000, duration: 90, image: 'https://picsum.photos/300/300?random=12' },
-];
-
+// 🎯 داده‌های پست‌های ویترین ذخیره شده
 const MOCK_FAVORITE_POSTS = [
   {
     id: 'p1',
@@ -94,23 +89,34 @@ const MOCK_FAVORITE_POSTS = [
     saved: true,
     gallery: ['https://picsum.photos/800/800?random=106'],
   },
+  {
+    id: 'p4',
+    businessName: 'ناخن گالری پریا',
+    businessLogo: 'https://picsum.photos/100/100?random=9',
+    businessId: 'b4',
+    rating: 4.4,
+    caption: 'طراحی ناخن با سبک ژورنالی و مینیمال 💖',
+    saved: true,
+    gallery: [
+      'https://picsum.photos/800/800?random=107',
+      'https://picsum.photos/800/800?random=108',
+    ],
+  },
 ];
 
+// 🎯 فقط ۲ تب (خدمات حذف شد)
 const TABS = [
   { id: 'businesses', label: 'کسب‌وکار', icon: 'store' },
-  { id: 'services', label: 'خدمات', icon: 'spa' },
   { id: 'posts', label: 'ویترین', icon: 'collections' },
 ];
 
 export default function FavoritesScreen({ navigation }) {
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('businesses');
-  const [activePost, setActivePost] = useState(null);
 
   const counts = useMemo(
     () => ({
       businesses: MOCK_FAVORITE_BUSINESSES.length,
-      services: MOCK_FAVORITE_SERVICES.length,
       posts: MOCK_FAVORITE_POSTS.length,
     }),
     []
@@ -124,36 +130,20 @@ export default function FavoritesScreen({ navigation }) {
     });
   };
 
-  // 🎯 هندلر حذف از علاقه‌مندی (جدا از کلیک کارت)
+  // 🎯 هندلر حذف از علاقه‌مندی
   const handleRemoveFavorite = (id, e) => {
-    // جلوگیری از bubble شدن event
     if (e) e.stopPropagation?.();
-    // در فاز واقعی: حذف از API/Context
     console.log('Remove favorite:', id);
   };
 
-  const handleSavePost = (postId) => {
-    if (activePost?.id === postId) {
-      setActivePost(null);
-    }
-  };
-
-  const handleNavigateToProfile = (businessId) => {
-    setActivePost(null);
-    navigation.navigate('Home', {
-      screen: 'BusinessDetails',
-      params: { businessId },
-    });
-  };
-
-  // ═══════════════ رندر کسب‌وکارها (قابل کلیک) ═══════════════
+  // ═══════════ رندر کسب‌وکارها ═══════════
   const renderBusinesses = () => {
     if (MOCK_FAVORITE_BUSINESSES.length === 0) {
       return (
         <EmptyState
           icon="🏪"
           title="هنوز کسب‌وکاری ذخیره نکرده‌اید"
-          description="با تپ کردن روی آیکون قلب در صفحه کسب‌وکارها، آن‌ها را به علاقه‌مندی‌ها اضافه کنید"
+          description="با تپ کردن روی آیکون ذخیره در صفحه کسب‌وکارها، آن‌ها را به علاقه‌مندی‌ها اضافه کنید"
           actionLabel="مشاهده کسب‌وکارها"
           onAction={() => navigation.navigate('Home')}
         />
@@ -175,7 +165,7 @@ export default function FavoritesScreen({ navigation }) {
               style={s.bizCard}
             >
               <View style={s.bizRow}>
-                {/* لوگوی کسب‌وکار */}
+                {/* لوگو */}
                 <View style={s.bizLogoWrapper}>
                   <Image source={{ uri: biz.logo }} style={s.bizLogo} />
                   {biz.VIP && (
@@ -211,27 +201,27 @@ export default function FavoritesScreen({ navigation }) {
 
                 {/* آیکون‌های کناری */}
                 <View style={s.bizActions}>
-                  {/* دکمه حذف از علاقه‌مندی */}
+                  {/* 🎯 آیکون bookmark اینستاگرام (ذخیره شده) */}
                   <TouchableOpacity
                     onPress={(e) => handleRemoveFavorite(biz.id, e)}
-                    style={[s.removeBtn, { backgroundColor: '#E91E6315' }]}
+                    style={[s.saveBtn, { backgroundColor: '#E91E6315' }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Icon name="favorite" size={20} color="#E91E63" />
+                    <Icon name="bookmark" size={22} color="#E91E63" />
                   </TouchableOpacity>
 
-                  {/* فلش نمایش پروفایل */}
+                  {/* فلش پروفایل */}
                   <View style={[s.arrowBox, { backgroundColor: colors.primary + '15' }]}>
                     <Icon name="chevron-left" size={20} color={colors.primary} />
                   </View>
                 </View>
               </View>
 
-              {/* hint پایین کارت */}
+              {/* Hint */}
               <View style={[s.bizHintRow, { borderTopColor: colors.border }]}>
                 <Icon name="touch-app" size={12} color={colors.textSecondary} />
                 <Text style={[s.bizHintText, { color: colors.textSecondary }]}>
-                  برای مشاهده پروفایل، روی کارت ضربه بزنید
+                  برای مشاهده پروفایل، روی کارت تپ کنید
                 </Text>
               </View>
             </Card>
@@ -241,54 +231,7 @@ export default function FavoritesScreen({ navigation }) {
     );
   };
 
-  const renderServices = () => {
-    if (MOCK_FAVORITE_SERVICES.length === 0) {
-      return (
-        <EmptyState
-          icon="💅"
-          title="هنوز خدمتی ذخیره نکرده‌اید"
-          description="خدمات مورد علاقه خود را از پروفایل کسب‌وکارها ذخیره کنید"
-          actionLabel="مشاهده خدمات"
-          onAction={() => navigation.navigate('Home')}
-        />
-      );
-    }
-    return (
-      <View style={s.serviceList}>
-        {MOCK_FAVORITE_SERVICES.map((svc) => (
-          <Card key={svc.id} variant="elevated" padding={0} radius={16} style={s.svcCard}>
-            <View style={s.svcRow}>
-              <Image source={{ uri: svc.image }} style={s.svcImage} />
-              <View style={s.svcInfo}>
-                <Text style={[s.svcName, { color: colors.textMain }]} numberOfLines={2}>
-                  {svc.name}
-                </Text>
-                <Text style={[s.svcBusiness, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {svc.business}
-                </Text>
-                <View style={s.svcMeta}>
-                  <Icon name="schedule" size={12} color={colors.textSecondary} />
-                  <Text style={[s.svcDuration, { color: colors.textSecondary }]}>
-                    {toPersianDigit(svc.duration)} دقیقه
-                  </Text>
-                </View>
-                <Text style={[s.svcPrice, { color: colors.primary }]}>
-                  {formatPrice(svc.price)}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => handleRemoveFavorite(svc.id)}
-                style={s.svcRemoveBtn}
-              >
-                <Icon name="favorite" size={20} color="#E91E63" />
-              </TouchableOpacity>
-            </View>
-          </Card>
-        ))}
-      </View>
-    );
-  };
-
+  // ═══════════ رندر پست‌های ویترین ═══════════
   const renderPosts = () => {
     if (MOCK_FAVORITE_POSTS.length === 0) {
       return (
@@ -305,10 +248,7 @@ export default function FavoritesScreen({ navigation }) {
       <View style={s.postsGrid}>
         {MOCK_FAVORITE_POSTS.map((post) => (
           <Card key={post.id} variant="elevated" padding={0} radius={14} style={s.postCard}>
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => setActivePost(post)}
-            >
+            <TouchableOpacity activeOpacity={0.9}>
               <View style={s.postImageWrap}>
                 <Image source={{ uri: post.gallery?.[0] }} style={s.postImage} />
                 {post.gallery && post.gallery.length > 1 && (
@@ -319,9 +259,10 @@ export default function FavoritesScreen({ navigation }) {
                     </Text>
                   </View>
                 )}
+                {/* 🎯 آیکون bookmark اینستاگرام */}
                 <TouchableOpacity
-                  style={s.postRemoveBtn}
-                  onPress={() => handleSavePost(post.id)}
+                  style={s.postSaveBtn}
+                  onPress={() => console.log('Remove post:', post.id)}
                 >
                   <Icon name="bookmark" size={18} color="#fff" />
                 </TouchableOpacity>
@@ -405,18 +346,8 @@ export default function FavoritesScreen({ navigation }) {
         contentContainerStyle={s.listContainer}
       >
         {activeTab === 'businesses' && renderBusinesses()}
-        {activeTab === 'services' && renderServices()}
         {activeTab === 'posts' && renderPosts()}
       </ScrollView>
-
-      {/* Post Modal */}
-      <PostModal
-        post={activePost}
-        visible={!!activePost}
-        onClose={() => setActivePost(null)}
-        onSave={handleSavePost}
-        onNavigateToProfile={handleNavigateToProfile}
-      />
     </ScreenWrapper>
   );
 }
@@ -445,7 +376,7 @@ const s = StyleSheet.create({
   tabBadgeText: { fontSize: 11, fontFamily: 'Vazir-Bold' },
   listContainer: { padding: 16, paddingBottom: 100, gap: 12 },
 
-  // ═══════════ کسب‌وکارها (قابل کلیک) ═══════════
+  // ═══════════ کسب‌وکارها ═══════════
   businessList: { gap: 12 },
   bizCard: {
     marginBottom: 0,
@@ -521,7 +452,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  removeBtn: {
+  saveBtn: {
     width: 38,
     height: 38,
     borderRadius: 12,
@@ -548,19 +479,6 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Vazir',
   },
-
-  // ═══════════ خدمات ═══════════
-  serviceList: { gap: 12 },
-  svcCard: { overflow: 'hidden', marginBottom: 0 },
-  svcRow: { flexDirection: 'row', padding: 12, gap: 12 },
-  svcImage: { width: 90, height: 90, borderRadius: 12 },
-  svcInfo: { flex: 1, gap: 3, justifyContent: 'space-between' },
-  svcName: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  svcBusiness: { fontSize: 11, fontFamily: 'Vazir' },
-  svcMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  svcDuration: { fontSize: 11, fontFamily: 'Vazir' },
-  svcPrice: { fontSize: 13, fontFamily: 'Vazir-Bold' },
-  svcRemoveBtn: { padding: 4, alignSelf: 'flex-start' },
 
   // ═══════════ ویترین ═══════════
   postsGrid: {
@@ -589,7 +507,7 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Vazir-Bold',
   },
-  postRemoveBtn: {
+  postSaveBtn: {
     position: 'absolute',
     top: 8,
     left: 8,
