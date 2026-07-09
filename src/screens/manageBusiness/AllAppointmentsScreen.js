@@ -1,519 +1,367 @@
 // src/screens/manageBusiness/AllAppointmentsScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import Header from '../../components/common/Header';
-import Card from '../../components/common/Card';
-import Avatar from '../../components/common/Avatar';
-import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
-import BottomSheet from '../../components/common/BottomSheet';
+import Toast from '../../components/common/Toast';
 
-const STATUS_FILTERS = [
-  { id: 'all', label: 'همه', color: '#607D8B' },
-  { id: 'pending', label: 'در انتظار', color: '#FFA000' },
-  { id: 'confirmed', label: 'تایید شده', color: '#43A047' },
-  { id: 'cancelled', label: 'لغو شده', color: '#E53935' },
-  { id: 'done', label: 'انجام شده', color: '#1E88E5' },
+import AppointmentFilters from '../../components/manageBusiness/AppointmentFilters';
+import AppointmentSearchBar from '../../components/manageBusiness/AppointmentSearchBar';
+import AppointmentCard from '../../components/manageBusiness/AppointmentCard';
+import AppointmentDetailSheet from '../../components/manageBusiness/AppointmentDetailSheet';
+import VerifyCodeModal from '../../components/manageBusiness/VerifyCodeModal';
+import CancelReasonModal from '../../components/manageBusiness/CancelReasonModal';
+
+const MOCK_APPOINTMENTS = [
+  {
+    id: 'apt_1',
+    customerName: 'نازنین کریمی',
+    customerPhone: '09121112233',
+    serviceName: 'فیشیال تخصصی پوست',
+    employeeName: 'سارا احمدی',
+    date: { jy: 1403, jm: 4, jd: 20 },
+    time: '۱۰:۳۰',
+    status: 'reserved',
+    price: 675000,
+    depositPaid: 200000,
+    verificationCode: '745892',
+    bookedAt: '۱۴۰۳/۰۴/۱۰ - ۱۴:۳۲',
+  },
+  {
+    id: 'apt_2',
+    customerName: 'الهام محمدی',
+    customerPhone: '09124445566',
+    serviceName: 'کاشت ناخن ژله‌ای',
+    employeeName: 'مریم رضایی',
+    date: { jy: 1403, jm: 4, jd: 20 },
+    time: '۱۴:۳۰',
+    status: 'reserved',
+    price: 450000,
+    depositPaid: 100000,
+    verificationCode: '382571',
+    bookedAt: '۱۴۰۳/۰۴/۱۵ - ۱۱:۲۰',
+  },
+  {
+    id: 'apt_3',
+    customerName: 'زهرا حسینی',
+    customerPhone: '09127778899',
+    serviceName: 'لیزر فول بادی',
+    employeeName: 'دکتر رضایی',
+    date: { jy: 1403, jm: 4, jd: 18 },
+    time: '۱۶:۰۰',
+    status: 'done',
+    price: 2125000,
+    depositPaid: 500000,
+    verificationCode: '917456',
+    bookedAt: '۱۴۰۳/۰۴/۱۰ - ۰۹:۱۵',
+    verifiedAt: '۱۴۰۳/۰۴/۱۸ - ۱۶:۴۵',
+  },
+  {
+    id: 'apt_4',
+    customerName: 'مریم احمدی',
+    customerPhone: '09123334455',
+    serviceName: 'رنگ و لایت مو',
+    employeeName: 'الناز کریمی',
+    date: { jy: 1403, jm: 4, jd: 17 },
+    time: '۱۱:۰۰',
+    status: 'cancelled_by_salon',
+    price: 1440000,
+    depositPaid: 300000,
+    verificationCode: '—',
+    bookedAt: '۱۴۰۳/۰۴/۱۲ - ۱۸:۰۰',
+    cancellationReason: 'سالن در این تاریخ تعطیل است',
+    refundAmount: 300000,
+  },
+  {
+    id: 'apt_6',
+    customerName: 'سمیرا قاسمی',
+    customerPhone: '09126665544',
+    serviceName: 'فیشیال VIP عروس',
+    employeeName: 'سارا احمدی',
+    date: { jy: 1403, jm: 4, jd: 22 },
+    time: '۰۹:۰۰',
+    status: 'reserved',
+    price: 950000,
+    depositPaid: 300000,
+    verificationCode: '528147',
+    bookedAt: '۱۴۰۳/۰۴/۱۸ - ۲۰:۳۰',
+  },
 ];
-
-const STATUS_META = {
-  pending: { label: 'در انتظار', color: '#FFA000', icon: 'schedule' },
-  confirmed: { label: 'تایید شده', color: '#43A047', icon: 'check-circle' },
-  cancelled: { label: 'لغو شده', color: '#E53935', icon: 'cancel' },
-  done: { label: 'انجام شده', color: '#1E88E5', icon: 'task-alt' },
-};
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-const formatPrice = (num) => `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
 export default function AllAppointmentsScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, updateAppointmentStatus, deleteAppointment } = useBusiness();
 
+  const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState(null);
+
   const [selectedApt, setSelectedApt] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
 
+  const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+  const [verifyTarget, setVerifyTarget] = useState(null);
+
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState(null);
+
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+
+  // ═══════════ فیلتر و جستجو ═══════════
   const filteredAppointments = useMemo(() => {
-    if (activeFilter === 'all') return businessData.appointments || [];
-    return (businessData.appointments || []).filter(
-      (apt) => apt.status === activeFilter
-    );
-  }, [businessData.appointments, activeFilter]);
+    let result = appointments;
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'cancelled') {
+        result = result.filter((a) => a.status === 'cancelled_by_salon');
+      } else {
+        result = result.filter((a) => a.status === activeFilter);
+      }
+    }
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.customerName.toLowerCase().includes(query) ||
+          a.serviceName.toLowerCase().includes(query) ||
+          a.employeeName.toLowerCase().includes(query) ||
+          a.customerPhone.includes(query)
+      );
+    }
+    if (dateFilter) {
+      const todayJalaali = { jy: 1403, jm: 4, jd: 20 };
+      result = result.filter((a) => {
+        const aptDate = a.date;
+        if (dateFilter === 'today') {
+          return (
+            aptDate.jy === todayJalaali.jy &&
+            aptDate.jm === todayJalaali.jm &&
+            aptDate.jd === todayJalaali.jd
+          );
+        }
+        if (dateFilter === 'week') {
+          return aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7;
+        }
+        if (dateFilter === 'month') {
+          return aptDate.jm === todayJalaali.jm;
+        }
+        return true;
+      });
+    }
+    return result;
+  }, [appointments, activeFilter, searchQuery, dateFilter]);
 
-  const stats = useMemo(() => {
-    const all = businessData.appointments || [];
+  const counts = useMemo(() => {
     return {
-      all: all.length,
-      pending: all.filter((a) => a.status === 'pending').length,
-      confirmed: all.filter((a) => a.status === 'confirmed').length,
-      cancelled: all.filter((a) => a.status === 'cancelled').length,
-      done: all.filter((a) => a.status === 'done').length,
+      all: appointments.length,
+      reserved: appointments.filter((a) => a.status === 'reserved').length,
+      cancelled: appointments.filter((a) => a.status === 'cancelled_by_salon').length,
+      done: appointments.filter((a) => a.status === 'done').length,
     };
-  }, [businessData.appointments]);
+  }, [appointments]);
 
+  // ═══════════ هندلرهای BottomSheet جزئیات ═══════════
   const openDetail = (apt) => {
     setSelectedApt(apt);
     setDetailVisible(true);
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    updateAppointmentStatus(id, newStatus);
+  const closeDetail = () => {
     setDetailVisible(false);
+    setTimeout(() => setSelectedApt(null), 300);
   };
 
-  const handleDelete = (apt) => {
-    Alert.alert(
-      'حذف نوبت',
-      `آیا از حذف نوبت "${apt.customerName}" مطمئن هستید؟`,
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: () => {
-            deleteAppointment(apt.id);
-            setDetailVisible(false);
-          },
-        },
-      ]
+  // ═══════════ هندلرهای تایید انجام خدمت ═══════════
+  const handleOpenVerify = (apt) => {
+    // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
+    setVerifyTarget(apt);
+    if (detailVisible) {
+      setDetailVisible(false);
+      setTimeout(() => setVerifyModalVisible(true), 350);
+    } else {
+      setVerifyModalVisible(true);
+    }
+  };
+
+  const handleCloseVerify = () => {
+    setVerifyModalVisible(false);
+    setTimeout(() => setVerifyTarget(null), 300);
+  };
+
+  const handleConfirmVerify = (aptId) => {
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.id === aptId
+          ? {
+              ...a,
+              status: 'done',
+              verifiedAt: new Date().toLocaleString('fa-IR'),
+            }
+          : a
+      )
     );
+    setVerifyModalVisible(false);
+    setVerifyTarget(null);
+    setToast({
+      visible: true,
+      message: '✓ خدمت تایید شد • بیعانه به حساب شما واریز می‌شود',
+      type: 'success',
+    });
+  };
+
+  // ═══════════ هندلرهای لغو نوبت ═══════════
+  const handleOpenCancel = (apt) => {
+    // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
+    setCancelTarget(apt);
+    if (detailVisible) {
+      setDetailVisible(false);
+      setTimeout(() => setCancelModalVisible(true), 350);
+    } else {
+      setCancelModalVisible(true);
+    }
+  };
+
+  const handleCloseCancel = () => {
+    setCancelModalVisible(false);
+    setTimeout(() => setCancelTarget(null), 300);
+  };
+
+  const handleConfirmCancel = (aptId, reason) => {
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.id === aptId
+          ? {
+              ...a,
+              status: 'cancelled_by_salon',
+              cancellationReason: reason,
+              refundAmount: a.depositPaid,
+            }
+          : a
+      )
+    );
+    setCancelModalVisible(false);
+    setCancelTarget(null);
+    setToast({
+      visible: true,
+      message: 'نوبت لغو شد • بیعانه به مشتری مسترد و پیامک ارسال می‌شود',
+      type: 'info',
+    });
+  };
+
+  // ═══════════ EmptyState ═══════════
+  const getEmptyStateConfig = () => {
+    if (searchQuery || dateFilter) {
+      return {
+        icon: '🔍',
+        title: 'نتیجه‌ای یافت نشد',
+        description: 'فیلترهای جستجو را تغییر دهید',
+      };
+    }
+    const configs = {
+      all: {
+        icon: '📅',
+        title: 'هنوز نوبتی ثبت نشده است',
+        description: 'پس از رزرو اولین نوبت توسط مشتریان، نوبت‌ها اینجا نمایش داده می‌شود',
+      },
+      reserved: {
+        icon: '📋',
+        title: 'نوبت رزرو شده‌ای وجود ندارد',
+        description: 'در حال حاضر هیچ نوبت فعالی برای نمایش وجود ندارد',
+      },
+      cancelled: {
+        icon: '❌',
+        title: 'نوبت لغو شده‌ای وجود ندارد',
+        description: 'هیچ نوبتی توسط سالن لغو نشده است',
+      },
+      done: {
+        icon: '✅',
+        title: 'نوبت انجام شده‌ای وجود ندارد',
+        description: 'هنوز هیچ خدمتی تکمیل و تایید نشده است',
+      },
+    };
+    return configs[activeFilter] || configs.all;
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
-      <Header title="همه نوبت‌ها" onBackPress={() => navigation.goBack()} />
+    <ScreenWrapper padding={0} edges={['bottom']}>
+      <AppointmentSearchBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        dateFilter={dateFilter}
+        onDateFilterChange={setDateFilter}
+      />
 
-      {/* Chips فیلتر وضعیت */}
-      <View style={s.filterContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={s.filterRow}
-        >
-          {STATUS_FILTERS.map((f) => {
-            const isActive = activeFilter === f.id;
-            const count = stats[f.id] || 0;
-            return (
-              <TouchableOpacity
-                key={f.id}
-                activeOpacity={0.8}
-                onPress={() => setActiveFilter(f.id)}
-                style={[
-                  s.filterChip,
-                  {
-                    backgroundColor: isActive ? f.color + '20' : colors.cardBackground,
-                    borderColor: isActive ? f.color : colors.border,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    s.filterChipText,
-                    { color: isActive ? f.color : colors.textMain },
-                  ]}
-                >
-                  {f.label}
-                </Text>
-                <View
-                  style={[
-                    s.filterChipBadge,
-                    {
-                      backgroundColor: isActive ? f.color : colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={s.filterChipBadgeText}>{toPersianDigit(count)}</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+      <AppointmentFilters
+        activeFilter={activeFilter}
+        counts={counts}
+        onChange={setActiveFilter}
+      />
 
-      {/* لیست نوبت‌ها */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.listContainer}
       >
         {filteredAppointments.length > 0 ? (
-          filteredAppointments.map((apt) => {
-            const meta = STATUS_META[apt.status] || STATUS_META.pending;
-            return (
-              <TouchableOpacity
+          <View style={s.list}>
+            {filteredAppointments.map((apt) => (
+              <AppointmentCard
                 key={apt.id}
-                activeOpacity={0.85}
-                onPress={() => openDetail(apt)}
-              >
-                <Card variant="elevated" padding={16} radius={18} style={s.aptCard}>
-                  <View style={s.aptHeader}>
-                    <View style={s.aptUser}>
-                      <Avatar name={apt.customerName} size="md" />
-                      <View style={s.aptUserInfo}>
-                        <Text style={[s.aptCustomerName, { color: colors.textMain }]}>
-                          {apt.customerName}
-                        </Text>
-                        <Text style={[s.aptCustomerPhone, { color: colors.textSecondary }]}>
-                          {toPersianDigit(apt.customerPhone || '—')}
-                        </Text>
-                      </View>
-                    </View>
-                    <View
-                      style={[
-                        s.statusBadge,
-                        { backgroundColor: meta.color + '20' },
-                      ]}
-                    >
-                      <Icon name={meta.icon} size={12} color={meta.color} />
-                      <Text style={[s.statusBadgeText, { color: meta.color }]}>
-                        {meta.label}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={s.aptDivider}>
-                    <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
-                  </View>
-
-                  <View style={s.aptDetails}>
-                    <View style={s.aptDetailItem}>
-                      <Icon name="spa" size={14} color={colors.textSecondary} />
-                      <Text style={[s.aptDetailText, { color: colors.textMain }]}>
-                        {apt.serviceName}
-                      </Text>
-                    </View>
-                    <View style={s.aptDetailItem}>
-                      <Icon name="person" size={14} color={colors.textSecondary} />
-                      <Text style={[s.aptDetailText, { color: colors.textMain }]}>
-                        {apt.employeeName}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={s.aptFooter}>
-                    <View style={s.aptTimeBox}>
-                      <Icon name="event" size={14} color={colors.primary} />
-                      <Text style={[s.aptTimeText, { color: colors.primary }]}>
-                        {apt.date
-                          ? `${toPersianDigit(apt.date.jy)}/${toPersianDigit(
-                              apt.date.jm
-                            )}/${toPersianDigit(apt.date.jd)}`
-                          : '—'}
-                      </Text>
-                      <View style={[s.dot, { backgroundColor: colors.border }]} />
-                      <Icon name="schedule" size={14} color={colors.primary} />
-                      <Text style={[s.aptTimeText, { color: colors.primary }]}>
-                        {apt.time}
-                      </Text>
-                    </View>
-                    <Text style={[s.aptPrice, { color: colors.textMain }]}>
-                      {formatPrice(apt.price)}
-                    </Text>
-                  </View>
-                </Card>
-              </TouchableOpacity>
-            );
-          })
+                appointment={apt}
+                onDetails={openDetail}
+                onVerify={handleOpenVerify}
+                onCancel={handleOpenCancel}
+              />
+            ))}
+          </View>
         ) : (
-          <EmptyState
-            icon="📅"
-            title="نوبتی یافت نشد"
-            description={
-              activeFilter === 'all'
-                ? 'هنوز هیچ نوبتی برای شما ثبت نشده است'
-                : `نوبتی با وضعیت "${STATUS_META[activeFilter]?.label}" وجود ندارد`
-            }
-          />
+          <EmptyState {...getEmptyStateConfig()} />
         )}
       </ScrollView>
 
       {/* BottomSheet جزئیات */}
-      <BottomSheet
+      <AppointmentDetailSheet
         visible={detailVisible}
-        onClose={() => setDetailVisible(false)}
-        title="جزئیات نوبت"
-        snapPoint={0.7}
-      >
-        {selectedApt && (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          >
-            <View style={s.detailCustomer}>
-              <Avatar name={selectedApt.customerName} size="xl" />
-              <Text style={[s.detailName, { color: colors.textMain }]}>
-                {selectedApt.customerName}
-              </Text>
-              <Text style={[s.detailPhone, { color: colors.textSecondary }]}>
-                {toPersianDigit(selectedApt.customerPhone || '—')}
-              </Text>
-            </View>
+        appointment={selectedApt}
+        onClose={closeDetail}
+      />
 
-            <Card
-              variant="default"
-              padding={14}
-              radius={14}
-              style={s.detailCard}
-            >
-              <View style={s.detailRow}>
-                <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
-                  خدمت
-                </Text>
-                <Text style={[s.detailValue, { color: colors.textMain }]}>
-                  {selectedApt.serviceName}
-                </Text>
-              </View>
-              <View style={s.detailRow}>
-                <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
-                  کارمند
-                </Text>
-                <Text style={[s.detailValue, { color: colors.textMain }]}>
-                  {selectedApt.employeeName}
-                </Text>
-              </View>
-              <View style={s.detailRow}>
-                <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
-                  تاریخ و ساعت
-                </Text>
-                <Text style={[s.detailValue, { color: colors.textMain }]}>
-                  {selectedApt.time}
-                </Text>
-              </View>
-              <View style={s.detailRow}>
-                <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
-                  مبلغ کل
-                </Text>
-                <Text style={[s.detailValue, { color: colors.primary }]}>
-                  {formatPrice(selectedApt.price)}
-                </Text>
-              </View>
-              {selectedApt.depositPaid > 0 && (
-                <View style={s.detailRow}>
-                  <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
-                    بیعانه پرداخت شده
-                  </Text>
-                  <Text style={[s.detailValue, { color: '#43A047' }]}>
-                    {formatPrice(selectedApt.depositPaid)}
-                  </Text>
-                </View>
-              )}
-            </Card>
+      {/*
+        ✅ اصلاح اصلی:
+        - شرط {verifyTarget && ...} حذف شد
+        - مدال همیشه mount شده و فقط با visible کنترل میشه
+        - داخل مدال‌ها if (!appointment) return null اضافه کن
+      */}
+      <VerifyCodeModal
+        visible={verifyModalVisible}
+        appointment={verifyTarget}
+        onClose={handleCloseVerify}
+        onConfirm={handleConfirmVerify}
+      />
 
-            <View style={s.detailActions}>
-              {selectedApt.status === 'pending' && (
-                <>
-                  <Button
-                    title="تایید نوبت"
-                    onPress={() => handleStatusChange(selectedApt.id, 'confirmed')}
-                    variant="primary"
-                    size="lg"
-                    fullWidth
-                    style={[s.actionBtn, { backgroundColor: '#43A047' }]}
-                    icon={<Icon name="check" size={20} color="#fff" />}
-                    iconPosition="right"
-                  />
-                  <Button
-                    title="لغو نوبت"
-                    onPress={() => handleStatusChange(selectedApt.id, 'cancelled')}
-                    variant="outline"
-                    size="lg"
-                    fullWidth
-                    style={[s.actionBtn, { borderColor: '#E53935' }]}
-                    textStyle={{ color: '#E53935' }}
-                    icon={<Icon name="close" size={20} color="#E53935" />}
-                    iconPosition="right"
-                  />
-                </>
-              )}
-              {selectedApt.status === 'confirmed' && (
-                <Button
-                  title="ثبت به عنوان انجام شده"
-                  onPress={() => handleStatusChange(selectedApt.id, 'done')}
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  style={[s.actionBtn, { backgroundColor: '#1E88E5' }]}
-                  icon={<Icon name="check-circle" size={20} color="#fff" />}
-                  iconPosition="right"
-                />
-              )}
-              <Button
-                title="حذف نوبت"
-                onPress={() => handleDelete(selectedApt)}
-                variant="ghost"
-                size="md"
-                fullWidth
-                textStyle={{ color: '#E53935' }}
-                icon={<Icon name="delete-outline" size={18} color="#E53935" />}
-                iconPosition="right"
-              />
-            </View>
-          </ScrollView>
-        )}
-      </BottomSheet>
+      <CancelReasonModal
+        visible={cancelModalVisible}
+        appointment={cancelTarget}
+        onClose={handleCloseCancel}
+        onConfirm={handleConfirmCancel}
+      />
+
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        position="top"
+        onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
+      />
     </ScreenWrapper>
   );
 }
 
 const s = StyleSheet.create({
-  filterContainer: {
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-  },
-  filterRow: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1.5,
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
-  filterChipBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  filterChipBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: 'Vazir-Bold',
-  },
   listContainer: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 120,
+  },
+  list: {
     gap: 12,
   },
-  aptCard: {
-    marginBottom: 0,
-  },
-  aptHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  aptUser: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  aptUserInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  aptCustomerName: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-  },
-  aptCustomerPhone: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
-  },
-  aptDivider: {
-    paddingVertical: 4,
-  },
-  dividerLine: {
-    height: 1,
-  },
-  aptDetails: {
-    gap: 6,
-    marginBottom: 10,
-  },
-  aptDetailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  aptDetailText: {
-    fontSize: 13,
-    fontFamily: 'Vazir',
-  },
-  aptFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  aptTimeBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  aptTimeText: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
-  },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    marginHorizontal: 2,
-  },
-  aptPrice: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
-  detailCustomer: {
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 16,
-  },
-  detailName: {
-    fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-  },
-  detailPhone: {
-    fontSize: 13,
-    fontFamily: 'Vazir',
-  },
-  detailCard: {
-    marginBottom: 16,
-    gap: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  detailLabel: {
-    fontSize: 13,
-    fontFamily: 'Vazir',
-  },
-  detailValue: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
-  detailActions: {
-    gap: 10,
-  },
-  actionBtn: {},
 });
