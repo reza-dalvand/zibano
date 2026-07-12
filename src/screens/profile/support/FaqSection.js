@@ -59,14 +59,14 @@ export default function FaqSection() {
           <Text style={[s.sectionTitle, { color: colors.textMain }]}>
             سوالات متداول
           </Text>
-          <Text style={[s.sectionSubtitle, { color: colors.textSecondary }]}>
+          {/* <Text style={[s.sectionSubtitle, { color: colors.textSecondary }]}>
             پاسخ به پرسش‌های رایج کاربران
-          </Text>
+          </Text> */}
         </View>
       </View>
 
       {/* باکس جستجو */}
-      <View
+      {/* <View
         style={[
           s.searchBox,
           {
@@ -96,7 +96,7 @@ export default function FaqSection() {
             <Icon name="close" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
-      </View>
+      </View> */}
 
       {/* فیلتر دسته‌بندی */}
       <ScrollView

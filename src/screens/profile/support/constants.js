@@ -9,7 +9,10 @@ export const SUPPORT_EMAIL = 'support@zibano.app';
 export const SUPPORT_HOURS_SIMPLE = 'شنبه تا پنجشنبه از ساعت ۹ الی ۱۸';
 
 // ============ کانال‌های ارتباطی ============
+// ============ کانال‌های ارتباطی ============
 export const SUPPORT_CHANNELS = [
+  // 🚫 کامنت شد - فعلاً تماس تلفنی نمایش داده نمی‌شود
+  /*
   {
     id: 'phone',
     title: 'تماس تلفنی',
@@ -22,19 +25,20 @@ export const SUPPORT_CHANNELS = [
     link: `tel:${SUPPORT_PHONE}`,
     type: 'phone',
   },
-  {
-    id: 'bale',
-    title: 'پیام‌رسان بله',
-    subtitle: 'پشتیبانی ایرانی',
-    description: 'پاسخ در کمتر از ۱۰ دقیقه',
-    icon: 'chat',
-    color: '#00a2e8',
-    gradient: ['#00a2e8', '#0081c4'],
-    actionLabel: 'شروع گفتگو',
-    link: 'https://ble.ir/zibano_support',
-    type: 'social',
-    badge: 'ایرانی',
-  },
+  */
+  // {
+  //   id: 'bale',
+  //   title: 'پیام‌رسان بله',
+  //   subtitle: 'پشتیبانی ایرانی',
+  //   description: 'پاسخ در کمتر از ۱۰ دقیقه',
+  //   icon: 'chat',
+  //   color: '#00a2e8',
+  //   gradient: ['#00a2e8', '#0081c4'],
+  //   actionLabel: 'شروع گفتگو',
+  //   link: 'https://ble.ir/zibano_support',
+  //   type: 'social',
+  //   badge: 'ایرانی',
+  // },
   {
     id: 'telegram',
     title: 'تلگرام',
