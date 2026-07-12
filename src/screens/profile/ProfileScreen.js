@@ -1,6 +1,6 @@
 // src/screens/profile/ProfileScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Switch, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -14,15 +14,13 @@ import ThemeToggleItem from '../../components/profile/ThemeToggleItem';
 import Toast from '../../components/common/Toast';
 
 export default function ProfileScreen({ navigation }) {
+  // ═══════════ همه Hook‌ها در ابتدا ═══════════
   const { colors, resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const { logout } = useAuth();
-
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-  // 🆕 state های منتقل شده از EditProfile
-  const [promotionsEnabled, setPromotionsEnabled] = useState(true);
-
+  // ═══════════ داده‌های ثابت ═══════════
   const mockUser = {
     name: 'مریم حسینی',
     phone: '۰۹۱۲۳۴۵۶۷۸۹',
@@ -69,17 +67,18 @@ export default function ProfileScreen({ navigation }) {
       route: 'EditProfile',
       color: '#FF9800',
     },
-    {
-      id: 'invite',
-      title: 'دعوت از دوستان',
-      subtitle: 'زیبانو را به دوستانتان معرفی کنید',
-      icon: 'people',
-      route: 'InviteFriends',
-      color: '#9C27B0',
-    },
   ];
 
   const settingsMenuItems = [
+    {
+      id: 'devices',
+      title: 'دستگاه‌های فعال',
+      subtitle: 'مدیریت نشست‌های فعال و امنیت حساب',
+      icon: 'devices',
+      route: 'ActiveDevices',
+      color: '#2196F3',
+      badge: 4,
+    },
     {
       id: 'support',
       title: 'پشتیبانی و راهنما',
@@ -90,7 +89,10 @@ export default function ProfileScreen({ navigation }) {
     },
   ];
 
+  // ═══════════ Handlers ═══════════
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
+
+  const handleMenuPress = (item) => navigation.navigate(item.route);
 
   const handleLogout = () => {
     Alert.alert(
@@ -114,54 +116,28 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  // 🆕 هندلر حذف حساب کاربری
   const handleDeleteAccount = () => {
     Alert.alert(
       '⚠️ حذف حساب کاربری',
-      'آیا از حذف دائمی حساب کاربری خود مطمئن هستید؟\n\nاین عمل قابل بازگشت نیست و تمامی اطلاعات شما شامل:\n\n• سوابق نوبت‌ها\n• علاقه‌مندی‌ها\n• سوابق پرداخت\n• نظرات و امتیازات\n\nبه طور کامل حذف خواهد شد.',
+      'آیا از حذف دائمی حساب کاربری خود مطمئن هستید؟\nاین عمل قابل بازگشت نیست.',
       [
         { text: 'انصراف', style: 'cancel' },
         {
           text: 'حذف دائمی حساب',
           style: 'destructive',
           onPress: () => {
-            Alert.alert(
-              'تایید نهایی',
-              'برای تایید نهایی حذف حساب، لطفاً عبارت "حذف" را در کادر زیر وارد کنید.',
-              [
-                { text: 'انصراف', style: 'cancel' },
-                {
-                  text: 'ادامه',
-                  onPress: () => {
-                    setToast({
-                      visible: true,
-                      message: 'این قابلیت در فاز بعدی فعال می‌شود',
-                      type: 'info',
-                    });
-                  },
-                },
-              ]
-            );
+            setToast({
+              visible: true,
+              message: 'این قابلیت در فاز بعدی فعال می‌شود',
+              type: 'info',
+            });
           },
         },
       ]
     );
   };
 
-  // 🆕 هندلر تغییر وضعیت پیشنهادات
-  const handleTogglePromotions = (value) => {
-    setPromotionsEnabled(value);
-    setToast({
-      visible: true,
-      message: value
-        ? 'دریافت پیشنهادات و تخفیف‌ها فعال شد'
-        : 'دریافت پیشنهادات و تخفیف‌ها غیرفعال شد',
-      type: 'info',
-    });
-  };
-
-  const handleMenuPress = (item) => navigation.navigate(item.route);
-
+  // ═══════════ Render ═══════════
   return (
     <ScreenWrapper scrollable={false} padding={0} edges={['top']}>
       <ProfileHeader user={mockUser} />
@@ -170,7 +146,6 @@ export default function ProfileScreen({ navigation }) {
         contentContainerStyle={s.scrollContent}
       >
         <ProfileStatsCard stats={userStats} />
-
         <ProfileMenuList
           title="دسترسی سریع"
           items={quickMenuItems}
@@ -183,43 +158,10 @@ export default function ProfileScreen({ navigation }) {
             تنظیمات
           </Text>
 
-          {/* 🆕 دریافت پیشنهادات و تخفیف‌ها */}
-          <Card
-            variant="default"
-            padding={0}
-            radius={16}
-            style={[s.promotionsCard, { borderColor: colors.border }]}
-          >
-            <View style={s.promotionsRow}>
-              <View style={s.promotionsInfo}>
-                <View style={[s.promotionsIconBox, { backgroundColor: '#FF980020' }]}>
-                  <Icon name="campaign" size={22} color="#FF9800" />
-                </View>
-                <View style={s.promotionsText}>
-                  <Text style={[s.promotionsTitle, { color: colors.textMain }]}>
-                    دریافت پیشنهادات و تخفیف‌ها
-                  </Text>
-                  <Text style={[s.promotionsSubtitle, { color: colors.textSecondary }]}>
-                    از تخفیف‌های ویژه و پیشنهادات اختصاصی از طریق پیامک باخبر شوید
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={promotionsEnabled}
-                onValueChange={handleTogglePromotions}
-                thumbColor={promotionsEnabled ? colors.primary : '#ccc'}
-                trackColor={{ true: colors.primary + '55', false: '#ddd' }}
-              />
-            </View>
-          </Card>
-
-          <View style={{ height: 10 }} />
-
           {/* تم شب/روز */}
           <View style={{ marginBottom: 10 }}>
             <ThemeToggleItem isDark={isDark} onToggle={toggleTheme} />
           </View>
-
           <ProfileMenuList
             title=""
             items={settingsMenuItems}
@@ -245,12 +187,11 @@ export default function ProfileScreen({ navigation }) {
                     حذف حساب کاربری
                   </Text>
                   <Text style={[s.dangerSubtitle, { color: colors.textSecondary }]}>
-                    حذف دائمی حساب و تمامی اطلاعات شما. این عمل قابل بازگشت نیست.
+                    حذف دائمی حساب و تمامی اطلاعات شما
                   </Text>
                 </View>
               </View>
             </View>
-
             <TouchableOpacity
               onPress={handleDeleteAccount}
               style={[s.dangerBtn, { borderColor: '#E53935' }]}
@@ -282,7 +223,6 @@ export default function ProfileScreen({ navigation }) {
           </Text>
         </View>
       </ScrollView>
-
       <Toast
         visible={toast.visible}
         message={toast.message}
@@ -308,47 +248,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     marginBottom: 12,
   },
-
-  // ═══════════════ پیشنهادات و تخفیف‌ها ═══════════════
-  promotionsCard: {
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  promotionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
-    gap: 12,
-  },
-  promotionsInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  promotionsIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  promotionsText: {
-    flex: 1,
-    gap: 2,
-  },
-  promotionsTitle: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-  },
-  promotionsSubtitle: {
-    fontSize: 11,
-    fontFamily: 'Vazir',
-    lineHeight: 17,
-  },
-
-  // ═══════════════ ناحیه خطرناک ═══════════════
   dangerCard: {
     borderWidth: 1.5,
     overflow: 'hidden',
@@ -400,8 +299,6 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Vazir-Bold',
   },
-
-  // ═══════════════ خروج ═══════════════
   logoutContainer: {
     marginTop: 16,
     gap: 12,

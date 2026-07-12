@@ -8,8 +8,10 @@ import FavoritesScreen from '../screens/profile/FavoritesScreen';
 import PaymentHistoryScreen from '../screens/profile/PaymentHistoryScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import ChangePhoneScreen from '../screens/profile/ChangePhoneScreen';
-import InviteFriendsScreen from '../screens/profile/InviteFriendsScreen';
+// 🚫 کامنت شد - در فاز فعلی استفاده نمی‌شود
+// import InviteFriendsScreen from '../screens/profile/InviteFriendsScreen';
 import SupportScreen from '../screens/profile/SupportScreen';
+import ActiveDevicesScreen from '../screens/profile/ActiveDevicesScreen'; // 🆕 اضافه شد
 
 const Stack = createNativeStackNavigator();
 
@@ -51,15 +53,23 @@ export default function ProfileStackNavigator() {
         component={ChangePhoneScreen}
         options={{ title: 'تغییر شماره موبایل' }}
       />
+      {/* 🚫 کامنت شد - در فاز فعلی استفاده نمی‌شود
       <Stack.Screen
         name="InviteFriends"
         component={InviteFriendsScreen}
         options={{ title: 'دعوت از دوستان' }}
       />
+      */}
       <Stack.Screen
         name="Support"
         component={SupportScreen}
         options={{ title: 'پشتیبانی' }}
+      />
+      {/* 🆕 صفحه جدید دستگاه‌های فعال */}
+      <Stack.Screen
+        name="ActiveDevices"
+        component={ActiveDevicesScreen}
+        options={{ title: 'دستگاه‌های فعال' }}
       />
     </Stack.Navigator>
   );
