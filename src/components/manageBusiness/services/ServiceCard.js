@@ -53,14 +53,6 @@ export default function ServiceCard({ service, onEdit, onToggle, onDelete }) {
           <Text style={[s.typeName, { color: colors.textSecondary }]} numberOfLines={1}>
             {service.typeName}
           </Text>
-          {service.duration && (
-            <View style={s.durationRow}>
-              <Icon name="schedule" size={12} color={colors.textSecondary} />
-              <Text style={[s.durationText, { color: colors.textSecondary }]}>
-                {toPersianDigit(service.duration)} دقیقه
-              </Text>
-            </View>
-          )}
           {/* 🆕 نمایش وضعیت یادآوری */}
           <View style={s.reminderRow}>
             <Icon

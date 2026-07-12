@@ -12,6 +12,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
+import StarRating from '../../components/common/StarRating';
 import { useAuth } from '../../context/AuthContext';
 import { useBusiness } from '../../context/BusinessContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +22,7 @@ const MOCK_BUSINESS_INFO = {
   name: 'سالن زیبایی نیلارام',
   logo: 'https://picsum.photos/100/100?random=1',
   rating: 4.9,
+  reviewsCount: 142,
   category: 'کلینیک پوست و مو',
   city: 'تهران، سعادت‌آباد',
   VIP: true,
@@ -29,21 +31,7 @@ const MOCK_BUSINESS_INFO = {
 const toPersianDigit = str =>
   String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-// ============ نقش‌ها و متن‌ها ============
-const ROLE_LABELS = {
-  manager: 'مدیر',
-  employee: 'کارمند',
-};
-
-const ROLE_ICONS = {
-  manager: 'verified-user',
-  employee: 'badge',
-};
-
-export default function ManageBusinessScreen({
-  navigation,
-  userRole = 'manager',
-}) {
+export default function ManageBusinessScreen({ navigation }) {
   const { colors } = useTheme();
   const { user } = useAuth();
   const { businessData } = useBusiness();
@@ -69,24 +57,34 @@ export default function ManageBusinessScreen({
   // ============ محاسبه آمار از Context ============
   const stats = useMemo(() => {
     const appointments = businessData?.appointments || [];
+    const todayJalaali = { jy: 1403, jm: 4, jd: 20 }; // موقت
 
     const activeAppointments = appointments.filter(
       apt => apt.status === 'pending' || apt.status === 'confirmed',
     ).length;
 
-    const teamCount = businessData?.team?.length || 0;
+    const todayAppointments = appointments.filter(apt => {
+      const d = apt.date;
+      return (
+        d &&
+        d.jy === todayJalaali.jy &&
+        d.jm === todayJalaali.jm &&
+        d.jd === todayJalaali.jd
+      );
+    }).length;
+
+    const totalBookings = appointments.length;
     const rating = businessData?.rating || MOCK_BUSINESS_INFO.rating;
-    const bookings = appointments.length || 0;
 
     return {
       activeAppointments,
-      teamCount,
+      todayAppointments,
+      totalBookings,
       rating,
-      bookings,
     };
   }, [businessData]);
 
-  // ============ کارت‌های آماری ============
+  // ============ کارت‌های آماری (۳ کارت) ============
   const STATS_CARDS = [
     {
       id: 'active',
@@ -95,39 +93,34 @@ export default function ManageBusinessScreen({
       icon: 'event-available',
       color: '#667eea',
       bg: '#667eea15',
+      subtitle: 'در انتظار انجام',
+    },
+    {
+      id: 'today',
+      label: 'نوبت امروز',
+      value: toPersianDigit(stats.todayAppointments),
+      icon: 'today',
+      color: '#f093fb',
+      bg: '#f093fb15',
+      subtitle: 'برنامه امروز',
     },
     {
       id: 'bookings',
       label: 'کل رزروها',
-      value: toPersianDigit(stats.bookings),
+      value: toPersianDigit(stats.totalBookings),
       icon: 'event-note',
-      color: '#f093fb',
-      bg: '#f093fb15',
-    },
-    {
-      id: 'team',
-      label: 'اعضای تیم',
-      value: toPersianDigit(stats.teamCount),
-      icon: 'people-alt',
       color: '#4facfe',
       bg: '#4facfe15',
-    },
-    {
-      id: 'rating',
-      label: 'امتیاز',
-      value: toPersianDigit(stats.rating.toFixed(1)),
-      icon: 'star',
-      color: '#FFC107',
-      bg: '#FFC10715',
+      subtitle: 'از ابتدا تاکنون',
     },
   ];
 
-  // ============ اقدامات سریع (۵ آیتم اصلی) ============
+  // ============ اقدامات سریع (۴ آیتم - بدون تیم) ============
   const QUICK_ACTIONS = [
     {
       id: 'appointments',
       label: 'نوبت‌ها',
-      subtitle: 'مدیریت و مشاهده نوبت‌های سالن',
+      subtitle: 'مدیریت نوبت‌های سالن',
       icon: 'event-note',
       route: 'AllAppointments',
       gradient: ['#667eea', '#764ba2'],
@@ -136,24 +129,15 @@ export default function ManageBusinessScreen({
     {
       id: 'services',
       label: 'خدمات',
-      subtitle: 'افزودن و ویرایش خدمات سالن',
+      subtitle: 'افزودن و ویرایش خدمات',
       icon: 'spa',
       route: 'ManageServices',
       gradient: ['#f093fb', '#f5576c'],
     },
     {
-      id: 'team',
-      label: 'تیم',
-      subtitle: 'مدیریت کارمندان و تخصص‌ها',
-      icon: 'people',
-      route: 'ManageTeam',
-      gradient: ['#4facfe', '#00f2fe'],
-      badge: stats.teamCount,
-    },
-    {
       id: 'schedule',
       label: 'زمان‌بندی',
-      subtitle: 'تنظیم شیفت و برنامه کارمندان',
+      subtitle: 'تنظیم ساعات کاری',
       icon: 'schedule',
       route: 'ManageSchedule',
       gradient: ['#43e97b', '#38f9d7'],
@@ -161,7 +145,7 @@ export default function ManageBusinessScreen({
     {
       id: 'portfolio',
       label: 'نمونه‌کار',
-      subtitle: 'آپلود و مدیریت گالری کارها',
+      subtitle: 'گالری کارهای شما',
       icon: 'photo-library',
       route: 'ManagePortfolio',
       gradient: ['#fa709a', '#fee140'],
@@ -186,6 +170,7 @@ export default function ManageBusinessScreen({
             },
           ]}
         >
+          {/* دایره‌های تزئینی */}
           <View
             style={[s.decorCircle1, { borderColor: 'rgba(255,255,255,0.15)' }]}
           />
@@ -194,6 +179,7 @@ export default function ManageBusinessScreen({
           />
 
           <View style={s.headerContent}>
+            {/* ردیف بالا: خوشامدگویی */}
             <View style={s.welcomeRow}>
               <View style={s.welcomeTextCol}>
                 <Text style={s.greetingText}>
@@ -203,30 +189,16 @@ export default function ManageBusinessScreen({
                   {user?.name || 'کاربر زیبانو'}
                 </Text>
               </View>
-
-              <View
-                style={[
-                  s.roleBadge,
-                  { backgroundColor: 'rgba(255, 255, 255, 0.2)' },
-                ]}
-              >
-                <Icon
-                  name={ROLE_ICONS[userRole] || 'person'}
-                  size={14}
-                  color="#fff"
-                />
-                <Text style={s.roleBadgeText}>
-                  {ROLE_LABELS[userRole] || 'کاربر'}
-                </Text>
-              </View>
             </View>
 
+            {/* کارت کسب‌وکار با امتیاز */}
             <View
               style={[
                 s.businessInfoRow,
                 { backgroundColor: 'rgba(255, 255, 255, 0.15)' },
               ]}
             >
+              {/* لوگو */}
               <Avatar
                 uri={MOCK_BUSINESS_INFO.logo}
                 name={MOCK_BUSINESS_INFO.name}
@@ -234,6 +206,8 @@ export default function ManageBusinessScreen({
                 showBorder
                 style={s.businessAvatar}
               />
+
+              {/* اطلاعات کسب‌وکار */}
               <View style={s.businessInfo}>
                 <View style={s.bizNameRow}>
                   <Text style={s.businessName} numberOfLines={1}>
@@ -260,13 +234,33 @@ export default function ManageBusinessScreen({
                 </View>
               </View>
 
-              {/* 🆕 دکمه کیف پول - مدیریت مالی */}
+              {/* ═══════ 🌟 بخش امتیاز - جدید ═══════ */}
+              <View style={s.ratingBox}>
+                <Text style={s.ratingNumber}>
+                  {toPersianDigit(stats.rating.toFixed(1))}
+                </Text>
+                <View style={s.ratingStarsRow}>
+                  <Icon name="star" size={14} color="#FFD700" />
+                  <Icon name="star" size={14} color="#FFD700" />
+                  <Icon name="star" size={14} color="#FFD700" />
+                  <Icon name="star" size={14} color="#FFD700" />
+                  <Icon name="star-half" size={14} color="#FFD700" />
+                </View>
+                <Text style={s.ratingCount}>
+                  ({toPersianDigit(MOCK_BUSINESS_INFO.reviewsCount)})
+                </Text>
+              </View>
+            </View>
+
+            {/* ردیف دکمه‌ها: کیف پول + تنظیمات */}
+            <View style={s.headerActionsRow}>
               <TouchableOpacity
                 style={s.walletButton}
                 onPress={() => navigation.navigate('FinancialManagement')}
                 activeOpacity={0.75}
               >
-                <Icon name="account-balance-wallet" size={20} color="#fff" />
+                <Icon name="account-balance-wallet" size={18} color="#fff" />
+                <Text style={s.walletBtnText}>کیف پول</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -274,61 +268,18 @@ export default function ManageBusinessScreen({
                 onPress={() => navigation.navigate('BusinessSettings')}
                 activeOpacity={0.7}
               >
-                <Icon name="settings" size={20} color="#fff" />
+                <Icon name="settings" size={18} color="#fff" />
+                <Text style={s.walletBtnText}>تنظیمات</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        {/* ═══════════ بخش آمار ═══════════ */}
-        <View style={s.statsSection}>
-          <View style={s.sectionHeaderRow}>
-            <View
-              style={[
-                s.sectionIcon,
-                { backgroundColor: colors.primary + '15' },
-              ]}
-            >
-              <Icon name="insights" size={18} color={colors.primary} />
-            </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              خلاصه عملکرد
-            </Text>
-          </View>
-
-          <View style={s.statsGrid}>
-            {STATS_CARDS.map(stat => (
-              <Card
-                key={stat.id}
-                variant="elevated"
-                padding={0}
-                radius={18}
-                style={s.statCard}
-              >
-                <View style={s.statCardInner}>
-                  <View style={[s.statIconBox, { backgroundColor: stat.bg }]}>
-                    <Icon name={stat.icon} size={22} color={stat.color} />
-                  </View>
-                  <Text style={[s.statValue, { color: colors.textMain }]}>
-                    {stat.value}
-                  </Text>
-                  <Text style={[s.statLabel, { color: colors.textSecondary }]}>
-                    {stat.label}
-                  </Text>
-                </View>
-              </Card>
-            ))}
-          </View>
-        </View>
-
-        {/* ═══════════ اقدامات سریع ═══════════ */}
+        {/* ═══════════ اقدامات سریع (۴ آیتم) ═══════════ */}
         <View style={[s.section, s.lastSection]}>
           <View style={s.sectionHeaderRow}>
             <View
-              style={[
-                s.sectionIcon,
-                { backgroundColor: colors.primary + '15' },
-              ]}
+              style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}
             >
               <Icon name="bolt" size={18} color={colors.primary} />
             </View>
@@ -337,7 +288,7 @@ export default function ManageBusinessScreen({
             </Text>
           </View>
 
-          <View style={s.quickActionsList}>
+          <View style={s.quickActionsGrid}>
             {QUICK_ACTIONS.map(item => (
               <TouchableOpacity
                 key={item.id}
@@ -351,14 +302,18 @@ export default function ManageBusinessScreen({
                 onPress={() => navigation.navigate(item.route)}
                 activeOpacity={0.8}
               >
+                {/* آیکون با گرادیان */}
                 <View
                   style={[
                     s.quickActionIconBox,
                     { backgroundColor: item.gradient[0] + '15' },
                   ]}
                 >
-                  <Icon name={item.icon} size={22} color={item.gradient[0]} />
-
+                  <Icon
+                    name={item.icon}
+                    size={28}
+                    color={item.gradient[0]}
+                  />
                   {item.badge && item.badge > 0 && (
                     <View style={s.actionBadge}>
                       <Text style={s.actionBadgeText}>
@@ -368,27 +323,21 @@ export default function ManageBusinessScreen({
                   )}
                 </View>
 
-                <View style={s.quickActionInfo}>
-                  <Text
-                    style={[s.quickActionTitle, { color: colors.textMain }]}
-                  >
-                    {item.label}
-                  </Text>
-                  <Text
-                    style={[
-                      s.quickActionSubtitle,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    {item.subtitle}
-                  </Text>
-                </View>
-
-                <Icon
-                  name="chevron-left"
-                  size={22}
-                  color={colors.textSecondary}
-                />
+                {/* متن */}
+                <Text
+                  style={[s.quickActionTitle, { color: colors.textMain }]}
+                >
+                  {item.label}
+                </Text>
+                <Text
+                  style={[
+                    s.quickActionSubtitle,
+                    { color: colors.textSecondary },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {item.subtitle}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -406,7 +355,7 @@ const s = StyleSheet.create({
   // ═══════════ هدر ═══════════
   headerGradient: {
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: 24,
     paddingHorizontal: 20,
     position: 'relative',
     overflow: 'hidden',
@@ -430,7 +379,7 @@ const s = StyleSheet.create({
     borderWidth: 2,
   },
   headerContent: {
-    gap: 18,
+    gap: 16,
     position: 'relative',
     zIndex: 2,
   },
@@ -449,29 +398,18 @@ const s = StyleSheet.create({
     color: '#ffffffcc',
   },
   userName: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Vazir-Bold',
     color: '#ffffff',
   },
-  roleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-  },
-  roleBadgeText: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
-    color: '#ffffff',
-  },
+
+  // ═══════════ کارت کسب‌وکار ═══════════
   businessInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 18,
-    gap: 10,
+    padding: 14,
+    borderRadius: 20,
+    gap: 12,
   },
   businessAvatar: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -488,7 +426,7 @@ const s = StyleSheet.create({
     gap: 6,
   },
   businessName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
     color: '#ffffff',
     flexShrink: 1,
@@ -502,7 +440,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   bizCategory: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Vazir-Medium',
     color: '#ffffffdd',
   },
@@ -513,31 +451,75 @@ const s = StyleSheet.create({
     marginTop: 2,
   },
   bizLocation: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Vazir',
     color: '#ffffffbb',
     flexShrink: 1,
   },
 
-  // 🆕 دکمه کیف پول
-  walletButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    justifyContent: 'center',
+  // ═══════════ 🌟 بخش امتیاز ═══════════
+  ratingBox: {
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 72,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  ratingNumber: {
+    fontSize: 22,
+    fontFamily: 'Vazir-Bold',
+    color: '#ffffff',
+    lineHeight: 26,
+  },
+  ratingStarsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 1,
+    marginVertical: 2,
+  },
+  ratingCount: {
+    fontSize: 9,
+    fontFamily: 'Vazir',
+    color: '#ffffffcc',
   },
 
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+  // ═══════════ دکمه‌های هدر ═══════════
+  headerActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  walletButton: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  walletBtnText: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+    color: '#ffffff',
   },
 
   // ═══════════ بخش‌ها ═══════════
@@ -571,84 +553,90 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
   },
 
-  // ═══════════ آمار ═══════════
+  // ═══════════ آمار (۳ کارت) ═══════════
   statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
+    gap: 10,
   },
   statCard: {
-    width: '48%',
+    flex: 1,
     marginBottom: 0,
     minHeight: 140,
   },
   statCardInner: {
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
     flex: 1,
   },
   statIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Vazir-Bold',
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
+  },
+  statSubtitle: {
+    fontSize: 9,
     fontFamily: 'Vazir',
     textAlign: 'center',
   },
 
-  // ═══════════ اقدامات سریع ═══════════
-  quickActionsList: {
-    gap: 10,
+  // ═══════════ اقدامات سریع (Grid 2x2) ═══════════
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   quickActionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-    borderRadius: 16,
+    width: '48%',
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 150,
+    justifyContent: 'center',
   },
   quickActionIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: 60,
+    height: 60,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-  },
-  quickActionInfo: {
-    flex: 1,
-    gap: 2,
+    marginBottom: 4,
   },
   quickActionTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
   },
   quickActionSubtitle: {
     fontSize: 11,
     fontFamily: 'Vazir',
     lineHeight: 16,
+    textAlign: 'center',
   },
   actionBadge: {
     position: 'absolute',
     top: -6,
     right: -6,
     backgroundColor: '#E53935',
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 5,

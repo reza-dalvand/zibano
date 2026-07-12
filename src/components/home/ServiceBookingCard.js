@@ -33,12 +33,6 @@ export default function ServiceBookingCard({ service, onBook }) {
           >
             {service.name}
           </Text>
-          <View style={s.serviceMeta}>
-            <Icon name="schedule" size={14} color={colors.textSecondary} />
-            <Text style={[s.serviceDuration, { color: colors.textSecondary }]}>
-              {toPersianDigit(service.duration)} دقیقه
-            </Text>
-          </View>
           <View style={s.servicePriceRow}>
             <View style={s.servicePriceCol}>
               {service.discount > 0 && (

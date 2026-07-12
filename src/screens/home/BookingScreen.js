@@ -122,12 +122,6 @@ export default function BookingModal({ visible, onClose, service }) {
             {currentService.name}
           </Text>
         </View>
-        <View style={[s.durationBadge, { backgroundColor: colors.primary + '15' }]}>
-          <Icon name="schedule" size={12} color={colors.primary} />
-          <Text style={[s.durationText, { color: colors.primary }]}>
-            {toPersianDigit(currentService.duration)} دقیقه
-          </Text>
-        </View>
       </View>
 
       {/* Step Indicator */}

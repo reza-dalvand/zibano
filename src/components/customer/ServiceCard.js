@@ -32,9 +32,6 @@ const ServiceCard = ({service, onPress}) => {
               {finalPrice.toLocaleString('fa-IR')} تومان
             </Text>
           </View>
-          <Text style={[styles.duration, {color: colors.textSecondary}]}>
-            {service.duration} دقیقه
-          </Text>
         </View>
       </View>
     </TouchableOpacity>
