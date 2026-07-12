@@ -3,7 +3,6 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeContext';
 import Header from '../components/common/Header';
-
 import ManageBusinessScreen from '../screens/manageBusiness/ManageBusinessScreen';
 import AllAppointmentsScreen from '../screens/manageBusiness/AllAppointmentsScreen';
 import ManageServicesScreen from '../screens/manageBusiness/ManageServicesScreen';
@@ -12,12 +11,13 @@ import ManageScheduleScreen from '../screens/manageBusiness/ManageScheduleScreen
 import ManagePortfolioScreen from '../screens/manageBusiness/ManagePortfolioScreen';
 import BusinessSettingsScreen from '../screens/manageBusiness/BusinessSettingsScreen';
 import ReviewsScreen from '../screens/manageBusiness/ReviewsScreen';
+// 🆕 صفحه جدید
+import EditServiceScreen from '../screens/manageBusiness/EditServiceScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function ManageStackNavigator() {
   const { colors } = useTheme();
-
   return (
     <Stack.Navigator
       screenOptions={{
@@ -38,7 +38,13 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="ManageServices"
         component={ManageServicesScreen}
-        options={{ title: 'مدیریت خدمات' }}
+        options={{ headerShown: false }}
+      />
+      {/* 🆕 صفحه ویرایش خدمت */}
+      <Stack.Screen
+        name="EditService"
+        component={EditServiceScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ManageTeam"
