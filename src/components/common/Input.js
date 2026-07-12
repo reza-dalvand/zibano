@@ -138,7 +138,7 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Medium',
     fontSize: 13,
     marginBottom: 6,
-    textAlign: 'right',
+    textAlign: 'left',
   },
   container: {
     flexDirection: 'row',
