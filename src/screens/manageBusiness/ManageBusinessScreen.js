@@ -14,7 +14,7 @@ import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import { useAuth } from '../../context/AuthContext';
 import { useBusiness } from '../../context/BusinessContext';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ============ دیتای موقت کسب‌وکار ============
 const MOCK_BUSINESS_INFO = {
@@ -47,7 +47,7 @@ export default function ManageBusinessScreen({
   const { colors } = useTheme();
   const { user } = useAuth();
   const { businessData } = useBusiness();
-  const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets();
 
   const [currentGreeting, setCurrentGreeting] = useState('');
   const [greetingEmoji, setGreetingEmoji] = useState('👋');
@@ -179,7 +179,7 @@ export default function ManageBusinessScreen({
           style={[
             s.headerGradient,
             {
-              paddingTop: insets.top + 8, // 🎯 insets.top
+              paddingTop: insets.top + 8,
               backgroundColor: colors.primary,
               borderBottomLeftRadius: 32,
               borderBottomRightRadius: 32,
@@ -259,6 +259,15 @@ export default function ManageBusinessScreen({
                   </Text>
                 </View>
               </View>
+
+              {/* 🆕 دکمه کیف پول - مدیریت مالی */}
+              <TouchableOpacity
+                style={s.walletButton}
+                onPress={() => navigation.navigate('FinancialManagement')}
+                activeOpacity={0.75}
+              >
+                <Icon name="account-balance-wallet" size={20} color="#fff" />
+              </TouchableOpacity>
 
               <TouchableOpacity
                 style={s.editButton}
@@ -462,7 +471,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 18,
-    gap: 12,
+    gap: 10,
   },
   businessAvatar: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -509,6 +518,19 @@ const s = StyleSheet.create({
     color: '#ffffffbb',
     flexShrink: 1,
   },
+
+  // 🆕 دکمه کیف پول
+  walletButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+
   editButton: {
     width: 40,
     height: 40,

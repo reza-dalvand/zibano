@@ -13,6 +13,7 @@ import BusinessSettingsScreen from '../screens/manageBusiness/BusinessSettingsSc
 import ReviewsScreen from '../screens/manageBusiness/ReviewsScreen';
 // 🆕 صفحه جدید
 import EditServiceScreen from '../screens/manageBusiness/EditServiceScreen';
+import FinancialManagementScreen from '../screens/manageBusiness/FinancialManagementScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,11 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="ManageDashboard"
         component={ManageBusinessScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FinancialManagement"
+        component={FinancialManagementScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
