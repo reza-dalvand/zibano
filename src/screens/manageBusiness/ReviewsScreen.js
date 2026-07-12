@@ -34,7 +34,8 @@ const MOCK_REVIEWS = [
     rating: 5,
     date: '۲ روز پیش',
     serviceName: 'فیشیال تخصصی',
-    comment: 'محیط بسیار تمیز و آرام. برخورد پرسنل عالی بود. حتماً دوباره مراجعه می‌کنم.',
+    comment:
+      'محیط بسیار تمیز و آرام. برخورد پرسنل عالی بود. حتماً دوباره مراجعه می‌کنم.',
   },
   {
     id: 'r2',
@@ -52,7 +53,8 @@ const MOCK_REVIEWS = [
     rating: 5,
     date: '۲ هفته پیش',
     serviceName: 'لیزر فول بادی',
-    comment: 'دستگاه پیشرفته و بدون درد. نتیجه فوق‌العاده بود. ممنون از تیم حرفه‌ای نیلارام.',
+    comment:
+      'دستگاه پیشرفته و بدون درد. نتیجه فوق‌العاده بود. ممنون از تیم حرفه‌ای نیلارام.',
   },
   {
     id: 'r4',
@@ -70,12 +72,13 @@ const MOCK_REVIEWS = [
     rating: 5,
     date: '۱ ماه پیش',
     serviceName: 'رنگ مو',
-    comment: 'بهترین تجربه رنگ مو که تا حالا داشتم. رنگ دقیقاً همونی شد که می‌خواستم.',
+    comment:
+      'بهترین تجربه رنگ مو که تا حالا داشتم. رنگ دقیقاً همونی شد که می‌خواستم.',
   },
 ];
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function ReviewsScreen({ navigation }) {
   const { colors } = useTheme();
@@ -88,9 +91,9 @@ export default function ReviewsScreen({ navigation }) {
     const total = reviews.length;
     const avg =
       total > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / total : 0;
-    const dist = [5, 4, 3, 2, 1].map((star) => ({
+    const dist = [5, 4, 3, 2, 1].map(star => ({
       star,
-      count: reviews.filter((r) => Math.round(r.rating) === star).length,
+      count: reviews.filter(r => Math.round(r.rating) === star).length,
     }));
     return { total, avg, dist };
   }, [reviews]);
@@ -98,14 +101,15 @@ export default function ReviewsScreen({ navigation }) {
   // فیلتر نظرات
   const filteredReviews = useMemo(() => {
     if (activeFilter === 'all') return reviews;
-    return reviews.filter(
-      (r) => Math.round(r.rating) === parseInt(activeFilter)
-    );
+    return reviews.filter(r => Math.round(r.rating) === parseInt(activeFilter));
   }, [reviews, activeFilter]);
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
-      <Header title="نظرات و امتیازات" onBackPress={() => navigation.goBack()} />
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
+      <Header
+        title="نظرات و امتیازات"
+        onBackPress={() => navigation.goBack()}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -127,11 +131,9 @@ export default function ReviewsScreen({ navigation }) {
 
             {/* توزیع امتیازها */}
             <View style={s.distribution}>
-              {stats.dist.map((d) => (
+              {stats.dist.map(d => (
                 <View key={d.star} style={s.distRow}>
-                  <Text
-                    style={[s.distStar, { color: colors.textSecondary }]}
-                  >
+                  <Text style={[s.distStar, { color: colors.textSecondary }]}>
                     {toPersianDigit(d.star)}
                   </Text>
                   <Icon
@@ -147,15 +149,17 @@ export default function ReviewsScreen({ navigation }) {
                         s.distBarFill,
                         {
                           backgroundColor:
-                            d.star >= 4 ? '#43A047' : d.star === 3 ? '#FFA000' : '#E53935',
+                            d.star >= 4
+                              ? '#43A047'
+                              : d.star === 3
+                              ? '#FFA000'
+                              : '#E53935',
                           width: `${(d.count / stats.total) * 100}%`,
                         },
                       ]}
                     />
                   </View>
-                  <Text
-                    style={[s.distCount, { color: colors.textSecondary }]}
-                  >
+                  <Text style={[s.distCount, { color: colors.textSecondary }]}>
                     {toPersianDigit(d.count)}
                   </Text>
                 </View>
@@ -171,7 +175,7 @@ export default function ReviewsScreen({ navigation }) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={s.filterRow}
           >
-            {FILTER_OPTIONS.map((f) => {
+            {FILTER_OPTIONS.map(f => {
               const isActive = activeFilter === f.id;
               return (
                 <TouchableOpacity
@@ -207,7 +211,7 @@ export default function ReviewsScreen({ navigation }) {
         {/* لیست نظرات */}
         <View style={s.reviewsList}>
           {filteredReviews.length > 0 ? (
-            filteredReviews.map((review) => (
+            filteredReviews.map(review => (
               <Card
                 key={review.id}
                 variant="elevated"
@@ -263,18 +267,12 @@ export default function ReviewsScreen({ navigation }) {
                   </View>
                 )}
 
-                <Text
-                  style={[s.reviewComment, { color: colors.textMain }]}
-                >
+                <Text style={[s.reviewComment, { color: colors.textMain }]}>
                   {review.comment}
                 </Text>
 
                 <TouchableOpacity style={s.replyBtn}>
-                  <Icon
-                    name="reply"
-                    size={16}
-                    color={colors.primary}
-                  />
+                  <Icon name="reply" size={16} color={colors.primary} />
                   <Text style={[s.replyText, { color: colors.primary }]}>
                     پاسخ به نظر
                   </Text>

@@ -1,6 +1,13 @@
 // src/screens/profile/ProfileScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -18,7 +25,11 @@ export default function ProfileScreen({ navigation }) {
   const { colors, resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
   const { logout } = useAuth();
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   // ═══════════ داده‌های ثابت ═══════════
   const mockUser = {
@@ -29,8 +40,20 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const userStats = [
-    { id: 1, label: 'نوبت‌ها', value: 12, icon: 'event-note', color: '#2196F3' },
-    { id: 2, label: 'علاقه‌مندی', value: 28, icon: 'favorite', color: '#E91E63' },
+    {
+      id: 1,
+      label: 'نوبت‌ها',
+      value: 12,
+      icon: 'event-note',
+      color: '#2196F3',
+    },
+    {
+      id: 2,
+      label: 'علاقه‌مندی',
+      value: 28,
+      icon: 'favorite',
+      color: '#E91E63',
+    },
   ];
 
   const quickMenuItems = [
@@ -92,7 +115,7 @@ export default function ProfileScreen({ navigation }) {
   // ═══════════ Handlers ═══════════
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
 
-  const handleMenuPress = (item) => navigation.navigate(item.route);
+  const handleMenuPress = item => navigation.navigate(item.route);
 
   const handleLogout = () => {
     Alert.alert(
@@ -112,7 +135,7 @@ export default function ProfileScreen({ navigation }) {
             });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -133,13 +156,17 @@ export default function ProfileScreen({ navigation }) {
             });
           },
         },
-      ]
+      ],
     );
   };
 
   // ═══════════ Render ═══════════
   return (
-    <ScreenWrapper scrollable={false} padding={0} edges={['top']}>
+    <ScreenWrapper
+      scrollable={false}
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+    >
       <ProfileHeader user={mockUser} />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -175,18 +202,25 @@ export default function ProfileScreen({ navigation }) {
             variant="default"
             padding={0}
             radius={16}
-            style={[s.dangerCard, { borderColor: '#E5393540', backgroundColor: '#E5393508' }]}
+            style={[
+              s.dangerCard,
+              { borderColor: '#E5393540', backgroundColor: '#E5393508' },
+            ]}
           >
             <View style={s.dangerRow}>
               <View style={s.dangerInfo}>
-                <View style={[s.dangerIconBox, { backgroundColor: '#E5393520' }]}>
+                <View
+                  style={[s.dangerIconBox, { backgroundColor: '#E5393520' }]}
+                >
                   <Icon name="delete-forever" size={22} color="#E53935" />
                 </View>
                 <View style={s.dangerText}>
                   <Text style={[s.dangerTitle, { color: '#E53935' }]}>
                     حذف حساب کاربری
                   </Text>
-                  <Text style={[s.dangerSubtitle, { color: colors.textSecondary }]}>
+                  <Text
+                    style={[s.dangerSubtitle, { color: colors.textSecondary }]}
+                  >
                     حذف دائمی حساب و تمامی اطلاعات شما
                   </Text>
                 </View>

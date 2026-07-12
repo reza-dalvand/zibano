@@ -11,17 +11,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 
 /**
- * کامپوننت wrapper استاندارد برای تمام صفحات اپلیکیشن
- *
- * @param {boolean} scrollable - اگر true، محتوا داخل ScrollView قرار می‌گیرد
- * @param {boolean} keyboardAware - اگر true، از KeyboardAvoidingView استفاده می‌کند
- * @param {number} padding - فاصله داخلی از لبه‌ها (پیش‌فرض: 0)
- * @param {number} bottomInset - فاصله اضافی از پایین برای تب‌بار شناور (پیش‌فرض: 100)
- * @param {string[]} edges - لبه‌های SafeArea که باید مدیریت شوند
- * @param {boolean} safeAreaTop - اگر true، لبه بالا هم مدیریت می‌شود (فقط برای صفحات بدون Header)
- * @param {boolean} hasHeader - آیا صفحه Header کامپوننت دارد؟ (پیش‌فرض: true)
- *   اگر true باشد و edges شامل 'top' باشد، 'top' خودکار حذف می‌شود
- *   (چون Header خودش insets.top را مدیریت می‌کند)
+ * کامپوننت Wrapper استاندارد برای تمام صفحات
+ * 
+ * 📌 قانون استفاده از edges:
+ * - صفحات با هدر ساده (کامپوننت Header): edges={['bottom', 'left', 'right']}
+ *   (چون Header خودش insets.top رو مدیریت می‌کنه)
+ * - صفحات با هدر رنگی/سفارشی (پروفایل، خانه، ویترین و...): edges={['top', 'bottom', 'left', 'right']}
+ *   یا کلاً prop edges رو ننویسید تا پیش‌فرض اعمال بشه
  */
 export default function ScreenWrapper({
   children,
@@ -29,33 +25,13 @@ export default function ScreenWrapper({
   keyboardAware = false,
   padding = 0,
   bottomInset = 100,
-  edges = null,
-  safeAreaTop = false,
-  hasHeader = true,
+  edges = ['top', 'bottom', 'left', 'right'], // ✅ پیش‌فرض: مدیریت کامل SafeArea
   style,
   contentStyle,
   showsVerticalScrollIndicator = false,
   bounces = true,
 }) {
   const { colors } = useTheme();
-
-  // 🎯 محاسبه هوشمند لبه‌های SafeArea
-  let computedEdges;
-  if (edges) {
-    computedEdges = [...edges];
-    // 🔧 اگه صفحه Header داره و top در edges هست → حذف top
-    // چون Header خودش insets.top رو مدیریت می‌کنه
-    if (hasHeader && computedEdges.includes('top')) {
-      computedEdges = computedEdges.filter((e) => e !== 'top');
-    }
-  } else {
-    computedEdges = [
-      ...(safeAreaTop || !hasHeader ? ['top'] : []),
-      'bottom',
-      'left',
-      'right',
-    ];
-  }
 
   const inner = scrollable ? (
     <ScrollView
@@ -91,7 +67,7 @@ export default function ScreenWrapper({
 
   return (
     <SafeAreaView
-      edges={computedEdges}
+      edges={edges}
       style={[s.root, { backgroundColor: colors.background }, style]}
     >
       {wrapped}
@@ -100,16 +76,8 @@ export default function ScreenWrapper({
 }
 
 const s = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  flat: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
+  root: { flex: 1 },
+  flex: { flex: 1 },
+  flat: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
 });

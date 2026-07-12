@@ -1,6 +1,12 @@
 // src/screens/home/HomeScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import AdSlider from '../../components/home/AdSlider';
@@ -12,8 +18,18 @@ import { useAuth } from '../../context/AuthContext';
 
 // ============ دیتای موقت ============
 const MOCK_ADS = [
-  { id: 1, imageUrl: 'https://picsum.photos/800/400?random=1', title: 'جشنواره تخفیف‌های بهار کلینیک رُز', subtitle: 'تا ۳۰٪ تخفیف خدمات پوست' },
-  { id: 2, imageUrl: 'https://picsum.photos/800/400?random=2', title: 'افتتاحیه سالن زیبایی لاویا', subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی' },
+  {
+    id: 1,
+    imageUrl: 'https://picsum.photos/800/400?random=1',
+    title: 'جشنواره تخفیف‌های بهار کلینیک رُز',
+    subtitle: 'تا ۳۰٪ تخفیف خدمات پوست',
+  },
+  {
+    id: 2,
+    imageUrl: 'https://picsum.photos/800/400?random=2',
+    title: 'افتتاحیه سالن زیبایی لاویا',
+    subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی',
+  },
 ];
 
 const MOCK_CATEGORIES = [
@@ -28,14 +44,64 @@ const MOCK_CATEGORIES = [
 ];
 
 const MOCK_SERVICES = [
-  { id: 1, name: 'فیشیال تخصصی پوست', business: 'کلینیک صدف', price: '۷۵۰,۰۰۰', originalPrice: '۹۵۰,۰۰۰', rating: '۴.۸', image: 'https://picsum.photos/300/300?random=11', discount: 20, duration: '۶۰ دقیقه' },
-  { id: 2, name: 'کاشت مژه هالیوودی', business: 'سالن زیبایی افرا', price: '۵۸۰,۰۰۰', originalPrice: '۵۸۰,۰۰۰', rating: '۴.۹', image: 'https://picsum.photos/300/300?random=12', discount: 0, duration: '۹۰ دقیقه' },
-  { id: 3, name: 'لیزر فول بادی', business: 'مرکز لیزر رویال', price: '۲,۵۰۰,۰۰۰', originalPrice: '۳,۲۰۰,۰۰۰', rating: '۴.۷', image: 'https://picsum.photos/300/300?random=13', discount: 22, duration: '۱۲۰ دقیقه' },
+  {
+    id: 1,
+    name: 'فیشیال تخصصی پوست',
+    business: 'کلینیک صدف',
+    price: '۷۵۰,۰۰۰',
+    originalPrice: '۹۵۰,۰۰۰',
+    rating: '۴.۸',
+    image: 'https://picsum.photos/300/300?random=11',
+    discount: 20,
+    duration: '۶۰ دقیقه',
+  },
+  {
+    id: 2,
+    name: 'کاشت مژه هالیوودی',
+    business: 'سالن زیبایی افرا',
+    price: '۵۸۰,۰۰۰',
+    originalPrice: '۵۸۰,۰۰۰',
+    rating: '۴.۹',
+    image: 'https://picsum.photos/300/300?random=12',
+    discount: 0,
+    duration: '۹۰ دقیقه',
+  },
+  {
+    id: 3,
+    name: 'لیزر فول بادی',
+    business: 'مرکز لیزر رویال',
+    price: '۲,۵۰۰,۰۰۰',
+    originalPrice: '۳,۲۰۰,۰۰۰',
+    rating: '۴.۷',
+    image: 'https://picsum.photos/300/300?random=13',
+    discount: 22,
+    duration: '۱۲۰ دقیقه',
+  },
 ];
 
 const MOCK_BUSINESSES = [
-  { id: 1, name: 'مجموعه زیبایی و سلامت نیلارام', address: 'تهران، سعادت آباد', rating: '۵.۰', reviewsCount: 142, VIP: true, logo: 'https://picsum.photos/200?random=21', servicesCount: 24, category: 'کلینیک پوست و مو' },
-  { id: 2, name: 'سالن تخصصی کراتین و رنگ موی النا', address: 'تهران، نیاوران', rating: '۴.۷', reviewsCount: 89, VIP: false, logo: 'https://picsum.photos/200?random=22', servicesCount: 18, category: 'سالن زیبایی' },
+  {
+    id: 1,
+    name: 'مجموعه زیبایی و سلامت نیلارام',
+    address: 'تهران، سعادت آباد',
+    rating: '۵.۰',
+    reviewsCount: 142,
+    VIP: true,
+    logo: 'https://picsum.photos/200?random=21',
+    servicesCount: 24,
+    category: 'کلینیک پوست و مو',
+  },
+  {
+    id: 2,
+    name: 'سالن تخصصی کراتین و رنگ موی النا',
+    address: 'تهران، نیاوران',
+    rating: '۴.۷',
+    reviewsCount: 89,
+    VIP: false,
+    logo: 'https://picsum.photos/200?random=22',
+    servicesCount: 18,
+    category: 'سالن زیبایی',
+  },
 ];
 // =================================
 
@@ -43,9 +109,7 @@ const MOCK_BUSINESSES = [
 function SectionHeader({ title, onSeeAll, colors }) {
   return (
     <View style={s.sectionHeader}>
-      <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-        {title}
-      </Text>
+      <Text style={[s.sectionTitle, { color: colors.textMain }]}>{title}</Text>
       {onSeeAll && (
         <TouchableOpacity onPress={onSeeAll}>
           <Text style={[s.seeAll, { color: colors.primary }]}>مشاهده همه</Text>
@@ -62,7 +126,7 @@ export default function HomeScreen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   return (
-    <ScreenWrapper scrollable padding={0} edges={['top']}>
+    <ScreenWrapper scrollable padding={0} edges={['bottom', 'left', 'right']}>
       {/* هدر مدرن */}
       <HomeHeader
         userName={user?.name}
@@ -81,20 +145,17 @@ export default function HomeScreen({ navigation }) {
         <View style={s.section}>
           <AdSlider
             ads={MOCK_ADS}
-            onPress={(ad) => console.log('Ad pressed:', ad.id)}
+            onPress={ad => console.log('Ad pressed:', ad.id)}
           />
         </View>
 
         {/* ۲. دسته‌بندی خدمات */}
         <View style={s.section}>
-          <SectionHeader
-            title="دسته‌بندی خدمات"
-            colors={colors}
-          />
+          <SectionHeader title="دسته‌بندی خدمات" colors={colors} />
           <CategoryGrid
             categories={MOCK_CATEGORIES}
             selectedId={selectedCategory}
-            onSelect={(item) => {
+            onSelect={item => {
               setSelectedCategory(item.id);
               navigation.navigate('CategoryBusinesses', {
                 categoryId: item.id,
@@ -117,7 +178,7 @@ export default function HomeScreen({ navigation }) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={s.servicesScroll}
           >
-            {MOCK_SERVICES.map((service) => (
+            {MOCK_SERVICES.map(service => (
               <ServiceListCard
                 key={service.id}
                 service={service}
@@ -137,7 +198,7 @@ export default function HomeScreen({ navigation }) {
             colors={colors}
           />
 
-          {MOCK_BUSINESSES.map((biz) => (
+          {MOCK_BUSINESSES.map(biz => (
             <BusinessListCard
               key={biz.id}
               business={biz}

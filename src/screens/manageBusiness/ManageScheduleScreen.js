@@ -52,15 +52,15 @@ const generateTimeOptions = () => {
 };
 
 const TIME_OPTIONS = generateTimeOptions();
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function ManageScheduleScreen({ navigation }) {
   const { colors } = useTheme();
   const { businessData, updateSchedule } = useBusiness();
 
   const [selectedEmployee, setSelectedEmployee] = useState(
-    businessData.team?.[0]?.id || null
+    businessData.team?.[0]?.id || null,
   );
   const [selectedService, setSelectedService] = useState(null);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
@@ -70,10 +70,10 @@ export default function ManageScheduleScreen({ navigation }) {
   // فیلتر خدمات: فقط خدماتی که به کارمند انتخاب شده متصل هستند
   const employeeServices = useMemo(() => {
     if (!selectedEmployee) return [];
-    const emp = businessData.team?.find((m) => m.id === selectedEmployee);
+    const emp = businessData.team?.find(m => m.id === selectedEmployee);
     if (!emp?.services) return [];
-    return (businessData.services || []).filter((s) =>
-      emp.services.includes(s.id)
+    return (businessData.services || []).filter(s =>
+      emp.services.includes(s.id),
     );
   }, [selectedEmployee, businessData.team, businessData.services]);
 
@@ -83,7 +83,7 @@ export default function ManageScheduleScreen({ navigation }) {
       setSelectedService(employeeServices[0].id);
     }
     if (employeeServices.length > 0) {
-      const stillExists = employeeServices.find((s) => s.id === selectedService);
+      const stillExists = employeeServices.find(s => s.id === selectedService);
       if (!stillExists) setSelectedService(employeeServices[0].id);
     }
   }, [employeeServices, selectedService]);
@@ -91,12 +91,10 @@ export default function ManageScheduleScreen({ navigation }) {
   // گرفتن برنامه فعلی
   const currentSchedule = useMemo(() => {
     if (!selectedEmployee || !selectedService) return {};
-    return (
-      businessData.schedules?.[selectedEmployee]?.[selectedService] || {}
-    );
+    return businessData.schedules?.[selectedEmployee]?.[selectedService] || {};
   }, [selectedEmployee, selectedService, businessData.schedules]);
 
-  const handleToggleDay = (dayKey) => {
+  const handleToggleDay = dayKey => {
     const current = currentSchedule[dayKey] || {};
     const newActive = !current.active;
     updateSchedule(selectedEmployee, selectedService, dayKey, {
@@ -113,7 +111,7 @@ export default function ManageScheduleScreen({ navigation }) {
     setTimePickerVisible(true);
   };
 
-  const handleTimeSelect = (timeId) => {
+  const handleTimeSelect = timeId => {
     if (!editingDay || !editingField) return;
     const current = currentSchedule[editingDay] || {};
     updateSchedule(selectedEmployee, selectedService, editingDay, {
@@ -136,7 +134,7 @@ export default function ManageScheduleScreen({ navigation }) {
   };
 
   // محاسبه تعداد slot های قابل رزرو برای یک روز
-  const calcSlotsCount = (day) => {
+  const calcSlotsCount = day => {
     if (!day.active) return 0;
     const [sh, sm] = (day.start || '09:00').split(':').map(Number);
     const [eh, em] = (day.end || '18:00').split(':').map(Number);
@@ -148,8 +146,11 @@ export default function ManageScheduleScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
-      <Header title="مدیریت زمان‌بندی" onBackPress={() => navigation.goBack()} />
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
+      <Header
+        title="مدیریت زمان‌بندی"
+        onBackPress={() => navigation.goBack()}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -165,7 +166,7 @@ export default function ManageScheduleScreen({ navigation }) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={s.chipsRow}
           >
-            {(businessData.team || []).map((emp) => {
+            {(businessData.team || []).map(emp => {
               const isActive = selectedEmployee === emp.id;
               return (
                 <TouchableOpacity
@@ -212,7 +213,7 @@ export default function ManageScheduleScreen({ navigation }) {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={s.chipsRow}
             >
-              {employeeServices.map((svc) => {
+              {employeeServices.map(svc => {
                 const isActive = selectedService === svc.id;
                 return (
                   <TouchableOpacity
@@ -305,11 +306,18 @@ export default function ManageScheduleScreen({ navigation }) {
                           <TouchableOpacity
                             style={[
                               s.timePicker,
-                              { backgroundColor: colors.background, borderColor: colors.border },
+                              {
+                                backgroundColor: colors.background,
+                                borderColor: colors.border,
+                              },
                             ]}
                             onPress={() => openTimePicker(day.key, 'start')}
                           >
-                            <Icon name="play-arrow" size={16} color={colors.primary} />
+                            <Icon
+                              name="play-arrow"
+                              size={16}
+                              color={colors.primary}
+                            />
                             <Text
                               style={[s.timeText, { color: colors.textMain }]}
                             >
@@ -317,18 +325,27 @@ export default function ManageScheduleScreen({ navigation }) {
                             </Text>
                           </TouchableOpacity>
 
-                          <Text style={[s.timeSep, { color: colors.textSecondary }]}>
+                          <Text
+                            style={[s.timeSep, { color: colors.textSecondary }]}
+                          >
                             تا
                           </Text>
 
                           <TouchableOpacity
                             style={[
                               s.timePicker,
-                              { backgroundColor: colors.background, borderColor: colors.border },
+                              {
+                                backgroundColor: colors.background,
+                                borderColor: colors.border,
+                              },
                             ]}
                             onPress={() => openTimePicker(day.key, 'end')}
                           >
-                            <Icon name="stop" size={16} color={colors.primary} />
+                            <Icon
+                              name="stop"
+                              size={16}
+                              color={colors.primary}
+                            />
                             <Text
                               style={[s.timeText, { color: colors.textMain }]}
                             >
@@ -344,7 +361,10 @@ export default function ManageScheduleScreen({ navigation }) {
                             color={colors.textSecondary}
                           />
                           <Text
-                            style={[s.durationLabel, { color: colors.textSecondary }]}
+                            style={[
+                              s.durationLabel,
+                              { color: colors.textSecondary },
+                            ]}
                           >
                             هر نوبت:
                           </Text>
@@ -353,7 +373,7 @@ export default function ManageScheduleScreen({ navigation }) {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={s.durationChips}
                           >
-                            {SLOT_DURATIONS.map((d) => {
+                            {SLOT_DURATIONS.map(d => {
                               const isSel = dayData.slotDuration === d.id;
                               return (
                                 <TouchableOpacity
@@ -424,14 +444,16 @@ export default function ManageScheduleScreen({ navigation }) {
       <BottomSheet
         visible={timePickerVisible}
         onClose={() => setTimePickerVisible(false)}
-        title={editingField === 'start' ? 'انتخاب ساعت شروع' : 'انتخاب ساعت پایان'}
+        title={
+          editingField === 'start' ? 'انتخاب ساعت شروع' : 'انتخاب ساعت پایان'
+        }
         snapPoint={0.7}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={s.timeGrid}
         >
-          {TIME_OPTIONS.map((time) => (
+          {TIME_OPTIONS.map(time => (
             <TouchableOpacity
               key={time.id}
               activeOpacity={0.8}

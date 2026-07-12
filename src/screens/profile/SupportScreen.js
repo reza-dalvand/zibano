@@ -7,14 +7,20 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import SupportChannels from './support/SupportChannels';
 import FaqSection from './support/FaqSection';
 import { SUPPORT_HOURS_SIMPLE } from './support/constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+
 
 export default function SupportScreen() {
   const { colors } = useTheme();
+    const insets = useSafeAreaInsets(); // 🆕
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       {/* ═══════════ هدر ساده ═══════════ */}
-      <View style={[s.heroSection, { backgroundColor: colors.primary }]}>
+      <View style={[s.heroSection, {
+        backgroundColor: colors.primary,
+        paddingTop: insets.top + 8, // 🎯 insets.top
+      }]}>
         <View style={s.heroContent}>
           <View style={s.heroIconWrapper}>
             <View style={s.heroIconCircle}>
@@ -23,7 +29,6 @@ export default function SupportScreen() {
             <View style={s.heroRing1} />
             <View style={s.heroRing2} />
           </View>
-
           <Text style={s.heroTitle}>پشتیبانی زیبانو</Text>
           <Text style={s.heroSubtitle}>
             تیم ما آماده پاسخگویی به سوالات و حل مشکلات شماست

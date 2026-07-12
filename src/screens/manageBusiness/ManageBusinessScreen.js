@@ -14,6 +14,7 @@ import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import { useAuth } from '../../context/AuthContext';
 import { useBusiness } from '../../context/BusinessContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 
 // ============ دیتای موقت کسب‌وکار ============
 const MOCK_BUSINESS_INFO = {
@@ -25,8 +26,8 @@ const MOCK_BUSINESS_INFO = {
   VIP: true,
 };
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 // ============ نقش‌ها و متن‌ها ============
 const ROLE_LABELS = {
@@ -39,10 +40,14 @@ const ROLE_ICONS = {
   employee: 'badge',
 };
 
-export default function ManageBusinessScreen({ navigation, userRole = 'manager' }) {
+export default function ManageBusinessScreen({
+  navigation,
+  userRole = 'manager',
+}) {
   const { colors } = useTheme();
   const { user } = useAuth();
   const { businessData } = useBusiness();
+  const insets = useSafeAreaInsets(); // 🆕
 
   const [currentGreeting, setCurrentGreeting] = useState('');
   const [greetingEmoji, setGreetingEmoji] = useState('👋');
@@ -66,7 +71,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
     const appointments = businessData?.appointments || [];
 
     const activeAppointments = appointments.filter(
-      (apt) => apt.status === 'pending' || apt.status === 'confirmed'
+      apt => apt.status === 'pending' || apt.status === 'confirmed',
     ).length;
 
     const teamCount = businessData?.team?.length || 0;
@@ -164,7 +169,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
   ];
 
   return (
-    <ScreenWrapper scrollable padding={0} edges={['top']}>
+    <ScreenWrapper scrollable padding={0} edges={['bottom', 'left', 'right']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -174,14 +179,19 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
           style={[
             s.headerGradient,
             {
+              paddingTop: insets.top + 8, // 🎯 insets.top
               backgroundColor: colors.primary,
               borderBottomLeftRadius: 32,
               borderBottomRightRadius: 32,
             },
           ]}
         >
-          <View style={[s.decorCircle1, { borderColor: 'rgba(255,255,255,0.15)' }]} />
-          <View style={[s.decorCircle2, { borderColor: 'rgba(255,255,255,0.08)' }]} />
+          <View
+            style={[s.decorCircle1, { borderColor: 'rgba(255,255,255,0.15)' }]}
+          />
+          <View
+            style={[s.decorCircle2, { borderColor: 'rgba(255,255,255,0.08)' }]}
+          />
 
           <View style={s.headerContent}>
             <View style={s.welcomeRow}>
@@ -231,7 +241,11 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
                   </Text>
                   {MOCK_BUSINESS_INFO.VIP && (
                     <View style={s.vipBadge}>
-                      <Icon name="workspace-premium" size={12} color="#FFD700" />
+                      <Icon
+                        name="workspace-premium"
+                        size={12}
+                        color="#FFD700"
+                      />
                     </View>
                   )}
                 </View>
@@ -260,7 +274,12 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
         {/* ═══════════ بخش آمار ═══════════ */}
         <View style={s.statsSection}>
           <View style={s.sectionHeaderRow}>
-            <View style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[
+                s.sectionIcon,
+                { backgroundColor: colors.primary + '15' },
+              ]}
+            >
               <Icon name="insights" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -269,7 +288,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
           </View>
 
           <View style={s.statsGrid}>
-            {STATS_CARDS.map((stat) => (
+            {STATS_CARDS.map(stat => (
               <Card
                 key={stat.id}
                 variant="elevated"
@@ -278,12 +297,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
                 style={s.statCard}
               >
                 <View style={s.statCardInner}>
-                  <View
-                    style={[
-                      s.statIconBox,
-                      { backgroundColor: stat.bg },
-                    ]}
-                  >
+                  <View style={[s.statIconBox, { backgroundColor: stat.bg }]}>
                     <Icon name={stat.icon} size={22} color={stat.color} />
                   </View>
                   <Text style={[s.statValue, { color: colors.textMain }]}>
@@ -301,7 +315,12 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
         {/* ═══════════ اقدامات سریع ═══════════ */}
         <View style={[s.section, s.lastSection]}>
           <View style={s.sectionHeaderRow}>
-            <View style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[
+                s.sectionIcon,
+                { backgroundColor: colors.primary + '15' },
+              ]}
+            >
               <Icon name="bolt" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -310,7 +329,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
           </View>
 
           <View style={s.quickActionsList}>
-            {QUICK_ACTIONS.map((item) => (
+            {QUICK_ACTIONS.map(item => (
               <TouchableOpacity
                 key={item.id}
                 style={[
@@ -329,11 +348,7 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
                     { backgroundColor: item.gradient[0] + '15' },
                   ]}
                 >
-                  <Icon
-                    name={item.icon}
-                    size={22}
-                    color={item.gradient[0]}
-                  />
+                  <Icon name={item.icon} size={22} color={item.gradient[0]} />
 
                   {item.badge && item.badge > 0 && (
                     <View style={s.actionBadge}>
@@ -345,17 +360,26 @@ export default function ManageBusinessScreen({ navigation, userRole = 'manager' 
                 </View>
 
                 <View style={s.quickActionInfo}>
-                  <Text style={[s.quickActionTitle, { color: colors.textMain }]}>
+                  <Text
+                    style={[s.quickActionTitle, { color: colors.textMain }]}
+                  >
                     {item.label}
                   </Text>
                   <Text
-                    style={[s.quickActionSubtitle, { color: colors.textSecondary }]}
+                    style={[
+                      s.quickActionSubtitle,
+                      { color: colors.textSecondary },
+                    ]}
                   >
                     {item.subtitle}
                   </Text>
                 </View>
 
-                <Icon name="chevron-left" size={22} color={colors.textSecondary} />
+                <Icon
+                  name="chevron-left"
+                  size={22}
+                  color={colors.textSecondary}
+                />
               </TouchableOpacity>
             ))}
           </View>

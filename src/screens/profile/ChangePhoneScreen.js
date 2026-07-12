@@ -1,7 +1,12 @@
 // src/screens/profile/ChangePhoneScreen.js
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, TouchableOpacity, Keyboard,
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
@@ -15,15 +20,15 @@ const OTP_LENGTH = 5;
 const RESEND_SECONDS = 60;
 const MOCK_OTP = '12345';
 
-const toEnglishDigits = (str) =>
+const toEnglishDigits = str =>
   String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-const validatePhone = (v) => /^09[0-9]{9}$/.test(v.replace(/[^0-9]/g, ''));
+const validatePhone = v => /^09[0-9]{9}$/.test(v.replace(/[^0-9]/g, ''));
 
 export default function ChangePhoneScreen({ navigation }) {
   const { colors } = useTheme();
@@ -36,13 +41,17 @@ export default function ChangePhoneScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
   const inputRefs = useRef([]);
 
   useEffect(() => {
     let interval = null;
     if (step === 2 && timer > 0) {
-      interval = setInterval(() => setTimer((p) => p - 1), 1000);
+      interval = setInterval(() => setTimer(p => p - 1), 1000);
     } else if (timer === 0) {
       setCanResend(true);
     }
@@ -57,7 +66,7 @@ export default function ChangePhoneScreen({ navigation }) {
     }
     setLoading(true);
     setPhoneError('');
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1000));
     setLoading(false);
     setStep(2);
     setTimer(RESEND_SECONDS);
@@ -104,7 +113,7 @@ export default function ChangePhoneScreen({ navigation }) {
     setLoading(true);
     setOtpError('');
     Keyboard.dismiss();
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1000));
     if (code === MOCK_OTP) {
       setLoading(false);
       setToast({
@@ -128,32 +137,45 @@ export default function ChangePhoneScreen({ navigation }) {
     setToast({ visible: true, message: 'کد جدید ارسال شد', type: 'info' });
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = seconds => {
     const m = Math.floor(seconds / 60);
     const sec = seconds % 60;
     return `${m}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const maskedPhone = newPhone ? newPhone.slice(0, 4) + '***' + newPhone.slice(-4) : '';
+  const maskedPhone = newPhone
+    ? newPhone.slice(0, 4) + '***' + newPhone.slice(-4)
+    : '';
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <View style={[s.content, { paddingHorizontal: 20 }]}>
         {step === 1 ? (
           <>
-            <View style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}
+            >
               <Icon name="smartphone" size={44} color={colors.primary} />
             </View>
-            <Text style={[s.title, { color: colors.textMain }]}>تغییر شماره موبایل</Text>
+            <Text style={[s.title, { color: colors.textMain }]}>
+              تغییر شماره موبایل
+            </Text>
             <Text style={[s.subtitle, { color: colors.textSecondary }]}>
-              برای امنیت بیشتر، شماره جدید شما باید با کد تایید (OTP) احراز هویت شود
+              برای امنیت بیشتر، شماره جدید شما باید با کد تایید (OTP) احراز هویت
+              شود
             </Text>
 
-            <Card variant="default" padding={14} radius={14} style={s.warningCard}>
+            <Card
+              variant="default"
+              padding={14}
+              radius={14}
+              style={s.warningCard}
+            >
               <View style={s.warningRow}>
                 <Icon name="info" size={20} color="#FFA000" />
                 <Text style={[s.warningText, { color: colors.textMain }]}>
-                  پس از تغییر شماره، برای ورود به حساب از شماره جدید استفاده خواهید کرد
+                  پس از تغییر شماره، برای ورود به حساب از شماره جدید استفاده
+                  خواهید کرد
                 </Text>
               </View>
             </Card>
@@ -162,15 +184,23 @@ export default function ChangePhoneScreen({ navigation }) {
               label="شماره موبایل جدید"
               placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹"
               value={newPhone}
-              onChangeText={(t) => {
-                const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '').slice(0, 11);
+              onChangeText={t => {
+                const cleaned = toEnglishDigits(t)
+                  .replace(/[^0-9]/g, '')
+                  .slice(0, 11);
                 setNewPhone(cleaned);
                 if (phoneError) setPhoneError('');
               }}
               keyboardType="phone-pad"
               maxLength={11}
               error={phoneError}
-              rightIcon={<Icon name="smartphone" size={22} color={colors.textSecondary} />}
+              rightIcon={
+                <Icon
+                  name="smartphone"
+                  size={22}
+                  color={colors.textSecondary}
+                />
+              }
             />
 
             <Button
@@ -188,10 +218,14 @@ export default function ChangePhoneScreen({ navigation }) {
           </>
         ) : (
           <>
-            <View style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}
+            >
               <Icon name="sms" size={44} color={colors.primary} />
             </View>
-            <Text style={[s.title, { color: colors.textMain }]}>کد تایید را وارد کنید</Text>
+            <Text style={[s.title, { color: colors.textMain }]}>
+              کد تایید را وارد کنید
+            </Text>
             <Text style={[s.subtitle, { color: colors.textSecondary }]}>
               کد {OTP_LENGTH} رقمی پیامک‌شده به{' '}
               <Text style={{ color: colors.primary, fontFamily: 'Vazir-Bold' }}>
@@ -204,7 +238,7 @@ export default function ChangePhoneScreen({ navigation }) {
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  ref={ref => (inputRefs.current[index] = ref)}
                   style={[
                     s.otpBox,
                     {
@@ -220,7 +254,7 @@ export default function ChangePhoneScreen({ navigation }) {
                     },
                   ]}
                   value={digit}
-                  onChangeText={(text) => handleChangeOtp(text, index)}
+                  onChangeText={text => handleChangeOtp(text, index)}
                   onFocus={() => setCurrentBox(index)}
                   keyboardType="number-pad"
                   maxLength={1}
@@ -234,7 +268,9 @@ export default function ChangePhoneScreen({ navigation }) {
             <View style={s.resendSection}>
               {canResend ? (
                 <TouchableOpacity onPress={handleResend}>
-                  <Text style={[s.resendActive, { color: colors.primary }]}>ارسال مجدد کد</Text>
+                  <Text style={[s.resendActive, { color: colors.primary }]}>
+                    ارسال مجدد کد
+                  </Text>
                 </TouchableOpacity>
               ) : (
                 <Text style={[s.resendTimer, { color: colors.textSecondary }]}>
@@ -243,7 +279,9 @@ export default function ChangePhoneScreen({ navigation }) {
               )}
               <TouchableOpacity onPress={() => setStep(1)} style={s.editPhone}>
                 <Icon name="edit" size={14} color={colors.primary} />
-                <Text style={[s.editPhoneText, { color: colors.primary }]}>ویرایش شماره</Text>
+                <Text style={[s.editPhoneText, { color: colors.primary }]}>
+                  ویرایش شماره
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -263,12 +301,16 @@ export default function ChangePhoneScreen({ navigation }) {
             <View
               style={[
                 s.hintBox,
-                { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' },
+                {
+                  backgroundColor: colors.primary + '10',
+                  borderColor: colors.primary + '30',
+                },
               ]}
             >
               <Icon name="info-outline" size={16} color={colors.primary} />
               <Text style={[s.hintText, { color: colors.primary }]}>
-                حالت آزمایشی: کد تایید <Text style={{ fontFamily: 'Vazir-Bold' }}>۱۲۳۴۵</Text> است
+                حالت آزمایشی: کد تایید{' '}
+                <Text style={{ fontFamily: 'Vazir-Bold' }}>۱۲۳۴۵</Text> است
               </Text>
             </View>
           </>
@@ -289,49 +331,79 @@ export default function ChangePhoneScreen({ navigation }) {
 const s = StyleSheet.create({
   content: { flex: 1, paddingTop: 24 },
   iconBox: {
-    width: 88, height: 88, borderRadius: 44,
-    alignItems: 'center', justifyContent: 'center',
-    alignSelf: 'center', marginBottom: 20,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 20, fontFamily: 'Vazir-Bold',
-    textAlign: 'center', marginBottom: 8,
+    fontSize: 20,
+    fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 13, fontFamily: 'Vazir', textAlign: 'center',
-    lineHeight: 22, marginBottom: 24, paddingHorizontal: 12,
+    fontSize: 13,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+    paddingHorizontal: 12,
   },
   warningCard: {
-    marginBottom: 20, borderWidth: 1,
-    borderColor: '#FFA00050', backgroundColor: '#FFA00015',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#FFA00050',
+    backgroundColor: '#FFA00015',
   },
   warningRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   warningText: { flex: 1, fontSize: 12, fontFamily: 'Vazir', lineHeight: 20 },
   mainBtn: { marginTop: 8 },
   otpContainer: {
-    flexDirection: 'row-reverse', justifyContent: 'center',
-    gap: 10, marginBottom: 20,
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 20,
   },
   otpBox: {
-    width: 52, height: 58, borderRadius: 14,
-    textAlign: 'center', fontSize: 22, fontFamily: 'Vazir-Bold',
+    width: 52,
+    height: 58,
+    borderRadius: 14,
+    textAlign: 'center',
+    fontSize: 22,
+    fontFamily: 'Vazir-Bold',
   },
   error: {
-    color: '#E53935', fontSize: 13, fontFamily: 'Vazir',
-    textAlign: 'center', marginBottom: 12,
+    color: '#E53935',
+    fontSize: 13,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    marginBottom: 12,
   },
   resendSection: {
-    flexDirection: 'row-reverse', justifyContent: 'space-between',
-    alignItems: 'center', marginVertical: 20, paddingHorizontal: 4,
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 20,
+    paddingHorizontal: 4,
   },
   resendActive: { fontSize: 14, fontFamily: 'Vazir-Bold' },
   resendTimer: { fontSize: 13, fontFamily: 'Vazir' },
   editPhone: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
   editPhoneText: { fontSize: 13, fontFamily: 'Vazir-Medium' },
   hintBox: {
-    flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center',
-    gap: 8, paddingVertical: 10, paddingHorizontal: 16,
-    borderRadius: 12, borderWidth: 1, marginTop: 12,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 12,
   },
   hintText: { fontSize: 12, fontFamily: 'Vazir' },
 });

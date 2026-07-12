@@ -1,7 +1,12 @@
 // src/screens/profile/EditProfileScreen.js
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -13,10 +18,10 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-const maskPhone = (phone) => {
+const maskPhone = phone => {
   if (!phone || phone.length < 11) return phone || '';
   return phone.slice(0, 4) + '***' + phone.slice(-4);
 };
@@ -33,10 +38,14 @@ export default function EditProfileScreen({ navigation }) {
 
   const [nameError, setNameError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   const updateField = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData(prev => ({ ...prev, [key]: value }));
     if (key === 'name' && nameError) setNameError('');
   };
 
@@ -57,25 +66,21 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const removeAvatar = () => {
-    Alert.alert(
-      'حذف عکس پروفایل',
-      'آیا از حذف عکس پروفایل خود مطمئن هستید؟',
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: () => {
-            updateField('avatarUrl', null);
-            setToast({
-              visible: true,
-              message: 'عکس پروفایل حذف شد',
-              type: 'info',
-            });
-          },
+    Alert.alert('حذف عکس پروفایل', 'آیا از حذف عکس پروفایل خود مطمئن هستید؟', [
+      { text: 'انصراف', style: 'cancel' },
+      {
+        text: 'حذف',
+        style: 'destructive',
+        onPress: () => {
+          updateField('avatarUrl', null);
+          setToast({
+            visible: true,
+            message: 'عکس پروفایل حذف شد',
+            type: 'info',
+          });
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSave = () => {
@@ -104,7 +109,11 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']} keyboardAware>
+    <ScreenWrapper
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+      keyboardAware
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -132,7 +141,11 @@ export default function EditProfileScreen({ navigation }) {
                   />
                 ) : (
                   <View style={s.avatarPlaceholder}>
-                    <Icon name="person" size={40} color={colors.textSecondary} />
+                    <Icon
+                      name="person"
+                      size={40}
+                      color={colors.textSecondary}
+                    />
                   </View>
                 )}
               </View>
@@ -141,7 +154,10 @@ export default function EditProfileScreen({ navigation }) {
               <View
                 style={[
                   s.cameraBtn,
-                  { backgroundColor: colors.primary, borderColor: colors.background },
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.background,
+                  },
                 ]}
               >
                 <Icon name="photo-camera" size={16} color="#fff" />
@@ -154,7 +170,10 @@ export default function EditProfileScreen({ navigation }) {
                 onPress={removeAvatar}
                 style={[
                   s.removeBtn,
-                  { backgroundColor: '#E53935', borderColor: colors.background },
+                  {
+                    backgroundColor: '#E53935',
+                    borderColor: colors.background,
+                  },
                 ]}
                 activeOpacity={0.85}
               >
@@ -163,7 +182,10 @@ export default function EditProfileScreen({ navigation }) {
             )}
           </View>
 
-          <Text style={[s.avatarName, { color: colors.textMain }]} numberOfLines={1}>
+          <Text
+            style={[s.avatarName, { color: colors.textMain }]}
+            numberOfLines={1}
+          >
             {formData.name || 'کاربر زیبانو'}
           </Text>
 
@@ -180,7 +202,12 @@ export default function EditProfileScreen({ navigation }) {
         {/* ═══════════════ کارت اطلاعات شخصی ═══════════════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <View style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[
+                s.sectionIcon,
+                { backgroundColor: colors.primary + '15' },
+              ]}
+            >
               <Icon name="person" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -194,9 +221,11 @@ export default function EditProfileScreen({ navigation }) {
               label="نام و نام خانوادگی *"
               placeholder="مثال: مریم حسینی"
               value={formData.name}
-              onChangeText={(t) => updateField('name', t)}
+              onChangeText={t => updateField('name', t)}
               error={nameError}
-              rightIcon={<Icon name="badge" size={20} color={colors.textSecondary} />}
+              rightIcon={
+                <Icon name="badge" size={20} color={colors.textSecondary} />
+              }
             />
 
             {/* ✅ سایر فیلدها حذف شدند: nickname, bio, email, birthDate */}
@@ -208,19 +237,28 @@ export default function EditProfileScreen({ navigation }) {
             <View
               style={[
                 s.phoneBox,
-                { backgroundColor: colors.background, borderColor: colors.border },
+                {
+                  backgroundColor: colors.background,
+                  borderColor: colors.border,
+                },
               ]}
             >
               <View style={s.phoneInfo}>
-                <View style={[s.phoneIconCircle, { backgroundColor: '#2196F320' }]}>
+                <View
+                  style={[s.phoneIconCircle, { backgroundColor: '#2196F320' }]}
+                >
                   <Icon name="smartphone" size={16} color="#2196F3" />
                 </View>
                 <Text style={[s.phoneValue, { color: colors.textMain }]}>
                   {toPersianDigit(maskPhone(user?.phone))}
                 </Text>
-                <View style={[s.verifiedBadge, { backgroundColor: '#43A04720' }]}>
+                <View
+                  style={[s.verifiedBadge, { backgroundColor: '#43A04720' }]}
+                >
                   <Icon name="verified" size={10} color="#43A047" />
-                  <Text style={[s.verifiedText, { color: '#43A047' }]}>تایید شده</Text>
+                  <Text style={[s.verifiedText, { color: '#43A047' }]}>
+                    تایید شده
+                  </Text>
                 </View>
               </View>
             </View>
@@ -228,7 +266,10 @@ export default function EditProfileScreen({ navigation }) {
             <TouchableOpacity
               style={[
                 s.changePhoneBtn,
-                { borderColor: colors.primary, backgroundColor: colors.primary + '10' },
+                {
+                  borderColor: colors.primary,
+                  backgroundColor: colors.primary + '10',
+                },
               ]}
               onPress={() => navigation.navigate('ChangePhone')}
               activeOpacity={0.85}
@@ -241,7 +282,11 @@ export default function EditProfileScreen({ navigation }) {
             </TouchableOpacity>
 
             <View style={s.phoneHintRow}>
-              <Icon name="info-outline" size={14} color={colors.textSecondary} />
+              <Icon
+                name="info-outline"
+                size={14}
+                color={colors.textSecondary}
+              />
               <Text style={[s.phoneHintText, { color: colors.textSecondary }]}>
                 برای تغییر شماره، کد تایید (OTP) به شماره جدید ارسال خواهد شد
               </Text>

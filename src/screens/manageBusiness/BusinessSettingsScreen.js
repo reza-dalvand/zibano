@@ -59,7 +59,7 @@ export default function BusinessSettingsScreen({ navigation }) {
   }, [businessData]);
 
   const updateField = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   const pickLogo = async () => {
@@ -85,7 +85,7 @@ export default function BusinessSettingsScreen({ navigation }) {
     updateBusinessInfo({
       name: formData.name.trim(),
       categoryId: formData.categoryId,
-      category: CATEGORIES.find((c) => c.id === formData.categoryId)?.label || '',
+      category: CATEGORIES.find(c => c.id === formData.categoryId)?.label || '',
       address: formData.address.trim(),
       phone: formData.phone.trim(),
       logo: formData.logoUrl,
@@ -102,7 +102,11 @@ export default function BusinessSettingsScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['top']} keyboardAware>
+    <ScreenWrapper
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+      keyboardAware
+    >
       <Header title="تنظیمات سالن" onBackPress={() => navigation.goBack()} />
 
       <ScrollView
@@ -129,7 +133,10 @@ export default function BusinessSettingsScreen({ navigation }) {
               <View style={s.logoPlaceholder}>
                 <Icon name="add-a-photo" size={32} color={colors.primary} />
                 <Text
-                  style={[s.logoPlaceholderText, { color: colors.textSecondary }]}
+                  style={[
+                    s.logoPlaceholderText,
+                    { color: colors.textSecondary },
+                  ]}
                 >
                   آپلود لوگو
                 </Text>
@@ -153,7 +160,7 @@ export default function BusinessSettingsScreen({ navigation }) {
             label="نام کسب‌وکار"
             placeholder="مثال: سالن زیبایی نیلارام"
             value={formData.name}
-            onChangeText={(t) => updateField('name', t)}
+            onChangeText={t => updateField('name', t)}
             rightIcon={
               <Icon name="store" size={22} color={colors.textSecondary} />
             }
@@ -164,14 +171,14 @@ export default function BusinessSettingsScreen({ navigation }) {
             placeholder="انتخاب نوع خدمات"
             value={formData.categoryId}
             options={CATEGORIES}
-            onSelect={(v) => updateField('categoryId', v)}
+            onSelect={v => updateField('categoryId', v)}
           />
 
           <Input
             label="شماره تماس"
             placeholder="مثال: ۰۲۱-۲۲۳۳۴۴۵۵"
             value={formData.phone}
-            onChangeText={(t) => updateField('phone', t)}
+            onChangeText={t => updateField('phone', t)}
             keyboardType="phone-pad"
             rightIcon={
               <Icon name="phone" size={22} color={colors.textSecondary} />
@@ -182,7 +189,7 @@ export default function BusinessSettingsScreen({ navigation }) {
             label="ساعات کاری"
             placeholder="مثال: شنبه تا پنج‌شنبه ۱۰ الی ۲۰"
             value={formData.workingHours}
-            onChangeText={(t) => updateField('workingHours', t)}
+            onChangeText={t => updateField('workingHours', t)}
             rightIcon={
               <Icon name="schedule" size={22} color={colors.textSecondary} />
             }
@@ -192,7 +199,7 @@ export default function BusinessSettingsScreen({ navigation }) {
             label="آدرس کامل"
             placeholder="آدرس دقیق سالن"
             value={formData.address}
-            onChangeText={(t) => updateField('address', t)}
+            onChangeText={t => updateField('address', t)}
             multiline
             numberOfLines={3}
             rightIcon={
@@ -212,7 +219,7 @@ export default function BusinessSettingsScreen({ navigation }) {
             label="اینستاگرام"
             placeholder="آیدی اینستاگرام (بدون @)"
             value={formData.instagram}
-            onChangeText={(t) => updateField('instagram', t)}
+            onChangeText={t => updateField('instagram', t)}
             rightIcon={<Icon name="photo-camera" size={22} color="#E1306C" />}
           />
 
@@ -220,7 +227,7 @@ export default function BusinessSettingsScreen({ navigation }) {
             label="تلگرام"
             placeholder="آیدی یا لینک تلگرام"
             value={formData.telegram}
-            onChangeText={(t) => updateField('telegram', t)}
+            onChangeText={t => updateField('telegram', t)}
             rightIcon={<Icon name="send" size={22} color="#0088cc" />}
           />
         </Card>

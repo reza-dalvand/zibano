@@ -31,24 +31,28 @@ export default function OtpVerifyScreen({ navigation, route }) {
   const [error, setError] = useState('');
   const [timer, setTimer] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   const inputRefs = useRef([]);
 
   useEffect(() => {
     let interval = null;
     if (timer > 0) {
-      interval = setInterval(() => setTimer((p) => p - 1), 1000);
+      interval = setInterval(() => setTimer(p => p - 1), 1000);
     } else {
       setCanResend(true);
     }
     return () => clearInterval(interval);
   }, [timer]);
 
-  const toEnglishDigits = (str) =>
+  const toEnglishDigits = str =>
     str
-      .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-      .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+      .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
   const handleChange = (text, index) => {
     const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
@@ -98,7 +102,7 @@ export default function OtpVerifyScreen({ navigation, route }) {
     setError('');
     Keyboard.dismiss();
 
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 1200));
 
     if (code === MOCK_OTP) {
       console.log('✅ OTP correct — calling login()');
@@ -130,18 +134,23 @@ export default function OtpVerifyScreen({ navigation, route }) {
     });
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = seconds => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="کد تایید" onBackPress={() => navigation.goBack()} />
 
       <View style={[styles.content, { paddingHorizontal: 24 }]}>
-        <View style={[styles.iconContainer, { backgroundColor: colors.primary + '15' }]}>
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: colors.primary + '15' },
+          ]}
+        >
           <Icon name="sms" size={48} color={colors.primary} />
         </View>
 
@@ -160,7 +169,7 @@ export default function OtpVerifyScreen({ navigation, route }) {
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              ref={(ref) => (inputRefs.current[index] = ref)}
+              ref={ref => (inputRefs.current[index] = ref)}
               style={[
                 styles.otpBox,
                 {
@@ -176,8 +185,8 @@ export default function OtpVerifyScreen({ navigation, route }) {
                 },
               ]}
               value={digit}
-              onChangeText={(text) => handleChange(text, index)}
-              onKeyPress={(e) => handleKeyPress(e, index)}
+              onChangeText={text => handleChange(text, index)}
+              onKeyPress={e => handleKeyPress(e, index)}
               onFocus={() => setCurrentBox(index)}
               keyboardType="number-pad"
               maxLength={1}
@@ -202,7 +211,10 @@ export default function OtpVerifyScreen({ navigation, route }) {
             </Text>
           )}
 
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.editPhone}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.editPhone}
+          >
             <Icon name="edit" size={14} color={colors.primary} />
             <Text style={[styles.editPhoneText, { color: colors.primary }]}>
               ویرایش شماره

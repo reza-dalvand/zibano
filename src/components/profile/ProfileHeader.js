@@ -2,17 +2,21 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 import { useTheme } from '../../theme/ThemeContext';
 import Avatar from '../common/Avatar';
 
 export default function ProfileHeader({ user }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets(); // 🆕
 
   return (
-    <View style={[s.headerContainer, { backgroundColor: colors.primary }]}>
+    <View style={[s.headerContainer, {
+      backgroundColor: colors.primary,
+      paddingTop: insets.top + 8, // 🎯 insets.top
+    }]}>
       <View style={s.headerContent}>
         <Text style={s.headerTitle}>پروفایل من</Text>
-
         <View style={s.userInfoRow}>
           <Avatar
             uri={user?.avatarUrl}
@@ -39,7 +43,7 @@ export default function ProfileHeader({ user }) {
 
 const s = StyleSheet.create({
   headerContainer: {
-    paddingTop: 20,
+    // paddingTop حذف شد
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,

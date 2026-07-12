@@ -1,6 +1,13 @@
 // src/screens/home/CategoryBusinessesScreen.js
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, RefreshControl, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -147,25 +154,24 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
     // فیلتر بر اساس جستجو
     if (search.trim()) {
       data = data.filter(
-        (item) =>
-          item.name.includes(search) || item.address.includes(search)
+        item => item.name.includes(search) || item.address.includes(search),
       );
     }
 
     // فیلتر بر اساس استان
     if (filters.province) {
-      data = data.filter((item) => item.provinceId === filters.province);
+      data = data.filter(item => item.provinceId === filters.province);
     }
 
     // فیلتر بر اساس شهر
     if (filters.city) {
-      data = data.filter((item) => item.cityId === filters.city);
+      data = data.filter(item => item.cityId === filters.city);
     }
 
     // فیلتر بر اساس امتیاز
     if (filters.minRating !== '0') {
       const minRatingNum = parseFloat(filters.minRating);
-      data = data.filter((item) => item.ratingNum >= minRatingNum);
+      data = data.filter(item => item.ratingNum >= minRatingNum);
     }
 
     // مرتب‌سازی
@@ -192,14 +198,18 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
     setTimeout(() => setRefreshing(false), 1000);
   };
 
-  const handleBusinessPress = (business) => {
+  const handleBusinessPress = business => {
     navigation.navigate('BusinessDetails', { businessId: business.id });
   };
 
   const handleClearFilters = () => setFilters(INITIAL_FILTERS);
 
   return (
-    <ScreenWrapper scrollable={false} padding={0} edges={['top']}>
+    <ScreenWrapper
+      scrollable={false}
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+    >
       {/* هدر گرادیانی با آیکون و SearchBar */}
       <CategoryHeader
         categoryName={categoryName}
@@ -217,12 +227,10 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
           style={[
             s.filterButton,
             {
-              backgroundColor: activeFiltersCount > 0
-                ? colors.primary
-                : colors.cardBackground,
-              borderColor: activeFiltersCount > 0
-                ? colors.primary
-                : colors.border,
+              backgroundColor:
+                activeFiltersCount > 0 ? colors.primary : colors.cardBackground,
+              borderColor:
+                activeFiltersCount > 0 ? colors.primary : colors.border,
             },
           ]}
           onPress={() => setFilterModalVisible(true)}
@@ -272,7 +280,7 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
         {/* لیست کسب‌وکارها */}
         <View style={s.listContainer}>
           {filteredData.length > 0 ? (
-            filteredData.map((business) => (
+            filteredData.map(business => (
               <BusinessListCard
                 key={business.id}
                 business={business}

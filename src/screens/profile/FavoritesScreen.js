@@ -1,6 +1,13 @@
 // src/screens/profile/FavoritesScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CommonActions } from '@react-navigation/native'; // ✅ اضافه شد
 import { useTheme } from '../../theme/ThemeContext';
@@ -9,8 +16,8 @@ import Card from '../../components/common/Card';
 import EmptyState from '../../components/common/EmptyState';
 import { PostModal } from '../../components/explore'; // ✅ اضافه شد
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 // 🎯 داده‌های کسب‌وکارهای مورد علاقه
 const MOCK_FAVORITE_BUSINESSES = [
@@ -112,7 +119,7 @@ const TABS = [
 export default function FavoritesScreen({ navigation }) {
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('businesses');
-  
+
   // ✅ state برای مدال پست
   const [activePost, setActivePost] = useState(null);
   // ✅ state برای لیست پست‌ها (تا بتوانیم saved را toggle کنیم)
@@ -123,17 +130,17 @@ export default function FavoritesScreen({ navigation }) {
       businesses: MOCK_FAVORITE_BUSINESSES.length,
       posts: favoritePosts.length,
     }),
-    [favoritePosts]
+    [favoritePosts],
   );
 
   // 🎯 هندلر کلیک روی کارت کسب‌وکار
   // ✅ اصلاح شده: ریست stack و سپس navigate
-  const handleBusinessPress = (biz) => {
+  const handleBusinessPress = biz => {
     const parent = navigation.getParent();
-    
+
     // ۱. اول تب Home را فعال کن
     parent?.navigate('Home');
-    
+
     // ۲. بعد با یک تاخیر کوتاه، صفحه جزئیات را push کن
     setTimeout(() => {
       parent?.navigate('Home', {
@@ -150,24 +157,22 @@ export default function FavoritesScreen({ navigation }) {
   };
 
   // ✅ هندلر کلیک روی پست ویترین - باز کردن مدال
-  const handlePostPress = (post) => {
+  const handlePostPress = post => {
     setActivePost(post);
   };
 
   // ✅ هندلر save/unsave پست
-  const handleSavePost = (postId) => {
-    setFavoritePosts((prev) =>
-      prev.map((p) =>
-        p.id === postId ? { ...p, saved: !p.saved } : p
-      )
+  const handleSavePost = postId => {
+    setFavoritePosts(prev =>
+      prev.map(p => (p.id === postId ? { ...p, saved: !p.saved } : p)),
     );
     if (activePost?.id === postId) {
-      setActivePost((prev) => ({ ...prev, saved: !prev.saved }));
+      setActivePost(prev => ({ ...prev, saved: !prev.saved }));
     }
   };
 
   // ✅ هندلر navigate به پروفایل کسب‌وکار از مدال پست
-  const handleNavigateToProfile = (businessId) => {
+  const handleNavigateToProfile = businessId => {
     setActivePost(null);
     const parent = navigation.getParent();
     parent?.navigate('Home');
@@ -197,38 +202,48 @@ export default function FavoritesScreen({ navigation }) {
     }
     return (
       <View style={s.businessList}>
-        {MOCK_FAVORITE_BUSINESSES.map((biz) => (
+        {MOCK_FAVORITE_BUSINESSES.map(biz => (
           <TouchableOpacity
             key={biz.id}
             activeOpacity={0.85}
             onPress={() => handleBusinessPress(biz)}
             style={{ marginBottom: 0 }}
           >
-            <Card
-              variant="elevated"
-              padding={14}
-              radius={18}
-              style={s.bizCard}
-            >
+            <Card variant="elevated" padding={14} radius={18} style={s.bizCard}>
               <View style={s.bizRow}>
                 <View style={s.bizLogoWrapper}>
                   <Image source={{ uri: biz.logo }} style={s.bizLogo} />
                   {biz.VIP && (
-                    <View style={[s.vipBadge, { backgroundColor: colors.primary }]}>
+                    <View
+                      style={[s.vipBadge, { backgroundColor: colors.primary }]}
+                    >
                       <Icon name="workspace-premium" size={10} color="#fff" />
                     </View>
                   )}
                 </View>
                 <View style={s.bizInfo}>
-                  <Text style={[s.bizName, { color: colors.textMain }]} numberOfLines={1}>
+                  <Text
+                    style={[s.bizName, { color: colors.textMain }]}
+                    numberOfLines={1}
+                  >
                     {biz.name}
                   </Text>
-                  <Text style={[s.bizCategory, { color: colors.primary }]} numberOfLines={1}>
+                  <Text
+                    style={[s.bizCategory, { color: colors.primary }]}
+                    numberOfLines={1}
+                  >
                     {biz.category}
                   </Text>
                   <View style={s.bizMeta}>
-                    <Icon name="location-on" size={12} color={colors.textSecondary} />
-                    <Text style={[s.bizCity, { color: colors.textSecondary }]} numberOfLines={1}>
+                    <Icon
+                      name="location-on"
+                      size={12}
+                      color={colors.textSecondary}
+                    />
+                    <Text
+                      style={[s.bizCity, { color: colors.textSecondary }]}
+                      numberOfLines={1}
+                    >
                       {biz.city}
                     </Text>
                     <View style={[s.dot, { backgroundColor: colors.border }]} />
@@ -236,21 +251,32 @@ export default function FavoritesScreen({ navigation }) {
                     <Text style={[s.bizRating, { color: colors.textMain }]}>
                       {toPersianDigit(biz.rating)}
                     </Text>
-                    <Text style={[s.bizReviews, { color: colors.textSecondary }]}>
+                    <Text
+                      style={[s.bizReviews, { color: colors.textSecondary }]}
+                    >
                       ({toPersianDigit(biz.reviewsCount)})
                     </Text>
                   </View>
                 </View>
                 <View style={s.bizActions}>
                   <TouchableOpacity
-                    onPress={(e) => handleRemoveBusinessFavorite(biz.id, e)}
+                    onPress={e => handleRemoveBusinessFavorite(biz.id, e)}
                     style={[s.saveBtn, { backgroundColor: '#E91E6315' }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     <Icon name="bookmark" size={22} color="#E91E63" />
                   </TouchableOpacity>
-                  <View style={[s.arrowBox, { backgroundColor: colors.primary + '15' }]}>
-                    <Icon name="chevron-left" size={20} color={colors.primary} />
+                  <View
+                    style={[
+                      s.arrowBox,
+                      { backgroundColor: colors.primary + '15' },
+                    ]}
+                  >
+                    <Icon
+                      name="chevron-left"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </View>
                 </View>
               </View>
@@ -282,12 +308,24 @@ export default function FavoritesScreen({ navigation }) {
     }
     return (
       <View style={s.postsGrid}>
-        {favoritePosts.map((post) => (
-          <Card key={post.id} variant="elevated" padding={0} radius={14} style={s.postCard}>
+        {favoritePosts.map(post => (
+          <Card
+            key={post.id}
+            variant="elevated"
+            padding={0}
+            radius={14}
+            style={s.postCard}
+          >
             {/* ✅ onPress اضافه شد - باز کردن مدال پست */}
-            <TouchableOpacity activeOpacity={0.9} onPress={() => handlePostPress(post)}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => handlePostPress(post)}
+            >
               <View style={s.postImageWrap}>
-                <Image source={{ uri: post.gallery?.[0] }} style={s.postImage} />
+                <Image
+                  source={{ uri: post.gallery?.[0] }}
+                  style={s.postImage}
+                />
                 {post.gallery && post.gallery.length > 1 && (
                   <View style={s.postGalleryBadge}>
                     <Icon name="collections" size={12} color="#fff" />
@@ -299,12 +337,21 @@ export default function FavoritesScreen({ navigation }) {
               </View>
               <View style={s.postInfo}>
                 <View style={s.postBusinessRow}>
-                  <Image source={{ uri: post.businessLogo }} style={s.postBizLogo} />
-                  <Text style={[s.postBizName, { color: colors.textMain }]} numberOfLines={1}>
+                  <Image
+                    source={{ uri: post.businessLogo }}
+                    style={s.postBizLogo}
+                  />
+                  <Text
+                    style={[s.postBizName, { color: colors.textMain }]}
+                    numberOfLines={1}
+                  >
                     {post.businessName}
                   </Text>
                 </View>
-                <Text style={[s.postCaption, { color: colors.textSecondary }]} numberOfLines={2}>
+                <Text
+                  style={[s.postCaption, { color: colors.textSecondary }]}
+                  numberOfLines={2}
+                >
                   {post.caption}
                 </Text>
               </View>
@@ -328,7 +375,7 @@ export default function FavoritesScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       {/* Tabs */}
       <View style={[s.tabsWrapper, { backgroundColor: colors.background }]}>
         <ScrollView
@@ -336,7 +383,7 @@ export default function FavoritesScreen({ navigation }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={s.tabsContainer}
         >
-          {TABS.map((tab) => {
+          {TABS.map(tab => {
             const isActive = activeTab === tab.id;
             const count = counts[tab.id] || 0;
             return (
@@ -345,7 +392,9 @@ export default function FavoritesScreen({ navigation }) {
                 style={[
                   s.tabButton,
                   {
-                    backgroundColor: isActive ? colors.primary : colors.cardBackground,
+                    backgroundColor: isActive
+                      ? colors.primary
+                      : colors.cardBackground,
                     borderColor: isActive ? colors.primary : colors.border,
                   },
                 ]}
@@ -356,14 +405,21 @@ export default function FavoritesScreen({ navigation }) {
                   size={16}
                   color={isActive ? '#fff' : colors.textSecondary}
                 />
-                <Text style={[s.tabText, { color: isActive ? '#fff' : colors.textMain }]}>
+                <Text
+                  style={[
+                    s.tabText,
+                    { color: isActive ? '#fff' : colors.textMain },
+                  ]}
+                >
                   {tab.label}
                 </Text>
                 <View
                   style={[
                     s.tabBadge,
                     {
-                      backgroundColor: isActive ? 'rgba(255,255,255,0.3)' : colors.primary + '20',
+                      backgroundColor: isActive
+                        ? 'rgba(255,255,255,0.3)'
+                        : colors.primary + '20',
                     },
                   ]}
                 >

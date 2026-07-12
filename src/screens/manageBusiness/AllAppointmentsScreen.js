@@ -106,31 +106,35 @@ export default function AllAppointmentsScreen({ navigation }) {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelTarget, setCancelTarget] = useState(null);
 
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   // ═══════════ فیلتر و جستجو ═══════════
   const filteredAppointments = useMemo(() => {
     let result = appointments;
     if (activeFilter !== 'all') {
       if (activeFilter === 'cancelled') {
-        result = result.filter((a) => a.status === 'cancelled_by_salon');
+        result = result.filter(a => a.status === 'cancelled_by_salon');
       } else {
-        result = result.filter((a) => a.status === activeFilter);
+        result = result.filter(a => a.status === activeFilter);
       }
     }
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toLowerCase();
       result = result.filter(
-        (a) =>
+        a =>
           a.customerName.toLowerCase().includes(query) ||
           a.serviceName.toLowerCase().includes(query) ||
           a.employeeName.toLowerCase().includes(query) ||
-          a.customerPhone.includes(query)
+          a.customerPhone.includes(query),
       );
     }
     if (dateFilter) {
       const todayJalaali = { jy: 1403, jm: 4, jd: 20 };
-      result = result.filter((a) => {
+      result = result.filter(a => {
         const aptDate = a.date;
         if (dateFilter === 'today') {
           return (
@@ -140,7 +144,9 @@ export default function AllAppointmentsScreen({ navigation }) {
           );
         }
         if (dateFilter === 'week') {
-          return aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7;
+          return (
+            aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7
+          );
         }
         if (dateFilter === 'month') {
           return aptDate.jm === todayJalaali.jm;
@@ -154,14 +160,15 @@ export default function AllAppointmentsScreen({ navigation }) {
   const counts = useMemo(() => {
     return {
       all: appointments.length,
-      reserved: appointments.filter((a) => a.status === 'reserved').length,
-      cancelled: appointments.filter((a) => a.status === 'cancelled_by_salon').length,
-      done: appointments.filter((a) => a.status === 'done').length,
+      reserved: appointments.filter(a => a.status === 'reserved').length,
+      cancelled: appointments.filter(a => a.status === 'cancelled_by_salon')
+        .length,
+      done: appointments.filter(a => a.status === 'done').length,
     };
   }, [appointments]);
 
   // ═══════════ هندلرهای BottomSheet جزئیات ═══════════
-  const openDetail = (apt) => {
+  const openDetail = apt => {
     setSelectedApt(apt);
     setDetailVisible(true);
   };
@@ -172,7 +179,7 @@ export default function AllAppointmentsScreen({ navigation }) {
   };
 
   // ═══════════ هندلرهای تایید انجام خدمت ═══════════
-  const handleOpenVerify = (apt) => {
+  const handleOpenVerify = apt => {
     // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
     setVerifyTarget(apt);
     if (detailVisible) {
@@ -188,17 +195,17 @@ export default function AllAppointmentsScreen({ navigation }) {
     setTimeout(() => setVerifyTarget(null), 300);
   };
 
-  const handleConfirmVerify = (aptId) => {
-    setAppointments((prev) =>
-      prev.map((a) =>
+  const handleConfirmVerify = aptId => {
+    setAppointments(prev =>
+      prev.map(a =>
         a.id === aptId
           ? {
               ...a,
               status: 'done',
               verifiedAt: new Date().toLocaleString('fa-IR'),
             }
-          : a
-      )
+          : a,
+      ),
     );
     setVerifyModalVisible(false);
     setVerifyTarget(null);
@@ -210,7 +217,7 @@ export default function AllAppointmentsScreen({ navigation }) {
   };
 
   // ═══════════ هندلرهای لغو نوبت ═══════════
-  const handleOpenCancel = (apt) => {
+  const handleOpenCancel = apt => {
     // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
     setCancelTarget(apt);
     if (detailVisible) {
@@ -227,8 +234,8 @@ export default function AllAppointmentsScreen({ navigation }) {
   };
 
   const handleConfirmCancel = (aptId, reason) => {
-    setAppointments((prev) =>
-      prev.map((a) =>
+    setAppointments(prev =>
+      prev.map(a =>
         a.id === aptId
           ? {
               ...a,
@@ -236,8 +243,8 @@ export default function AllAppointmentsScreen({ navigation }) {
               cancellationReason: reason,
               refundAmount: a.depositPaid,
             }
-          : a
-      )
+          : a,
+      ),
     );
     setCancelModalVisible(false);
     setCancelTarget(null);
@@ -261,7 +268,8 @@ export default function AllAppointmentsScreen({ navigation }) {
       all: {
         icon: '📅',
         title: 'هنوز نوبتی ثبت نشده است',
-        description: 'پس از رزرو اولین نوبت توسط مشتریان، نوبت‌ها اینجا نمایش داده می‌شود',
+        description:
+          'پس از رزرو اولین نوبت توسط مشتریان، نوبت‌ها اینجا نمایش داده می‌شود',
       },
       reserved: {
         icon: '📋',
@@ -283,7 +291,7 @@ export default function AllAppointmentsScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <AppointmentSearchBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -303,7 +311,7 @@ export default function AllAppointmentsScreen({ navigation }) {
       >
         {filteredAppointments.length > 0 ? (
           <View style={s.list}>
-            {filteredAppointments.map((apt) => (
+            {filteredAppointments.map(apt => (
               <AppointmentCard
                 key={apt.id}
                 appointment={apt}
@@ -350,7 +358,7 @@ export default function AllAppointmentsScreen({ navigation }) {
         message={toast.message}
         type={toast.type}
         position="top"
-        onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
+        onHide={() => setToast(prev => ({ ...prev, visible: false }))}
       />
     </ScreenWrapper>
   );

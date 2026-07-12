@@ -1,6 +1,13 @@
 // src/screens/createBusiness/CreateBusinessScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -44,7 +51,7 @@ export default function CreateBusinessScreen({ navigation }) {
   const registeredPhone = user?.phone || '09123456789';
 
   const updateForm = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   const renderCurrentStep = () => {
@@ -54,7 +61,7 @@ export default function CreateBusinessScreen({ navigation }) {
           <BasicInfoStep
             formData={formData}
             onUpdate={updateForm}
-            onValidationChange={(valid) => setIsStepValid(valid)}
+            onValidationChange={valid => setIsStepValid(valid)}
           />
         );
       case 2:
@@ -86,7 +93,10 @@ export default function CreateBusinessScreen({ navigation }) {
         1: 'لطفاً تمام فیلدهای الزامی را تکمیل کنید',
         2: 'ابتدا کد ملی خود را استعلام و تایید کنید',
       };
-      Alert.alert('تکمیل اطلاعات', messages[currentStep] || 'لطفاً اطلاعات لازم را تکمیل کنید');
+      Alert.alert(
+        'تکمیل اطلاعات',
+        messages[currentStep] || 'لطفاً اطلاعات لازم را تکمیل کنید',
+      );
       return;
     }
 
@@ -99,7 +109,10 @@ export default function CreateBusinessScreen({ navigation }) {
 
   const handleFinalSubmit = () => {
     if (!canFinalSubmit) {
-      Alert.alert('احراز هویت لازم است', 'برای ثبت نهایی کسب‌وکار، ابتدا باید کد ملی خود را با شماره ثبت‌نام شده تطبیق دهید');
+      Alert.alert(
+        'احراز هویت لازم است',
+        'برای ثبت نهایی کسب‌وکار، ابتدا باید کد ملی خود را با شماره ثبت‌نام شده تطبیق دهید',
+      );
       return;
     }
 
@@ -137,8 +150,11 @@ export default function CreateBusinessScreen({ navigation }) {
   // 🎯 صفحه قوانین
   if (!termsAccepted) {
     return (
-      <ScreenWrapper padding={0} edges={['bottom']}>
-        <Header title="ثبت کسب‌وکار جدید" onBackPress={() => navigation.goBack()} />
+      <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
+        <Header
+          title="ثبت کسب‌وکار جدید"
+          onBackPress={() => navigation.goBack()}
+        />
         <TermsAndConditionsStep
           navbarHeight={NAVBAR_HEIGHT}
           onAccept={() => {
@@ -153,7 +169,7 @@ export default function CreateBusinessScreen({ navigation }) {
 
   // 🎯 Wizard
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       {/* 🎯 هدر لاکچری - جمع‌وجور و کوچک */}
       <View
         style={[
@@ -182,7 +198,7 @@ export default function CreateBusinessScreen({ navigation }) {
 
       {/* 🎯 اسکرول‌ویو اصلی با key={currentStep} برای scroll to top خودکار */}
       <ScrollView
-        key={currentStep}  // ⬅️ تغییر کلیدی! با تغییر step، صفحه از بالا شروع می‌شود
+        key={currentStep} // ⬅️ تغییر کلیدی! با تغییر step، صفحه از بالا شروع می‌شود
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: insets.bottom + NAVBAR_HEIGHT + 20,
@@ -205,7 +221,9 @@ export default function CreateBusinessScreen({ navigation }) {
                 variant="outline"
                 size="md"
                 style={s.halfButton}
-                icon={<Icon name="arrow-forward" size={18} color={colors.primary} />}
+                icon={
+                  <Icon name="arrow-forward" size={18} color={colors.primary} />
+                }
                 iconPosition="right"
               />
             )}
@@ -231,8 +249,10 @@ export default function CreateBusinessScreen({ navigation }) {
             <View style={s.warningBox}>
               <Icon name="info-outline" size={14} color="#FFA000" />
               <Text style={[s.warningText, { color: colors.textSecondary }]}>
-                {currentStep === 1 && 'برای فعال‌سازی دکمه «مرحله بعد»، تمام فیلدهای الزامی را تکمیل کنید'}
-                {currentStep === 2 && 'برای فعال‌سازی دکمه ثبت نهایی، ابتدا کد ملی خود را استعلام و تایید کنید'}
+                {currentStep === 1 &&
+                  'برای فعال‌سازی دکمه «مرحله بعد»، تمام فیلدهای الزامی را تکمیل کنید'}
+                {currentStep === 2 &&
+                  'برای فعال‌سازی دکمه ثبت نهایی، ابتدا کد ملی خود را استعلام و تایید کنید'}
               </Text>
             </View>
           )}

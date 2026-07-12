@@ -88,7 +88,8 @@ const MOCK_BUSINESS = {
         'https://picsum.photos/800/800?random=160',
         'https://picsum.photos/800/800?random=260',
       ],
-      description: 'فیشیال تخصصی عروس با استفاده از بهترین محصولات روز دنیا. شامل پاکسازی عمیق، ماسک طلا و ماساژ صورت.',
+      description:
+        'فیشیال تخصصی عروس با استفاده از بهترین محصولات روز دنیا. شامل پاکسازی عمیق، ماسک طلا و ماساژ صورت.',
     },
     {
       id: 'pf2',
@@ -146,7 +147,7 @@ export default function BusinessDetailsScreen({ navigation }) {
   const [activePortfolio, setActivePortfolio] = useState(null);
   const [portfolioInitialIndex, setPortfolioInitialIndex] = useState(0);
 
-  const openBooking = (service) => {
+  const openBooking = service => {
     setSelectedService(service);
     setBookingModalVisible(true);
   };
@@ -157,10 +158,10 @@ export default function BusinessDetailsScreen({ navigation }) {
     setPortfolioModalVisible(true);
   };
 
-  const minServicePrice = Math.min(...biz.services.map((s) => s.price));
+  const minServicePrice = Math.min(...biz.services.map(s => s.price));
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -187,7 +188,7 @@ export default function BusinessDetailsScreen({ navigation }) {
         <View style={s.tabContentWrapper}>
           {activeTab === 'services' && (
             <View style={s.servicesList}>
-              {biz.services.map((service) => (
+              {biz.services.map(service => (
                 <ServiceBookingCard
                   key={service.id}
                   service={service}

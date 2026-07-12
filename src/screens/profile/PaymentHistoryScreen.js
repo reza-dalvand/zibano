@@ -9,11 +9,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 import Dropdown from '../../components/common/Dropdown';
 
-import {
-  MOCK_PAYMENTS,
-  MONTHS,
-  YEARS,
-} from './paymentHistory/constants';
+import { MOCK_PAYMENTS, MONTHS, YEARS } from './paymentHistory/constants';
 import { formatPrice } from './paymentHistory/helpers';
 import PaymentCard from './paymentHistory/PaymentCard';
 import InvoiceModal from './paymentHistory/InvoiceModal';
@@ -27,23 +23,27 @@ export default function PaymentHistoryScreen() {
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [invoiceModalVisible, setInvoiceModalVisible] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   // 🎯 فیلتر تراکنش‌ها بر اساس ماه و سال
   const filteredPayments = useMemo(() => {
-    return MOCK_PAYMENTS.filter((p) => {
+    return MOCK_PAYMENTS.filter(p => {
       if (selectedMonth !== 0 && p.month !== selectedMonth) return false;
       if (selectedYear !== 0 && p.year !== selectedYear) return false;
       return true;
     });
   }, [selectedMonth, selectedYear]);
 
-  const handleOpenInvoice = (payment) => {
+  const handleOpenInvoice = payment => {
     setSelectedPayment(payment);
     setInvoiceModalVisible(true);
   };
 
-  const handleCopyCode = (code) => {
+  const handleCopyCode = code => {
     Clipboard.setString(code);
     setToast({ visible: true, message: 'کد پیگیری کپی شد', type: 'success' });
   };
@@ -74,9 +74,17 @@ export default function PaymentHistoryScreen() {
   const hasActiveFilter = selectedMonth !== 0 || selectedYear !== 0;
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       {/* 🆕 فیلتر ماه و سال */}
-      <View style={[s.filterContainer, { backgroundColor: colors.background, borderBottomColor: colors.border }]}>
+      <View
+        style={[
+          s.filterContainer,
+          {
+            backgroundColor: colors.background,
+            borderBottomColor: colors.border,
+          },
+        ]}
+      >
         <View style={s.filterRow}>
           <View style={s.filterItem}>
             <Dropdown
@@ -98,9 +106,12 @@ export default function PaymentHistoryScreen() {
       </View>
 
       {/* 📋 لیست تراکنش‌ها */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.listContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.listContainer}
+      >
         {filteredPayments.length > 0 ? (
-          filteredPayments.map((payment) => (
+          filteredPayments.map(payment => (
             <PaymentCard
               key={payment.id}
               payment={payment}

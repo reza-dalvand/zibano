@@ -16,8 +16,8 @@ import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 const MOCK_DEVICES = [
   {
@@ -65,19 +65,23 @@ export default function ActiveDevicesScreen({ navigation }) {
   // ═══════════ همه Hook‌ها در ابتدا ═══════════
   const { colors } = useTheme();
   const [devices, setDevices] = useState(MOCK_DEVICES);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   // ═══════════ محاسبات ═══════════
-  const currentDevice = devices.find((d) => d.isCurrent);
-  const otherDevices = devices.filter((d) => !d.isCurrent);
+  const currentDevice = devices.find(d => d.isCurrent);
+  const otherDevices = devices.filter(d => !d.isCurrent);
   const stats = {
     total: devices.length,
-    trusted: devices.filter((d) => d.trusted).length,
-    suspicious: devices.filter((d) => !d.trusted && !d.isCurrent).length,
+    trusted: devices.filter(d => d.trusted).length,
+    suspicious: devices.filter(d => !d.trusted && !d.isCurrent).length,
   };
 
   // ═══════════ Handlers ═══════════
-  const handleRemoveDevice = (device) => {
+  const handleRemoveDevice = device => {
     Alert.alert(
       'خروج از دستگاه',
       `آیا مطمئن هستید که می‌خواهید از "${device.name}" خارج شوید؟`,
@@ -87,7 +91,7 @@ export default function ActiveDevicesScreen({ navigation }) {
           text: 'خروج',
           style: 'destructive',
           onPress: () => {
-            setDevices((prev) => prev.filter((d) => d.id !== device.id));
+            setDevices(prev => prev.filter(d => d.id !== device.id));
             setToast({
               visible: true,
               message: `✓ نشست "${device.name}" بسته شد`,
@@ -95,7 +99,7 @@ export default function ActiveDevicesScreen({ navigation }) {
             });
           },
         },
-      ]
+      ],
     );
   };
 
@@ -109,7 +113,7 @@ export default function ActiveDevicesScreen({ navigation }) {
           text: 'خروج از همه',
           style: 'destructive',
           onPress: () => {
-            setDevices((prev) => prev.filter((d) => d.isCurrent));
+            setDevices(prev => prev.filter(d => d.isCurrent));
             setToast({
               visible: true,
               message: '✓ از همه دستگاه‌ها خارج شدید',
@@ -117,13 +121,13 @@ export default function ActiveDevicesScreen({ navigation }) {
             });
           },
         },
-      ]
+      ],
     );
   };
 
   // ═══════════ Render ═══════════
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -131,7 +135,12 @@ export default function ActiveDevicesScreen({ navigation }) {
         {/* آمار */}
         <View style={s.statsRow}>
           <View style={s.statItem}>
-            <View style={[s.statIconBox, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[
+                s.statIconBox,
+                { backgroundColor: colors.primary + '15' },
+              ]}
+            >
               <Icon name="devices" size={20} color={colors.primary} />
             </View>
             <Text style={[s.statValue, { color: colors.textMain }]}>
@@ -183,7 +192,9 @@ export default function ActiveDevicesScreen({ navigation }) {
               style={{ borderColor: colors.primary + '60', borderWidth: 1.5 }}
             >
               <View style={s.deviceHeader}>
-                <View style={[s.deviceIconBox, { backgroundColor: '#2196F318' }]}>
+                <View
+                  style={[s.deviceIconBox, { backgroundColor: '#2196F318' }]}
+                >
                   <Icon name={currentDevice.icon} size={26} color="#2196F3" />
                 </View>
                 <View style={s.deviceTextInfo}>
@@ -194,8 +205,15 @@ export default function ActiveDevicesScreen({ navigation }) {
                     {currentDevice.os}
                   </Text>
                 </View>
-                <View style={[s.currentBadge, { backgroundColor: colors.primary + '20' }]}>
-                  <View style={[s.currentDot, { backgroundColor: colors.primary }]} />
+                <View
+                  style={[
+                    s.currentBadge,
+                    { backgroundColor: colors.primary + '20' },
+                  ]}
+                >
+                  <View
+                    style={[s.currentDot, { backgroundColor: colors.primary }]}
+                  />
                   <Text style={[s.currentBadgeText, { color: colors.primary }]}>
                     فعلی
                   </Text>
@@ -220,7 +238,7 @@ export default function ActiveDevicesScreen({ navigation }) {
 
           {otherDevices.length > 0 ? (
             <View style={s.devicesList}>
-              {otherDevices.map((device) => (
+              {otherDevices.map(device => (
                 <Card
                   key={device.id}
                   variant="elevated"
@@ -228,14 +246,21 @@ export default function ActiveDevicesScreen({ navigation }) {
                   radius={16}
                 >
                   <View style={s.deviceHeader}>
-                    <View style={[s.deviceIconBox, { backgroundColor: '#607D8B18' }]}>
+                    <View
+                      style={[
+                        s.deviceIconBox,
+                        { backgroundColor: '#607D8B18' },
+                      ]}
+                    >
                       <Icon name={device.icon} size={26} color="#607D8B" />
                     </View>
                     <View style={s.deviceTextInfo}>
                       <Text style={[s.deviceName, { color: colors.textMain }]}>
                         {device.name}
                       </Text>
-                      <Text style={[s.deviceOs, { color: colors.textSecondary }]}>
+                      <Text
+                        style={[s.deviceOs, { color: colors.textSecondary }]}
+                      >
                         {device.os}
                       </Text>
                     </View>
@@ -248,8 +273,14 @@ export default function ActiveDevicesScreen({ navigation }) {
                   </View>
                   <View style={s.deviceDetails}>
                     <View style={s.detailRow}>
-                      <Icon name="public" size={14} color={colors.textSecondary} />
-                      <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
+                      <Icon
+                        name="public"
+                        size={14}
+                        color={colors.textSecondary}
+                      />
+                      <Text
+                        style={[s.detailLabel, { color: colors.textSecondary }]}
+                      >
                         آی‌پی:
                       </Text>
                       <Text style={[s.detailValue, { color: colors.textMain }]}>
@@ -257,8 +288,14 @@ export default function ActiveDevicesScreen({ navigation }) {
                       </Text>
                     </View>
                     <View style={s.detailRow}>
-                      <Icon name="schedule" size={14} color={colors.textSecondary} />
-                      <Text style={[s.detailLabel, { color: colors.textSecondary }]}>
+                      <Icon
+                        name="schedule"
+                        size={14}
+                        color={colors.textSecondary}
+                      />
+                      <Text
+                        style={[s.detailLabel, { color: colors.textSecondary }]}
+                      >
                         آخرین فعالیت:
                       </Text>
                       <Text style={[s.detailValue, { color: colors.textMain }]}>

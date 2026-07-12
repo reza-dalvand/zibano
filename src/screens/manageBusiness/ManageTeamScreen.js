@@ -10,25 +10,25 @@ export default function ManageTeamScreen({ navigation }) {
   const { businessData, addTeamMember, updateTeamMember, deleteTeamMember } =
     useBusiness();
 
-  const handleChange = (updatedTeam) => {
+  const handleChange = updatedTeam => {
     const currentTeam = businessData.team || [];
 
     // اضافه کردن اعضا جدید
     const newMembers = updatedTeam.filter(
-      (m) => !currentTeam.find((cm) => cm.id === m.id)
+      m => !currentTeam.find(cm => cm.id === m.id),
     );
-    newMembers.forEach((m) => addTeamMember(m));
+    newMembers.forEach(m => addTeamMember(m));
 
     // حذف اعضا
-    currentTeam.forEach((cm) => {
-      if (!updatedTeam.find((m) => m.id === cm.id)) {
+    currentTeam.forEach(cm => {
+      if (!updatedTeam.find(m => m.id === cm.id)) {
         deleteTeamMember(cm.id);
       }
     });
 
     // ویرایش اعضا
-    updatedTeam.forEach((um) => {
-      const current = currentTeam.find((cm) => cm.id === um.id);
+    updatedTeam.forEach(um => {
+      const current = currentTeam.find(cm => cm.id === um.id);
       if (current && JSON.stringify(current) !== JSON.stringify(um)) {
         updateTeamMember(um.id, um);
       }
@@ -36,7 +36,7 @@ export default function ManageTeamScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="مدیریت تیم" onBackPress={() => navigation.goBack()} />
       <View style={s.content}>
         <TeamManagement

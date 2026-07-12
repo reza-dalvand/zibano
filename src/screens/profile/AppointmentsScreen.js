@@ -17,10 +17,10 @@ import Avatar from '../../components/common/Avatar';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-const formatPrice = (num) =>
+const formatPrice = num =>
   `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
 // ⏱️ زمان بین دریافت مجدد کد (۵ دقیقه = ۳۰۰ ثانیه)
@@ -133,7 +133,7 @@ const STATUS_META = {
 function VerificationCodeCard({ appointment, colors, onToast }) {
   const [code, setCode] = useState(appointment.verificationCode);
   const [lastRegenAt, setLastRegenAt] = useState(
-    appointment.lastRegeneratedAt || Date.now()
+    appointment.lastRegeneratedAt || Date.now(),
   );
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -154,12 +154,28 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
     // انیمیشن تغییر کد
     Animated.sequence([
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
-        Animated.timing(scaleAnim, { toValue: 0.9, duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.9,
+          duration: 200,
+          useNativeDriver: true,
+        }),
       ]),
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.spring(scaleAnim, { toValue: 1, bounciness: 10, useNativeDriver: true }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          bounciness: 10,
+          useNativeDriver: true,
+        }),
       ]),
     ]).start();
 
@@ -174,7 +190,7 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
   };
 
   const handleCopyCode = () => {
-    Clipboard.setString(code.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+    Clipboard.setString(code.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
     onToast({
       visible: true,
       message: 'کد تایید کپی شد',
@@ -182,11 +198,11 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
     });
   };
 
-  const formatTime = (sec) => {
+  const formatTime = sec => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     return `${toPersianDigit(m.toString().padStart(2, '0'))}:${toPersianDigit(
-      s.toString().padStart(2, '0')
+      s.toString().padStart(2, '0'),
     )}`;
   };
 
@@ -198,15 +214,24 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
       style={[s.verificationCard, { borderColor: colors.primary + '40' }]}
     >
       {/* هدر کارت کد تایید */}
-      <View style={[s.verificationHeader, { backgroundColor: colors.primary + '15' }]}>
-        <View style={[s.verificationIconBox, { backgroundColor: colors.primary }]}>
+      <View
+        style={[
+          s.verificationHeader,
+          { backgroundColor: colors.primary + '15' },
+        ]}
+      >
+        <View
+          style={[s.verificationIconBox, { backgroundColor: colors.primary }]}
+        >
           <Icon name="verified-user" size={18} color="#fff" />
         </View>
         <View style={s.verificationHeaderInfo}>
           <Text style={[s.verificationTitle, { color: colors.textMain }]}>
             کد تایید نوبت
           </Text>
-          <Text style={[s.verificationSubtitle, { color: colors.textSecondary }]}>
+          <Text
+            style={[s.verificationSubtitle, { color: colors.textSecondary }]}
+          >
             این کد را پس از انجام خدمت به سالن‌دار ارائه دهید
           </Text>
         </View>
@@ -236,7 +261,9 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
                 },
               ]}
             >
-              <Text style={[s.codeDigit, { color: colors.primary }]}>{digit}</Text>
+              <Text style={[s.codeDigit, { color: colors.primary }]}>
+                {digit}
+              </Text>
             </View>
           ))}
         </Animated.View>
@@ -290,24 +317,28 @@ export default function AppointmentsScreen({ navigation }) {
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'info',
+  });
 
   const filteredAppointments = useMemo(() => {
     if (activeTab === 'upcoming') {
-      return appointments.filter((a) => a.isUpcoming);
+      return appointments.filter(a => a.isUpcoming);
     }
-    return appointments.filter((a) => !a.isUpcoming);
+    return appointments.filter(a => !a.isUpcoming);
   }, [appointments, activeTab]);
 
   const stats = useMemo(
     () => ({
-      upcoming: appointments.filter((a) => a.isUpcoming).length,
-      past: appointments.filter((a) => !a.isUpcoming).length,
+      upcoming: appointments.filter(a => a.isUpcoming).length,
+      past: appointments.filter(a => !a.isUpcoming).length,
     }),
-    [appointments]
+    [appointments],
   );
 
-  const renderAppointment = (apt) => {
+  const renderAppointment = apt => {
     const meta = STATUS_META[apt.status] || STATUS_META.reserved;
     const showVerificationCard =
       apt.isUpcoming && apt.status === 'reserved' && apt.verificationCode;
@@ -318,7 +349,11 @@ export default function AppointmentsScreen({ navigation }) {
           {/* هدر: کسب‌وکار + تگ وضعیت */}
           <View style={s.aptHeader}>
             <View style={s.aptBusiness}>
-              <Avatar uri={apt.businessLogo} name={apt.businessName} size="md" />
+              <Avatar
+                uri={apt.businessLogo}
+                name={apt.businessName}
+                size="md"
+              />
               <View style={s.aptBusinessInfo}>
                 <Text
                   style={[s.aptBusinessName, { color: colors.textMain }]}
@@ -334,7 +369,9 @@ export default function AppointmentsScreen({ navigation }) {
                 </Text>
               </View>
             </View>
-            <View style={[s.statusBadge, { backgroundColor: meta.color + '20' }]}>
+            <View
+              style={[s.statusBadge, { backgroundColor: meta.color + '20' }]}
+            >
               <Icon name={meta.icon} size={12} color={meta.color} />
               <Text style={[s.statusBadgeText, { color: meta.color }]}>
                 {meta.label}
@@ -371,7 +408,10 @@ export default function AppointmentsScreen({ navigation }) {
           <View
             style={[
               s.priceBox,
-              { backgroundColor: colors.background, borderColor: colors.border },
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
             ]}
           >
             {/* ردیف مبلغ کل */}
@@ -410,10 +450,7 @@ export default function AppointmentsScreen({ navigation }) {
                 </View>
                 <View style={s.priceValueRow}>
                   <View
-                    style={[
-                      s.discountBadge,
-                      { backgroundColor: '#43A04720' },
-                    ]}
+                    style={[s.discountBadge, { backgroundColor: '#43A04720' }]}
                   >
                     <Text style={[s.discountBadgeText, { color: '#43A047' }]}>
                       {toPersianDigit(apt.discountPercent)}٪
@@ -446,19 +483,22 @@ export default function AppointmentsScreen({ navigation }) {
             )}
 
             {/* ردیف مسترد شده (فقط در صورت لغو توسط سالن) */}
-            {apt.status === 'cancelled_by_salon' && apt.refundAmount !== undefined && (
-              <View style={[s.priceRow, { marginTop: 4 }]}>
-                <View style={s.priceLabelRow}>
-                  <Icon name="undo" size={14} color="#43A047" />
-                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>
-                    مبلغ مسترد شده
+            {apt.status === 'cancelled_by_salon' &&
+              apt.refundAmount !== undefined && (
+                <View style={[s.priceRow, { marginTop: 4 }]}>
+                  <View style={s.priceLabelRow}>
+                    <Icon name="undo" size={14} color="#43A047" />
+                    <Text
+                      style={[s.priceLabel, { color: colors.textSecondary }]}
+                    >
+                      مبلغ مسترد شده
+                    </Text>
+                  </View>
+                  <Text style={[s.priceValue, { color: '#43A047' }]}>
+                    {formatPrice(apt.refundAmount)}
                   </Text>
                 </View>
-                <Text style={[s.priceValue, { color: '#43A047' }]}>
-                  {formatPrice(apt.refundAmount)}
-                </Text>
-              </View>
-            )}
+              )}
           </View>
 
           {/* پیام لغو توسط سالن */}
@@ -505,7 +545,9 @@ export default function AppointmentsScreen({ navigation }) {
           size={16}
           color={isActive ? '#fff' : colors.textSecondary}
         />
-        <Text style={[s.tabText, { color: isActive ? '#fff' : colors.textMain }]}>
+        <Text
+          style={[s.tabText, { color: isActive ? '#fff' : colors.textMain }]}
+        >
           {label}
         </Text>
         <View
@@ -528,12 +570,15 @@ export default function AppointmentsScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <View style={[s.tabsWrapper, { backgroundColor: colors.background }]}>
         <View
           style={[
             s.tabsContainer,
-            { backgroundColor: colors.cardBackground, borderColor: colors.border },
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.border,
+            },
           ]}
         >
           {renderTabButton('upcoming', 'آینده', 'event-available')}
@@ -559,7 +604,9 @@ export default function AppointmentsScreen({ navigation }) {
                 ? 'با رزرو نوبت از کسب‌وکارهای زیبانو، نوبت‌های آینده شما اینجا نمایش داده می‌شود'
                 : 'پس از انجام اولین نوبت، سوابق شما اینجا نمایش داده خواهد شد'
             }
-            actionLabel={activeTab === 'upcoming' ? 'رزرو نوبت جدید' : 'بازگشت به خانه'}
+            actionLabel={
+              activeTab === 'upcoming' ? 'رزرو نوبت جدید' : 'بازگشت به خانه'
+            }
             onAction={() => navigation.navigate('Home')}
           />
         )}
@@ -670,7 +717,12 @@ const s = StyleSheet.create({
     borderWidth: 1,
     marginTop: 12,
   },
-  cancelReasonText: { fontSize: 12, fontFamily: 'Vazir', flex: 1, lineHeight: 20 },
+  cancelReasonText: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+    lineHeight: 20,
+  },
 
   // ========== کد تایید ==========
   verificationCard: {

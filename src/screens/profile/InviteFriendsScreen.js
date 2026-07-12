@@ -1,6 +1,13 @@
 // src/screens/profile/InviteFriendsScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Share, Alert, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Share,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -8,8 +15,8 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const toPersianDigit = str =>
+  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function InviteFriendsScreen() {
   const { colors } = useTheme();
@@ -45,17 +52,20 @@ export default function InviteFriendsScreen() {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom']} scrollable>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} scrollable>
       <View style={s.content}>
         <View style={s.heroSection}>
-          <View style={[s.heroIconBox, { backgroundColor: colors.primary + '15' }]}>
+          <View
+            style={[s.heroIconBox, { backgroundColor: colors.primary + '15' }]}
+          >
             <Icon name="card-giftcard" size={56} color={colors.primary} />
           </View>
           <Text style={[s.heroTitle, { color: colors.textMain }]}>
             دوستان خود را دعوت کنید
           </Text>
           <Text style={[s.heroSubtitle, { color: colors.textSecondary }]}>
-            زیبانو را به دوستانتان معرفی کنید و همراه با آن‌ها از خدمات زیبایی لذت ببرید
+            زیبانو را به دوستانتان معرفی کنید و همراه با آن‌ها از خدمات زیبایی
+            لذت ببرید
           </Text>
         </View>
 
@@ -66,7 +76,10 @@ export default function InviteFriendsScreen() {
           <View
             style={[
               s.codeBox,
-              { backgroundColor: colors.background, borderColor: colors.primary + '40' },
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.primary + '40',
+              },
             ]}
           >
             <Text style={[s.codeText, { color: colors.primary }]} selectable>
@@ -76,7 +89,11 @@ export default function InviteFriendsScreen() {
               style={[s.copyBtn, { backgroundColor: colors.primary }]}
               onPress={handleCopy}
             >
-              <Icon name={copied ? 'check' : 'content-copy'} size={16} color="#fff" />
+              <Icon
+                name={copied ? 'check' : 'content-copy'}
+                size={16}
+                color="#fff"
+              />
             </TouchableOpacity>
           </View>
           <Text style={[s.codeHint, { color: colors.textSecondary }]}>
@@ -90,26 +107,44 @@ export default function InviteFriendsScreen() {
           <View style={s.linkRow}>
             <Icon name="link" size={20} color={colors.primary} />
             <View style={s.linkInfo}>
-              <Text style={[s.linkLabel, { color: colors.textSecondary }]}>لینک دعوت</Text>
-              <Text style={[s.linkValue, { color: colors.textMain }]} numberOfLines={1}>
+              <Text style={[s.linkLabel, { color: colors.textSecondary }]}>
+                لینک دعوت
+              </Text>
+              <Text
+                style={[s.linkValue, { color: colors.textMain }]}
+                numberOfLines={1}
+              >
                 {referralLink}
               </Text>
             </View>
           </View>
         </Card>
 
-        <Text style={[s.stepsTitle, { color: colors.textMain }]}>چگونه دعوت کنم؟</Text>
+        <Text style={[s.stepsTitle, { color: colors.textMain }]}>
+          چگونه دعوت کنم؟
+        </Text>
         <View style={s.stepsContainer}>
           {[
-            { icon: 'share', text: 'کد معرف یا لینک دعوت را با دوستانتان به اشتراک بگذارید' },
-            { icon: 'person-add', text: 'دوست شما با کد شما در زیبانو ثبت‌نام می‌کند' },
-            { icon: 'celebration', text: 'همراه با دوستانتان از خدمات زیبانو لذت ببرید' },
+            {
+              icon: 'share',
+              text: 'کد معرف یا لینک دعوت را با دوستانتان به اشتراک بگذارید',
+            },
+            {
+              icon: 'person-add',
+              text: 'دوست شما با کد شما در زیبانو ثبت‌نام می‌کند',
+            },
+            {
+              icon: 'celebration',
+              text: 'همراه با دوستانتان از خدمات زیبانو لذت ببرید',
+            },
           ].map((step, index) => (
             <View key={index} style={s.stepRow}>
               <View style={[s.stepNumber, { backgroundColor: colors.primary }]}>
                 <Icon name={step.icon} size={16} color="#fff" />
               </View>
-              <Text style={[s.stepText, { color: colors.textMain }]}>{step.text}</Text>
+              <Text style={[s.stepText, { color: colors.textMain }]}>
+                {step.text}
+              </Text>
             </View>
           ))}
         </View>
@@ -133,25 +168,47 @@ const s = StyleSheet.create({
   content: { padding: 20, paddingBottom: 100 },
   heroSection: { alignItems: 'center', marginBottom: 28, gap: 8 },
   heroIconBox: {
-    width: 100, height: 100, borderRadius: 50,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   heroTitle: { fontSize: 20, fontFamily: 'Vazir-Bold', textAlign: 'center' },
   heroSubtitle: {
-    fontSize: 13, fontFamily: 'Vazir', textAlign: 'center',
-    lineHeight: 22, paddingHorizontal: 12,
+    fontSize: 13,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 12,
   },
   codeCard: { marginBottom: 12, alignItems: 'center', gap: 12 },
   codeLabel: { fontSize: 13, fontFamily: 'Vazir' },
   codeBox: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 14, paddingHorizontal: 16, borderRadius: 14,
-    borderWidth: 1.5, borderStyle: 'dashed', width: '100%', gap: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    width: '100%',
+    gap: 10,
   },
-  codeText: { fontSize: 20, fontFamily: 'Vazir-Bold', letterSpacing: 2, flex: 1 },
+  codeText: {
+    fontSize: 20,
+    fontFamily: 'Vazir-Bold',
+    letterSpacing: 2,
+    flex: 1,
+  },
   copyBtn: {
-    width: 40, height: 40, borderRadius: 12,
-    alignItems: 'center', justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   codeHint: { fontSize: 12, fontFamily: 'Vazir', textAlign: 'center' },
   linkCard: { marginBottom: 24 },
@@ -163,8 +220,11 @@ const s = StyleSheet.create({
   stepsContainer: { gap: 14, marginBottom: 24 },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stepNumber: {
-    width: 36, height: 36, borderRadius: 18,
-    alignItems: 'center', justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   stepText: { flex: 1, fontSize: 13, fontFamily: 'Vazir', lineHeight: 20 },
   shareBtn: { marginTop: 8 },

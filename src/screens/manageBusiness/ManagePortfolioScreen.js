@@ -34,7 +34,7 @@ export default function ManagePortfolioScreen({ navigation }) {
   const [serviceId, setServiceId] = useState(null);
   const [images, setImages] = useState([]);
 
-  const serviceOptions = (businessData.services || []).map((s) => ({
+  const serviceOptions = (businessData.services || []).map(s => ({
     id: s.id,
     label: s.name,
   }));
@@ -52,7 +52,7 @@ export default function ManagePortfolioScreen({ navigation }) {
     setModalVisible(true);
   };
 
-  const openEditModal = (pf) => {
+  const openEditModal = pf => {
     setEditing(pf);
     setTitle(pf.title || '');
     setDescription(pf.description || '');
@@ -73,13 +73,13 @@ export default function ManagePortfolioScreen({ navigation }) {
       selectionLimit: 5,
     });
     if (!result.didCancel && result.assets) {
-      const newImages = result.assets.map((a) => a.uri);
-      setImages((prev) => [...prev, ...newImages].slice(0, 8));
+      const newImages = result.assets.map(a => a.uri);
+      setImages(prev => [...prev, ...newImages].slice(0, 8));
     }
   };
 
-  const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  const removeImage = index => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = () => {
@@ -108,23 +108,19 @@ export default function ManagePortfolioScreen({ navigation }) {
     closeModal();
   };
 
-  const handleDelete = (pf) => {
-    Alert.alert(
-      'حذف نمونه‌کار',
-      `آیا از حذف "${pf.title}" مطمئن هستید؟`,
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: () => deletePortfolio(pf.id),
-        },
-      ]
-    );
+  const handleDelete = pf => {
+    Alert.alert('حذف نمونه‌کار', `آیا از حذف "${pf.title}" مطمئن هستید؟`, [
+      { text: 'انصراف', style: 'cancel' },
+      {
+        text: 'حذف',
+        style: 'destructive',
+        onPress: () => deletePortfolio(pf.id),
+      },
+    ]);
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['top']}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="نمونه‌کارها" onBackPress={() => navigation.goBack()} />
 
       <ScrollView
@@ -133,7 +129,7 @@ export default function ManagePortfolioScreen({ navigation }) {
       >
         {businessData.portfolios && businessData.portfolios.length > 0 ? (
           <View style={s.gridContainer}>
-            {businessData.portfolios.map((pf) => (
+            {businessData.portfolios.map(pf => (
               <Card
                 key={pf.id}
                 variant="elevated"
@@ -160,10 +156,13 @@ export default function ManagePortfolioScreen({ navigation }) {
                   </Text>
                   {pf.serviceId && (
                     <Text
-                      style={[s.portfolioService, { color: colors.textSecondary }]}
+                      style={[
+                        s.portfolioService,
+                        { color: colors.textSecondary },
+                      ]}
                       numberOfLines={1}
                     >
-                      {businessData.services?.find((s) => s.id === pf.serviceId)
+                      {businessData.services?.find(s => s.id === pf.serviceId)
                         ?.name || '—'}
                     </Text>
                   )}
@@ -299,9 +298,7 @@ export default function ManagePortfolioScreen({ navigation }) {
                 onPress={pickImages}
               >
                 <Icon name="add-a-photo" size={28} color={colors.primary} />
-                <Text
-                  style={[s.addImageText, { color: colors.primary }]}
-                >
+                <Text style={[s.addImageText, { color: colors.primary }]}>
                   افزودن
                 </Text>
               </TouchableOpacity>

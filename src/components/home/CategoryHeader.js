@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 import { useTheme } from '../../theme/ThemeContext';
 import SearchBar from '../common/SearchBar';
 
@@ -15,8 +16,8 @@ export default function CategoryHeader({
   onBackPress,
 }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets(); // 🆕
 
-  // مپ آیکون‌ها به گرادیان رنگی
   const getGradientColors = (icon) => {
     const gradients = {
       face: ['#E91E63', '#C2185B'],
@@ -34,9 +35,11 @@ export default function CategoryHeader({
   const [gradientStart, gradientEnd] = getGradientColors(categoryIcon);
 
   return (
-    <View style={[s.headerContainer, { backgroundColor: gradientStart }]}>
+    <View style={[s.headerContainer, {
+      backgroundColor: gradientStart,
+      paddingTop: insets.top + 8, // 🎯 insets.top
+    }]}>
       <View style={s.headerContent}>
-        {/* ردیف بالا: دکمه بازگشت + اطلاعات دسته */}
         <View style={s.topRow}>
           <TouchableOpacity
             style={s.backButton}
@@ -45,7 +48,6 @@ export default function CategoryHeader({
           >
             <Icon name="arrow-forward" size={22} color="#fff" />
           </TouchableOpacity>
-
           <View style={s.categoryInfo}>
             <View style={s.categoryIconBox}>
               <Icon name={categoryIcon} size={28} color={gradientStart} />
@@ -57,14 +59,11 @@ export default function CategoryHeader({
               </Text>
             </View>
           </View>
-
           <View style={s.resultCounter}>
             <Text style={s.resultNumber}>{resultCount}</Text>
             <Text style={s.resultLabel}>کسب‌وکار</Text>
           </View>
         </View>
-
-        {/* SearchBar */}
         <View style={s.searchWrapper}>
           <SearchBar
             value={searchQuery}
@@ -79,11 +78,12 @@ export default function CategoryHeader({
 
 const s = StyleSheet.create({
   headerContainer: {
-    paddingTop: 20,
+    // paddingTop حذف شد
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
+  // بقیه بدون تغییر...
   headerContent: {
     paddingHorizontal: 20,
     gap: 20,

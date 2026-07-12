@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 import { useTheme } from '../../theme/ThemeContext';
 import SearchBar from '../common/SearchBar';
 import Avatar from '../common/Avatar';
@@ -16,9 +17,13 @@ export default function HomeHeader({
   notificationCount = 0,
 }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets(); // 🆕
 
   return (
-    <View style={[s.headerContainer, { backgroundColor: colors.primary }]}>
+    <View style={[s.headerContainer, {
+      backgroundColor: colors.primary,
+      paddingTop: insets.top + 8, // 🎯 insets.top + فاصله اضافی
+    }]}>
       <View style={s.headerContent}>
         {/* ردیف بالا: آواتار + خوشامدگویی + نوتیفیکیشن */}
         <View style={s.topRow}>
@@ -37,7 +42,6 @@ export default function HomeHeader({
               </Text>
             </View>
           </View>
-
           <TouchableOpacity
             style={s.notificationBtn}
             onPress={onNotificationPress}
@@ -53,7 +57,6 @@ export default function HomeHeader({
             )}
           </TouchableOpacity>
         </View>
-
         {/* نوار جستجو */}
         <View style={s.searchWrapper}>
           <SearchBar
@@ -70,11 +73,12 @@ export default function HomeHeader({
 
 const s = StyleSheet.create({
   headerContainer: {
-    paddingTop: 20,
+    // paddingTop حذف شد - الان داینامیک هست
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
+  // بقیه استایل‌ها بدون تغییر...
   headerContent: {
     paddingHorizontal: 20,
     gap: 20,

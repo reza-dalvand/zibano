@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 import {
   FilterModal,
   PostModal,
@@ -21,6 +22,7 @@ const INITIAL_FILTERS = {
 
 export default function ExploreScreen({ navigation }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets(); // 🆕
 
   // state ها
   const [posts, setPosts] = useState(MOCK_POSTS);
@@ -30,8 +32,9 @@ export default function ExploreScreen({ navigation }) {
 
   // ---------- منطق فیلتر ----------
   const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      if (filters.province && post.provinceId !== filters.province) return false;
+    return posts.filter(post => {
+      if (filters.province && post.provinceId !== filters.province)
+        return false;
       if (filters.city && post.cityId !== filters.city) return false;
       if (filters.businessType && post.businessTypeId !== filters.businessType)
         return false;
@@ -51,18 +54,16 @@ export default function ExploreScreen({ navigation }) {
     filters.minRating !== '0';
 
   // ---------- هندلرها ----------
-  const handleSave = (postId) => {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId ? { ...p, saved: !p.saved } : p
-      )
+  const handleSave = postId => {
+    setPosts(prev =>
+      prev.map(p => (p.id === postId ? { ...p, saved: !p.saved } : p)),
     );
     if (activePost?.id === postId) {
-      setActivePost((prev) => ({ ...prev, saved: !prev.saved }));
+      setActivePost(prev => ({ ...prev, saved: !prev.saved }));
     }
   };
 
-  const handleNavigateToProfile = (businessId) => {
+  const handleNavigateToProfile = businessId => {
     navigation.navigate('Home', {
       screen: 'BusinessDetails',
       params: { businessId },
@@ -73,38 +74,36 @@ export default function ExploreScreen({ navigation }) {
 
   // ---------- رندر ----------
   return (
-    <ScreenWrapper scrollable={true} padding={0} edges={['top']} >
+    <ScreenWrapper
+      scrollable={true}
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+    >
       {/* هدر صفحه */}
       <View
         style={[
           styles.header,
-          { borderColor: colors.border, backgroundColor: colors.background },
+          {
+            borderColor: colors.border,
+            backgroundColor: colors.background,
+            paddingTop: insets.top + 8, // 🎯 insets.top
+          },
         ]}
       >
-        <Text style={[styles.headerTitle, { color: colors.textMain }]}>
-          ویترین
-        </Text>
+        <Text style={[styles.headerTitle, { color: colors.textMain }]}>ویترین</Text>
         <TouchableOpacity
           onPress={() => setFilterVisible(true)}
           style={[
             styles.filterBtn,
             {
-              backgroundColor: hasActiveFilter
-                ? colors.primary + '15'
-                : colors.cardBackground,
+              backgroundColor: hasActiveFilter ? colors.primary + '15' : colors.cardBackground,
               borderColor: hasActiveFilter ? colors.primary : colors.border,
             },
           ]}
         >
-          <Icon
-            name="tune"
-            size={20}
-            color={hasActiveFilter ? colors.primary : colors.textMain}
-          />
+          <Icon name="tune" size={20} color={hasActiveFilter ? colors.primary : colors.textMain} />
           {hasActiveFilter && (
-            <View
-              style={[styles.filterBadge, { backgroundColor: colors.primary }]}
-            />
+            <View style={[styles.filterBadge, { backgroundColor: colors.primary }]} />
           )}
         </TouchableOpacity>
       </View>
