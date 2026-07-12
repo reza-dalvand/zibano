@@ -65,7 +65,7 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="ManagePortfolio"
         component={ManagePortfolioScreen}
-        options={{ title: 'نمونه‌کارها' }}
+        options={{ title: 'نمونه‌کارها', headerShown: false}}
       />
       <Stack.Screen
         name="BusinessSettings"
