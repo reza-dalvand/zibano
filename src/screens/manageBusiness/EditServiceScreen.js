@@ -163,7 +163,7 @@ export default function EditServiceScreen({ navigation, route }) {
   return (
     // ✅ حذف edges - ScreenWrapper به صورت پیش‌فرض bottom را مدیریت می‌کند
     // و Header خودش insets.top را اضافه می‌کند
-    <ScreenWrapper padding={0} keyboardAware>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <Header
         title={isEditMode ? 'ویرایش خدمت' : 'افزودن خدمت جدید'}
         onBackPress={() => navigation.goBack()}

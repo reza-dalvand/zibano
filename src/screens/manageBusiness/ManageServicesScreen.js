@@ -50,7 +50,8 @@ export default function ManageServicesScreen({ navigation }) {
 
   return (
     // ✅ edges حذف شد - ScreenWrapper با hasHeader=true (پیش‌فرض) خودش مدیریت می‌کنه
-    <ScreenWrapper padding={0}>
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}
+>
       <Header
         title="مدیریت خدمات"
         onBackPress={() => navigation.goBack()}
