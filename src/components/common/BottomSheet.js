@@ -123,7 +123,7 @@ export default function BottomSheet({
             top: topOffset,
             backgroundColor: colors.cardBackground,
             borderColor: colors.border,
-            paddingBottom: insets.bottom + 16,
+            paddingBottom: insets.bottom + 90,
             transform: [{ translateY }],
           },
           style,

@@ -6,605 +6,371 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Switch,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBusiness } from '../../context/BusinessContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import Header from '../../components/common/Header';
 import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
-import BottomSheet from '../../components/common/BottomSheet';
 import EmptyState from '../../components/common/EmptyState';
+import Toast from '../../components/common/Toast';
+import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
+import ScheduleModal from '../../components/manageBusiness/schedule/ScheduleModal';
 
-const DAYS = [
-  { key: 'sat', label: 'شنبه' },
-  { key: 'sun', label: 'یک‌شنبه' },
-  { key: 'mon', label: 'دوشنبه' },
-  { key: 'tue', label: 'سه‌شنبه' },
-  { key: 'wed', label: 'چهارشنبه' },
-  { key: 'thu', label: 'پنج‌شنبه' },
-  { key: 'fri', label: 'جمعه' },
-];
+const toPersianDigit = (str) =>
+  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-const SLOT_DURATIONS = [
-  { id: 15, label: '۱۵ دقیقه' },
-  { id: 30, label: '۳۰ دقیقه' },
-  { id: 45, label: '۴۵ دقیقه' },
-  { id: 60, label: '۶۰ دقیقه' },
-  { id: 90, label: '۹۰ دقیقه' },
-  { id: 120, label: '۱۲۰ دقیقه' },
-];
+// ═══════════ تبدیل ساعت به متن خوانا ═══════════
+const formatTime = (time) => toPersianDigit(time || '—');
 
-// تولید ساعات قابل انتخاب (۰۷:۰۰ تا ۲۲:۰۰ - هر ۳۰ دقیقه)
-const generateTimeOptions = () => {
-  const times = [];
-  for (let h = 7; h <= 22; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      times.push({
-        id: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
-        label: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
-      });
-    }
-  }
-  return times;
+// ═══════════ تبدیل مدت (دقیقه) به متن فارسی ═══════════
+const formatDuration = (minutes) => {
+  if (!minutes) return '—';
+  if (minutes < 60) return `${toPersianDigit(minutes)} دقیقه`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (m === 0) return `${toPersianDigit(h)} ساعت`;
+  return `${toPersianDigit(h)} ساعت و ${toPersianDigit(m)} دقیقه`;
 };
-
-const TIME_OPTIONS = generateTimeOptions();
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function ManageScheduleScreen({ navigation }) {
   const { colors } = useTheme();
   const { businessData, updateSchedule } = useBusiness();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-  const [selectedEmployee, setSelectedEmployee] = useState(
-    businessData.team?.[0]?.id || null,
+  // ═══════════ خدمات فعال ═══════════
+  const services = useMemo(
+    () => (businessData.services || []).filter((s) => s.isActive !== false),
+    [businessData.services]
   );
-  const [selectedService, setSelectedService] = useState(null);
-  const [timePickerVisible, setTimePickerVisible] = useState(false);
-  const [editingDay, setEditingDay] = useState(null);
-  const [editingField, setEditingField] = useState(null); // 'start' یا 'end'
 
-  // فیلتر خدمات: فقط خدماتی که به کارمند انتخاب شده متصل هستند
-  const employeeServices = useMemo(() => {
-    if (!selectedEmployee) return [];
-    const emp = businessData.team?.find(m => m.id === selectedEmployee);
-    if (!emp?.services) return [];
-    return (businessData.services || []).filter(s =>
-      emp.services.includes(s.id),
-    );
-  }, [selectedEmployee, businessData.team, businessData.services]);
+  // ═══════════ شناسه مالک (چون تیم نداریم) ═══════════
+  const ownerId = businessData.team?.[0]?.id || 'owner';
 
-  // مقداردهی اولیه selectedService
-  React.useEffect(() => {
-    if (employeeServices.length > 0 && !selectedService) {
-      setSelectedService(employeeServices[0].id);
-    }
-    if (employeeServices.length > 0) {
-      const stillExists = employeeServices.find(s => s.id === selectedService);
-      if (!stillExists) setSelectedService(employeeServices[0].id);
-    }
-  }, [employeeServices, selectedService]);
+  // ═══════════ محاسبه آمار هر خدمت ═══════════
+  const getServiceStats = (serviceId) => {
+    const schedule = businessData.schedules?.[ownerId]?.[serviceId] || {};
+    const allDays = Object.values(schedule);
+    
+    // روزهای تنظیم‌شده (فعال)
+    const activeDays = allDays.filter((d) => d.active);
+    
+    // مجموع slot های قابل رزرو
+    const totalSlots = activeDays.reduce((sum, d) => {
+      return sum + (d.slotCount || 0);
+    }, 0);
+    
+    // مجموع استراحت‌ها
+    const totalBreaks = activeDays.reduce((sum, d) => {
+      return sum + (d.breaks?.length || 0);
+    }, 0);
+    
+    // آخرین تاریخ تنظیم‌شده
+    const lastDate = activeDays.length > 0 
+      ? activeDays[activeDays.length - 1]?.dateKey 
+      : null;
 
-  // گرفتن برنامه فعلی
-  const currentSchedule = useMemo(() => {
-    if (!selectedEmployee || !selectedService) return {};
-    return businessData.schedules?.[selectedEmployee]?.[selectedService] || {};
-  }, [selectedEmployee, selectedService, businessData.schedules]);
+    return { 
+      daysCount: activeDays.length, 
+      totalSlots,
+      totalBreaks,
+      lastDate,
+    };
+  };
 
-  const handleToggleDay = dayKey => {
-    const current = currentSchedule[dayKey] || {};
-    const newActive = !current.active;
-    updateSchedule(selectedEmployee, selectedService, dayKey, {
-      active: newActive,
-      start: current.start || '09:00',
-      end: current.end || '18:00',
-      slotDuration: current.slotDuration || 60,
+  // ═══════════ باز کردن مدال ═══════════
+  const openModal = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setModalVisible(true);
+  };
+
+  // ═══════════ ذخیره تنظیمات (ساختار جدید) ═══════════
+  const handleSave = ({ serviceId, date, workStart, workEnd, slotDuration, breaks, slotCount }) => {
+    const dateKey = `${date.jy}/${String(date.jm).padStart(2, '0')}/${String(date.jd).padStart(2, '0')}`;
+    
+    const scheduleData = {
+      active: true,
+      workStart,
+      workEnd,
+      slotDuration,
+      breaks: breaks || [],
+      slotCount: slotCount || 0,
+      dateKey,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    updateSchedule(ownerId, serviceId, `d_${date.jy}_${date.jm}_${date.jd}`, scheduleData);
+
+    setToast({
+      visible: true,
+      message: `✓ ${toPersianDigit(slotCount)} نوبت کاری با موفقیت تنظیم شد`,
+      type: 'success',
     });
-  };
-
-  const openTimePicker = (dayKey, field) => {
-    setEditingDay(dayKey);
-    setEditingField(field);
-    setTimePickerVisible(true);
-  };
-
-  const handleTimeSelect = timeId => {
-    if (!editingDay || !editingField) return;
-    const current = currentSchedule[editingDay] || {};
-    updateSchedule(selectedEmployee, selectedService, editingDay, {
-      active: current.active ?? true,
-      start: editingField === 'start' ? timeId : current.start || '09:00',
-      end: editingField === 'end' ? timeId : current.end || '18:00',
-      slotDuration: current.slotDuration || 60,
-    });
-    setTimePickerVisible(false);
-  };
-
-  const handleDurationChange = (dayKey, duration) => {
-    const current = currentSchedule[dayKey] || {};
-    updateSchedule(selectedEmployee, selectedService, dayKey, {
-      active: current.active ?? true,
-      start: current.start || '09:00',
-      end: current.end || '18:00',
-      slotDuration: duration,
-    });
-  };
-
-  // محاسبه تعداد slot های قابل رزرو برای یک روز
-  const calcSlotsCount = day => {
-    if (!day.active) return 0;
-    const [sh, sm] = (day.start || '09:00').split(':').map(Number);
-    const [eh, em] = (day.end || '18:00').split(':').map(Number);
-    const startMin = sh * 60 + sm;
-    const endMin = eh * 60 + em;
-    const duration = day.slotDuration || 60;
-    if (endMin <= startMin) return 0;
-    return Math.floor((endMin - startMin) / duration);
   };
 
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
-      <Header
-        title="مدیریت زمان‌بندی"
-        onBackPress={() => navigation.goBack()}
-      />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        {/* انتخاب کارمند */}
-        <View style={s.section}>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-            کارمند
+        {/* ═══════════ هدر صفحه ═══════════ */}
+        <View style={s.heroSection}>
+          <View style={[s.heroIconBox, { backgroundColor: colors.primary + '15' }]}>
+            <Icon name="schedule" size={32} color={colors.primary} />
+          </View>
+          <Text style={[s.heroTitle, { color: colors.textMain }]}>
+            مدیریت ساعات کاری
           </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={s.chipsRow}
-          >
-            {(businessData.team || []).map(emp => {
-              const isActive = selectedEmployee === emp.id;
-              return (
-                <TouchableOpacity
-                  key={emp.id}
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedEmployee(emp.id)}
-                  style={[
-                    s.chip,
-                    {
-                      backgroundColor: isActive
-                        ? colors.primary + '20'
-                        : colors.cardBackground,
-                      borderColor: isActive ? colors.primary : colors.border,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      s.chipText,
-                      { color: isActive ? colors.primary : colors.textMain },
-                    ]}
-                  >
-                    {emp.name}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-            {(!businessData.team || businessData.team.length === 0) && (
-              <Text style={[s.emptyHint, { color: colors.textSecondary }]}>
-                ابتدا اعضای تیم را تعریف کنید
-              </Text>
-            )}
-          </ScrollView>
+          <Text style={[s.heroSubtitle, { color: colors.textSecondary }]}>
+            بازه کاری، مدت هر نوبت و زمان‌های استراحت را مشخص کنید
+          </Text>
         </View>
 
-        {/* انتخاب خدمت */}
-        {selectedEmployee && (
-          <View style={s.section}>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              خدمت
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={s.chipsRow}
-            >
-              {employeeServices.map(svc => {
-                const isActive = selectedService === svc.id;
-                return (
-                  <TouchableOpacity
-                    key={svc.id}
-                    activeOpacity={0.8}
-                    onPress={() => setSelectedService(svc.id)}
-                    style={[
-                      s.chip,
-                      {
-                        backgroundColor: isActive
-                          ? colors.primary + '20'
-                          : colors.cardBackground,
-                        borderColor: isActive ? colors.primary : colors.border,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        s.chipText,
-                        { color: isActive ? colors.primary : colors.textMain },
-                      ]}
-                    >
-                      {svc.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-              {employeeServices.length === 0 && (
-                <Text style={[s.emptyHint, { color: colors.textSecondary }]}>
-                  هیچ خدمتی به این کارمند اختصاص داده نشده
-                </Text>
-              )}
-            </ScrollView>
-          </View>
-        )}
+        {/* ═══════════ کارت راهنما ═══════════ */}
+        <Card
+          variant="default"
+          padding={12}
+          radius={14}
+          style={[s.hintCard, { borderColor: colors.primary + '30', backgroundColor: colors.primary + '08' }]}
+        >
+          <Icon name="lightbulb" size={18} color={colors.primary} />
+          <Text style={[s.hintText, { color: colors.textSecondary }]}>
+            روی آیکون تقویم هر خدمت ضربه بزنید تا ساعات کاری آن را برای یک روز مشخص تنظیم کنید
+          </Text>
+        </Card>
 
-        {/* برنامه هفتگی */}
-        {selectedEmployee && selectedService && (
-          <View style={s.section}>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              برنامه هفتگی
-            </Text>
-            <Card variant="elevated" padding={0} radius={18}>
-              {DAYS.map((day, index) => {
-                const dayData = currentSchedule[day.key] || {
-                  active: false,
-                  start: '09:00',
-                  end: '18:00',
-                  slotDuration: 60,
-                };
-                const slots = calcSlotsCount(dayData);
-                return (
-                  <View
-                    key={day.key}
-                    style={[
-                      s.dayRow,
-                      index < DAYS.length - 1 && {
-                        borderBottomWidth: 1,
-                        borderBottomColor: colors.border,
-                      },
-                    ]}
-                  >
-                    <View style={s.dayHeader}>
-                      <Switch
-                        value={dayData.active}
-                        onValueChange={() => handleToggleDay(day.key)}
-                        thumbColor={dayData.active ? colors.primary : '#ccc'}
-                        trackColor={{
-                          true: colors.primary + '55',
-                          false: '#ddd',
-                        }}
-                      />
-                      <Text
-                        style={[
-                          s.dayLabel,
-                          {
-                            color: dayData.active
-                              ? colors.textMain
-                              : colors.textSecondary,
-                          },
-                        ]}
-                      >
-                        {day.label}
+        {/* ═══════════ لیست خدمات ═══════════ */}
+        {services.length > 0 ? (
+          <View style={s.servicesList}>
+            {services.map((service) => {
+              const stats = getServiceStats(service.id);
+              return (
+                <Card
+                  key={service.id}
+                  variant="elevated"
+                  padding={0}
+                  radius={18}
+                  style={s.serviceCard}
+                >
+                  {/* محتوای اصلی خدمت */}
+                  <View style={s.serviceContent}>
+                    <ServiceTypeIcon typeId={service.typeId} size={56} />
+                    <View style={s.serviceInfo}>
+                      <Text style={[s.serviceName, { color: colors.textMain }]}>
+                        {service.name}
+                      </Text>
+                      <Text style={[s.serviceType, { color: colors.textSecondary }]}>
+                        {service.typeName}
+                      </Text>
+                      <View style={s.serviceMeta}>
+                        <Icon name="schedule" size={12} color={colors.textSecondary} />
+                        <Text style={[s.metaText, { color: colors.textSecondary }]}>
+                          {toPersianDigit(service.duration || 60)} دقیقه هر نوبت
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => openModal(service.id)}
+                      style={[s.scheduleBtn, { backgroundColor: colors.primary }]}
+                    >
+                      <Icon name="edit-calendar" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* ═══════════ آمار تنظیمات ═══════════ */}
+                  <View style={[s.statsRow, { borderTopColor: colors.border }]}>
+                    {/* روزهای تنظیم‌شده */}
+                    <View style={s.statItem}>
+                      <View style={[s.statIconCircle, { backgroundColor: '#43A04718' }]}>
+                        <Icon name="event-available" size={12} color="#43A047" />
+                      </View>
+                      <Text style={[s.statText, { color: colors.textSecondary }]}>
+                        {toPersianDigit(stats.daysCount)} روز
                       </Text>
                     </View>
 
-                    {dayData.active && (
-                      <View style={s.dayDetails}>
-                        <View style={s.timeRow}>
-                          <TouchableOpacity
-                            style={[
-                              s.timePicker,
-                              {
-                                backgroundColor: colors.background,
-                                borderColor: colors.border,
-                              },
-                            ]}
-                            onPress={() => openTimePicker(day.key, 'start')}
-                          >
-                            <Icon
-                              name="play-arrow"
-                              size={16}
-                              color={colors.primary}
-                            />
-                            <Text
-                              style={[s.timeText, { color: colors.textMain }]}
-                            >
-                              {toPersianDigit(dayData.start)}
-                            </Text>
-                          </TouchableOpacity>
+                    <View style={[s.statDivider, { backgroundColor: colors.border }]} />
 
-                          <Text
-                            style={[s.timeSep, { color: colors.textSecondary }]}
-                          >
-                            تا
-                          </Text>
-
-                          <TouchableOpacity
-                            style={[
-                              s.timePicker,
-                              {
-                                backgroundColor: colors.background,
-                                borderColor: colors.border,
-                              },
-                            ]}
-                            onPress={() => openTimePicker(day.key, 'end')}
-                          >
-                            <Icon
-                              name="stop"
-                              size={16}
-                              color={colors.primary}
-                            />
-                            <Text
-                              style={[s.timeText, { color: colors.textMain }]}
-                            >
-                              {toPersianDigit(dayData.end)}
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-
-                        <View style={s.durationRow}>
-                          <Icon
-                            name="access-time"
-                            size={14}
-                            color={colors.textSecondary}
-                          />
-                          <Text
-                            style={[
-                              s.durationLabel,
-                              { color: colors.textSecondary },
-                            ]}
-                          >
-                            هر نوبت:
-                          </Text>
-                          <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={s.durationChips}
-                          >
-                            {SLOT_DURATIONS.map(d => {
-                              const isSel = dayData.slotDuration === d.id;
-                              return (
-                                <TouchableOpacity
-                                  key={d.id}
-                                  onPress={() =>
-                                    handleDurationChange(day.key, d.id)
-                                  }
-                                  style={[
-                                    s.durationChip,
-                                    {
-                                      backgroundColor: isSel
-                                        ? colors.primary
-                                        : colors.cardBackground,
-                                      borderColor: isSel
-                                        ? colors.primary
-                                        : colors.border,
-                                    },
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      s.durationChipText,
-                                      {
-                                        color: isSel ? '#fff' : colors.textMain,
-                                      },
-                                    ]}
-                                  >
-                                    {d.label}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
-                          </ScrollView>
-                        </View>
-
-                        <View style={s.slotsInfoRow}>
-                          <Icon
-                            name="info-outline"
-                            size={14}
-                            color={colors.primary}
-                          />
-                          <Text
-                            style={[s.slotsInfoText, { color: colors.primary }]}
-                          >
-                            {toPersianDigit(slots)} نوبت قابل رزرو در این روز
-                          </Text>
-                        </View>
+                    {/* نوبت‌های فعال */}
+                    <View style={s.statItem}>
+                      <View style={[s.statIconCircle, { backgroundColor: '#2196F318' }]}>
+                        <Icon name="access-time" size={12} color="#2196F3" />
                       </View>
-                    )}
-                  </View>
-                );
-              })}
-            </Card>
-          </View>
-        )}
+                      <Text style={[s.statText, { color: colors.textSecondary }]}>
+                        {toPersianDigit(stats.totalSlots)} نوبت
+                      </Text>
+                    </View>
 
-        {/* Empty State */}
-        {(!selectedEmployee || !selectedService) && (
+                    <View style={[s.statDivider, { backgroundColor: colors.border }]} />
+
+                    {/* استراحت‌ها */}
+                    <View style={s.statItem}>
+                      <View style={[s.statIconCircle, { backgroundColor: '#9C27B018' }]}>
+                        <Icon name="coffee" size={12} color="#9C27B0" />
+                      </View>
+                      <Text style={[s.statText, { color: colors.textSecondary }]}>
+                        {toPersianDigit(stats.totalBreaks)} استراحت
+                      </Text>
+                    </View>
+                  </View>
+                </Card>
+              );
+            })}
+          </View>
+        ) : (
           <EmptyState
             icon="📅"
-            title="کارمند یا خدمت را انتخاب کنید"
-            description="ابتدا یک کارمند و سپس خدمت موردنظر را انتخاب کنید تا بتوانید برنامه زمانی او را مدیریت کنید"
+            title="خدمتی برای تنظیم وجود ندارد"
+            description="ابتدا خدمات سالن خود را اضافه کنید، سپس زمان‌بندی آن‌ها را مشخص کنید"
+            actionLabel="مدیریت خدمات"
+            onAction={() => navigation.navigate('ManageServices')}
           />
         )}
+
+        <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Time Picker BottomSheet */}
-      <BottomSheet
-        visible={timePickerVisible}
-        onClose={() => setTimePickerVisible(false)}
-        title={
-          editingField === 'start' ? 'انتخاب ساعت شروع' : 'انتخاب ساعت پایان'
-        }
-        snapPoint={0.7}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={s.timeGrid}
-        >
-          {TIME_OPTIONS.map(time => (
-            <TouchableOpacity
-              key={time.id}
-              activeOpacity={0.8}
-              onPress={() => handleTimeSelect(time.id)}
-              style={[
-                s.timeOption,
-                {
-                  backgroundColor: colors.cardBackground,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Icon name="schedule" size={16} color={colors.primary} />
-              <Text style={[s.timeOptionText, { color: colors.textMain }]}>
-                {toPersianDigit(time.label)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </BottomSheet>
+      {/* ═══════════ مدال زمان‌بندی (۳ مرحله‌ای) ═══════════ */}
+      <ScheduleModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        services={services}
+        initialServiceId={selectedServiceId}
+        existingSchedule={businessData.schedules?.[ownerId] || {}}
+        onSave={handleSave}
+      />
+
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        position="top"
+        onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
+      />
     </ScreenWrapper>
   );
 }
 
 const s = StyleSheet.create({
   scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-    marginBottom: 10,
-  },
-  chipsRow: {
-    gap: 8,
-    paddingRight: 4,
-  },
-  chip: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 18,
-    borderWidth: 1.5,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
-  chipText: {
-    fontSize: 13,
+  // ═══════════ Hero Section ═══════════
+  heroSection: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  heroIconBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  heroTitle: {
+    fontSize: 19,
     fontFamily: 'Vazir-Bold',
   },
-  emptyHint: {
+  heroSubtitle: {
     fontSize: 12,
     fontFamily: 'Vazir',
-    paddingVertical: 8,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
-  dayRow: {
-    padding: 14,
-    gap: 10,
-  },
-  dayHeader: {
+  // ═══════════ Hint Card ═══════════
+  hintCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  hintText: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+  },
+  // ═══════════ Services List ═══════════
+  servicesList: {
     gap: 12,
   },
-  dayLabel: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
+  serviceCard: {
+    overflow: 'hidden',
+  },
+  serviceContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 14,
+  },
+  serviceInfo: {
     flex: 1,
+    gap: 3,
   },
-  dayDetails: {
-    gap: 10,
-    paddingRight: 4,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  timePicker: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  timeText: {
-    fontSize: 14,
+  serviceName: {
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-  timeSep: {
+  serviceType: {
     fontSize: 12,
-    fontFamily: 'Vazir',
+    fontFamily: 'Vazir-Medium',
   },
-  durationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  durationLabel: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  durationChips: {
-    gap: 6,
-  },
-  durationChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  durationChipText: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
-  },
-  slotsInfoRow: {
+  serviceMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#A88B7D10',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
+    marginTop: 2,
   },
-  slotsInfoText: {
+  metaText: {
     fontSize: 11,
-    fontFamily: 'Vazir-Bold',
+    fontFamily: 'Vazir',
   },
-  timeGrid: {
+  scheduleBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  // ═══════════ Stats Row ═══════════
+  statsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingBottom: 20,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    paddingVertical: 10,
   },
-  timeOption: {
-    width: '23%',
+  statItem: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
   },
-  timeOptionText: {
-    fontSize: 12,
+  statIconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statText: {
+    fontSize: 11,
     fontFamily: 'Vazir-Bold',
+  },
+  statDivider: {
+    width: 1,
+    height: 24,
   },
 });
