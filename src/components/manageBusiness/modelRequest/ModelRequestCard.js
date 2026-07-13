@@ -1,111 +1,191 @@
 // src/components/manageBusiness/modelRequest/ModelRequestCard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Linking } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../theme/ThemeContext';
 import Card from '../../common/Card';
 import Badge from '../../common/Badge';
 
 const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-export default function ModelRequestCard({ request, onPress, onEdit, onDelete }) {
+const MAX_DESC_LENGTH = 300;
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—';
+  return toPersianDigit(dateStr);
+};
+
+const truncateDescription = (text) => {
+  if (!text) return '';
+  if (text.length <= MAX_DESC_LENGTH) return text;
+  return text.slice(0, MAX_DESC_LENGTH).trim() + '...';
+};
+
+export default function ModelRequestCard({ request, onEdit, onDelete }) {
   const { colors } = useTheme();
 
-  const statusColors = {
-    active: '#4CAF50',
-    completed: '#2196F3',
-    closed: '#757575',
+  const statusConfig = {
+    active: {
+      label: 'فعال',
+      variant: 'success',
+      color: '#4CAF50',
+    },
+    inactive: {
+      label: 'غیرفعال',
+      variant: 'error',
+      color: '#E53935',
+    },
   };
 
-  const statusLabels = {
-    active: 'فعال',
-    completed: 'تکمیل شده',
-    closed: 'بسته شده',
+  const currentStatus = statusConfig[request.status] || statusConfig.inactive;
+
+  const handleDelete = () => {
+    Alert.alert(
+      'حذف درخواست مدل',
+      `آیا از حذف "${request.title}" مطمئن هستید؟\n\nاین عمل قابل بازگشت نیست.`,
+      [
+        { text: 'انصراف', style: 'cancel' },
+        {
+          text: 'حذف',
+          style: 'destructive',
+          onPress: () => onDelete?.(request),
+        },
+      ]
+    );
   };
+
+  const handleCall = async () => {
+    if (!request.contactPhone) return;
+    try {
+      const phoneUrl = `tel:${request.contactPhone}`;
+      const canCall = await Linking.canOpenURL(phoneUrl);
+      if (canCall) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert('خطا', 'امکان برقراری تماس وجود ندارد');
+      }
+    } catch (error) {
+      Alert.alert('خطا', 'امکان برقراری تماس وجود ندارد');
+    }
+  };
+
+  const truncatedDesc = truncateDescription(request.description);
+  const isTruncated = request.description && request.description.length > MAX_DESC_LENGTH;
 
   return (
     <Card variant="elevated" padding={0} radius={18}>
-      <TouchableOpacity onPress={() => onPress?.(request)} activeOpacity={0.85}>
-        {/* هدر */}
-        <View style={[s.header, { borderBottomColor: colors.border }]}>
-          <View style={s.headerLeft}>
-            {request.serviceImage && (
-              <Image source={{ uri: request.serviceImage }} style={s.serviceImage} />
-            )}
-            <View style={s.headerInfo}>
-              <Text style={[s.serviceName, { color: colors.textMain }]} numberOfLines={1}>
-                {request.serviceName}
-              </Text>
-              <Text style={[s.requestTitle, { color: colors.textSecondary }]} numberOfLines={1}>
-                {request.title}
-              </Text>
-            </View>
-          </View>
-          <Badge
-            label={statusLabels[request.status]}
-            variant={request.status === 'active' ? 'success' : 'neutral'}
-            size="md"
-          />
-        </View>
-
-        {/* جزئیات */}
-        <View style={s.details}>
-          <View style={s.detailRow}>
-            <Icon name="schedule" size={14} color={colors.textSecondary} />
-            <Text style={[s.detailText, { color: colors.textSecondary }]}>
-              مدت زمان: {toPersianDigit(request.duration)} دقیقه
-            </Text>
-          </View>
-
-          {request.discount > 0 && (
-            <View style={s.detailRow}>
-              <Icon name="local-offer" size={14} color="#4CAF50" />
-              <Text style={[s.detailText, { color: '#4CAF50' }]}>
-                تخفیف ویژه: {toPersianDigit(request.discount)}٪
-              </Text>
-            </View>
+      {/* هدر */}
+      <View style={[s.header, { borderBottomColor: colors.border }]}>
+        <View style={s.headerLeft}>
+          {request.serviceImage && (
+            <Image source={{ uri: request.serviceImage }} style={s.serviceImage} />
           )}
-
-          <View style={s.detailRow}>
-            <Icon name="people" size={14} color={colors.primary} />
-            <Text style={[s.detailText, { color: colors.textSecondary }]}>
-              {toPersianDigit(request.applicants || 0)} متقاضی
+          <View style={s.headerInfo}>
+            <Text style={[s.serviceName, { color: colors.textMain }]} numberOfLines={1}>
+              {request.serviceName}
+            </Text>
+            <Text style={[s.requestTitle, { color: colors.textSecondary }]} numberOfLines={1}>
+              {request.title}
             </Text>
           </View>
         </View>
+        <Badge
+          label={currentStatus.label}
+          variant={currentStatus.variant}
+          size="md"
+        />
+      </View>
 
-        {/* دکمه‌های اکشن */}
-        <View style={[s.actions, { borderTopColor: colors.border }]}>
-          <TouchableOpacity
-            style={[s.actionBtn, { backgroundColor: colors.primary + '15' }]}
-            onPress={(e) => {
-              e.stopPropagation();
-              onEdit?.(request);
-            }}
-          >
-            <Icon name="edit" size={18} color={colors.primary} />
-          </TouchableOpacity>
+      {/* شماره تماس */}
+      {request.contactPhone && (
+        <TouchableOpacity
+          onPress={handleCall}
+          activeOpacity={0.7}
+          style={[s.infoBox, { backgroundColor: colors.background, borderColor: colors.border }]}
+        >
+          <View style={[s.infoIconBox, { backgroundColor: '#4CAF5020' }]}>
+            <Icon name="phone" size={16} color="#4CAF50" />
+          </View>
+          <View style={s.infoTextCol}>
+            <Text style={[s.infoLabel, { color: colors.textSecondary }]}>شماره تماس:</Text>
+            <Text style={[s.infoValue, { color: colors.textMain }]}>
+              {toPersianDigit(request.contactPhone)}
+            </Text>
+          </View>
+          <View style={[s.callBtn, { backgroundColor: '#4CAF50' }]}>
+            <Icon name="call" size={14} color="#fff" />
+            <Text style={s.callBtnText}>تماس</Text>
+          </View>
+        </TouchableOpacity>
+      )}
 
-          <TouchableOpacity
-            style={[s.actionBtn, { backgroundColor: '#E5393515' }]}
-            onPress={(e) => {
-              e.stopPropagation();
-              onDelete?.(request);
-            }}
-          >
-            <Icon name="delete-outline" size={18} color="#E53935" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[s.viewBtn, { backgroundColor: colors.primary }]}
-            onPress={() => onPress?.(request)}
-          >
-            <Text style={[s.viewBtnText, { color: '#fff' }]}>مشاهده متقاضیان</Text>
-            <Icon name="chevron-left" size={18} color="#fff" />
-          </TouchableOpacity>
+      {/* 🆕 توضیحات در کادر سفید */}
+      {truncatedDesc ? (
+        <View style={[s.descBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <View style={s.descHeader}>
+            <Icon name="description" size={14} color={colors.primary} />
+            <Text style={[s.descTitle, { color: colors.textMain }]}>توضیحات آگهی</Text>
+          </View>
+          <Text style={[s.descText, { color: colors.textSecondary }]}>
+            {truncatedDesc}
+          </Text>
+          {isTruncated && (
+            <Text style={[s.truncatedHint, { color: colors.primary }]}>
+              • توضیحات کامل در هنگام ویرایش قابل مشاهده است
+            </Text>
+          )}
         </View>
-      </TouchableOpacity>
+      ) : null}
+
+      {/* ❌ قسمت الزامات حذف شد */}
+
+      {/* تاریخ ایجاد و انقضا */}
+      <View style={[s.datesBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+        <View style={s.dateRow}>
+          <Icon name="event-note" size={14} color={colors.textSecondary} />
+          <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ ایجاد:</Text>
+          <Text style={[s.dateValue, { color: colors.textMain }]}>
+            {formatDate(request.createdAt)}
+          </Text>
+        </View>
+        <View style={s.dateRow}>
+          <Icon name="event-busy" size={14} color={colors.textSecondary} />
+          <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ انقضا:</Text>
+          <Text style={[s.dateValue, { color: colors.textMain }]}>
+            {formatDate(request.expiresAt)}
+          </Text>
+        </View>
+      </View>
+
+      {/* پیام آگهی غیرفعال */}
+      {request.status === 'inactive' && (
+        <View style={[s.inactiveBox, { backgroundColor: '#E5393510', borderColor: '#E5393530' }]}>
+          <Icon name="block" size={16} color="#E53935" />
+          <Text style={[s.inactiveText, { color: '#E53935' }]}>
+            این آگهی غیرفعال است و در جستجو نمایش داده نمی‌شود
+          </Text>
+        </View>
+      )}
+
+      {/* دکمه‌های اکشن */}
+      <View style={[s.actions, { borderTopColor: colors.border }]}>
+        <TouchableOpacity
+          style={[s.actionBtn, { backgroundColor: colors.primary + '15' }]}
+          onPress={() => onEdit?.(request)}
+        >
+          <Icon name="edit" size={20} color={colors.primary} />
+          <Text style={[s.actionBtnText, { color: colors.primary }]}>ویرایش</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[s.actionBtn, { backgroundColor: '#E5393515' }]}
+          onPress={handleDelete}
+        >
+          <Icon name="delete-outline" size={20} color="#E53935" />
+          <Text style={[s.actionBtnText, { color: '#E53935' }]}>حذف</Text>
+        </TouchableOpacity>
+      </View>
     </Card>
   );
 }
@@ -141,44 +221,153 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-  details: {
-    padding: 14,
+  // 🆕 استایل‌های مشترک برای کادرهای اطلاعاتی
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 14,
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  infoIconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  infoTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  infoLabel: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+  },
+  infoValue: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+    letterSpacing: 0.5,
+  },
+  callBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  callBtnText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
+  // 🆕 استایل کادر توضیحات
+  descBox: {
+    marginHorizontal: 14,
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
     gap: 8,
   },
-  detailRow: {
+  descHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  descTitle: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
+  descText: {
+    fontSize: 13,
+    fontFamily: 'Vazir',
+    lineHeight: 20,
+  },
+  truncatedHint: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    marginTop: 2,
+  },
+  // تاریخ‌ها
+  datesBox: {
+    marginHorizontal: 14,
+    marginTop: 10,
+    marginBottom: 12,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 6,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dateLabel: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+  },
+  dateValue: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
+  durationBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginHorizontal: 14,
+    marginBottom: 14,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  detailText: {
+  durationText: {
+    flex: 1,
     fontSize: 12,
-    fontFamily: 'Vazir',
+    fontFamily: 'Vazir-Medium',
+    lineHeight: 18,
+  },
+  inactiveBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 14,
+    marginBottom: 14,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  inactiveText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'Vazir-Medium',
+    lineHeight: 18,
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 12,
+    gap: 10,
+    padding: 14,
     borderTopWidth: 1,
   },
   actionBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  viewBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
+    gap: 8,
+    paddingVertical: 12,
     borderRadius: 12,
   },
-  viewBtnText: {
-    fontSize: 13,
+  actionBtnText: {
+    fontSize: 14,
     fontFamily: 'Vazir-Bold',
   },
 });

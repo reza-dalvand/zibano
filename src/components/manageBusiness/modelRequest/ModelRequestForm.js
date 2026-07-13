@@ -1,35 +1,44 @@
-// src/components/manageBusiness/modelRequest/ModelRequestForm.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../theme/ThemeContext';
 import Input from '../../common/Input';
 import Dropdown from '../../common/Dropdown';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
-import Divider from '../../common/Divider';
 
 const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-export default function ModelRequestForm({ services, initialData, onSave, onClose }) {
+// 🆕 تابع تبدیل ارقام فارسی/عربی به انگلیسی
+const toEnglishDigits = (str) =>
+  String(str || '')
+    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+
+const MAX_DESC_LENGTH = 300;
+
+export default function ModelRequestForm({
+  services,
+  initialData,
+  defaultPhone,
+  onSave,
+  onClose,
+}) {
   const { colors } = useTheme();
 
   const [formData, setFormData] = useState({
     serviceId: initialData?.serviceId || null,
     title: initialData?.title || '',
     description: initialData?.description || '',
-    duration: initialData?.duration ? String(initialData.duration) : '60',
-    discount: initialData?.discount ? String(initialData.discount) : '50',
-    maxApplicants: initialData?.maxApplicants ? String(initialData.maxApplicants) : '5',
     requirements: initialData?.requirements || '',
-    isActive: initialData?.isActive !== false,
+    contactPhone: initialData?.contactPhone || defaultPhone || '',
   });
 
   const [errors, setErrors] = useState({});
 
   const updateField = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value || '' }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: '' }));
   };
 
@@ -40,19 +49,12 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
     if (!formData.title.trim()) newErrors.title = 'عنوان الزامی است';
     if (!formData.description.trim()) newErrors.description = 'توضیحات الزامی است';
 
-    const duration = parseInt(formData.duration);
-    if (!duration || duration < 15) {
-      newErrors.duration = 'مدت زمان باید حداقل ۱۵ دقیقه باشد';
-    }
-
-    const discount = parseInt(formData.discount);
-    if (isNaN(discount) || discount < 0 || discount > 100) {
-      newErrors.discount = 'تخفیف باید بین ۰ تا ۱۰۰ باشد';
-    }
-
-    const maxApplicants = parseInt(formData.maxApplicants);
-    if (!maxApplicants || maxApplicants < 1) {
-      newErrors.maxApplicants = 'حداقل ۱ متقاضی';
+    // ✅ استفاده از toEnglishDigits برای اعتبارسنجی
+    const cleanedPhone = toEnglishDigits(formData.contactPhone).replace(/[^0-9]/g, '');
+    if (!cleanedPhone) {
+      newErrors.contactPhone = 'شماره تماس الزامی است';
+    } else if (cleanedPhone.length < 10) {
+      newErrors.contactPhone = 'شماره تماس معتبر نیست';
     }
 
     setErrors(newErrors);
@@ -60,9 +62,7 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
     if (Object.keys(newErrors).length === 0) {
       onSave({
         ...formData,
-        duration: parseInt(formData.duration),
-        discount: parseInt(formData.discount),
-        maxApplicants: parseInt(formData.maxApplicants),
+        contactPhone: cleanedPhone,
       });
     }
   };
@@ -72,11 +72,15 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
     label: s.name,
   }));
 
-  const selectedService = (services || []).find((s) => s.id === formData.serviceId);
-  const discountNum = parseInt(formData.discount) || 0;
-  const finalPrice = selectedService
-    ? selectedService.finalPrice * (1 - discountNum / 100)
-    : 0;
+  const descLength = (formData.description || '').length;
+  const remainingChars = MAX_DESC_LENGTH - descLength;
+  const isNearLimit = remainingChars <= 50 && remainingChars > 0;
+  const isAtLimit = remainingChars === 0;
+
+  // ✅ مقدار نمایشی شماره - تبدیل به فارسی
+  const phoneDisplayValue = formData.contactPhone
+    ? toPersianDigit(toEnglishDigits(formData.contactPhone))
+    : '';
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
@@ -93,17 +97,27 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
           <Text style={s.errorText}>{errors.serviceId}</Text>
         )}
 
-        {selectedService && (
-          <View style={[s.pricePreview, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}>
-            <Icon name="attach-money" size={16} color={colors.primary} />
-            <View style={s.priceInfo}>
-              <Text style={[s.priceLabel, { color: colors.textSecondary }]}>قیمت اصلی:</Text>
-              <Text style={[s.priceValue, { color: colors.textMain }]}>
-                {toPersianDigit(selectedService.finalPrice.toLocaleString())} تومان
-              </Text>
-            </View>
-          </View>
-        )}
+        {/* 🆕 شماره تماس زیر خدمت - با رفع باگ */}
+        <Input
+          label="شماره تماس برای مدل‌ها *"
+          placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹"
+          value={phoneDisplayValue}
+          onChangeText={(t) => {
+            // ✅ ابتدا ارقام فارسی/عربی را به انگلیسی تبدیل کن، سپس غیرعدد را حذف کن
+            const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '').slice(0, 11);
+            updateField('contactPhone', cleaned);
+          }}
+          error={errors.contactPhone}
+          keyboardType="phone-pad"
+          maxLength={13}
+          rightIcon={<Icon name="phone" size={20} color={colors.textSecondary} />}
+        />
+        <View style={[s.phoneHint, { backgroundColor: colors.primary + '08', borderColor: colors.primary + '25' }]}>
+          <Icon name="info-outline" size={14} color={colors.primary} />
+          <Text style={[s.phoneHintText, { color: colors.textSecondary }]}>
+            این شماره در کارت آگهی نمایش داده می‌شود و مدل‌ها می‌توانند مستقیماً تماس بگیرند.
+          </Text>
+        </View>
       </Card>
 
       {/* اطلاعات پایه */}
@@ -112,7 +126,7 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
         <Input
           label="عنوان درخواست *"
           placeholder="مثال: مدل برای فیشیال تخصصی"
-          value={formData.title}
+          value={formData.title || ''}
           onChangeText={(t) => updateField('title', t)}
           error={errors.title}
           rightIcon={<Icon name="label" size={20} color={colors.textSecondary} />}
@@ -121,92 +135,57 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
         <Input
           label="توضیحات *"
           placeholder="توضیحات کامل درباره نیاز به مدل..."
-          value={formData.description}
-          onChangeText={(t) => updateField('description', t)}
+          value={formData.description || ''}
+          onChangeText={(t) => {
+            if ((t || '').length <= MAX_DESC_LENGTH) {
+              updateField('description', t);
+            }
+          }}
           error={errors.description}
           multiline
           numberOfLines={4}
+          maxLength={MAX_DESC_LENGTH}
         />
 
-        <Input
+        {/* شمارنده کاراکتر */}
+        <View style={s.charCounterRow}>
+          <Icon
+            name="text-fields"
+            size={12}
+            color={isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary}
+          />
+          <Text
+            style={[
+              s.charCounterText,
+              {
+                color: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary,
+              },
+            ]}
+          >
+            {toPersianDigit(descLength)} از {toPersianDigit(MAX_DESC_LENGTH)} کاراکتر
+          </Text>
+          <View style={{ flex: 1 }} />
+          <View style={[s.charProgressBar, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                s.charProgressFill,
+                {
+                  width: `${(descLength / MAX_DESC_LENGTH) * 100}%`,
+                  backgroundColor: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.primary,
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* <Input
           label="الزامات و شرایط"
           placeholder="مثال: سن بین ۲۰ تا ۳۵ سال، پوست سالم..."
-          value={formData.requirements}
+          value={formData.requirements || ''}
           onChangeText={(t) => updateField('requirements', t)}
           multiline
           numberOfLines={3}
-        />
-      </Card>
-
-      {/* تنظیمات */}
-      <Text style={[s.sectionTitle, { color: colors.textMain }]}>تنظیمات</Text>
-      <Card variant="elevated" padding={16} radius={16}>
-        <Input
-          label="مدت زمان (دقیقه) *"
-          placeholder="مثال: ۶۰"
-          value={toPersianDigit(formData.duration)}
-          onChangeText={(t) => {
-            const cleaned = t.replace(/[^0-9]/g, '');
-            updateField('duration', cleaned);
-          }}
-          keyboardType="numeric"
-          error={errors.duration}
-          rightIcon={<Text style={s.unitText}>دقیقه</Text>}
-        />
-
-        <Input
-          label="درصد تخفیف ویژه مدل *"
-          placeholder="مثال: ۵۰"
-          value={toPersianDigit(formData.discount)}
-          onChangeText={(t) => {
-            const cleaned = t.replace(/[^0-9]/g, '');
-            const num = Math.min(100, parseInt(cleaned) || 0);
-            updateField('discount', String(num));
-          }}
-          keyboardType="numeric"
-          maxLength={3}
-          error={errors.discount}
-          rightIcon={<Text style={s.unitText}>٪</Text>}
-        />
-
-        {selectedService && finalPrice > 0 && (
-          <View style={[s.finalPriceBox, { backgroundColor: '#4CAF5010', borderColor: '#4CAF5040' }]}>
-            <Icon name="check-circle" size={16} color="#4CAF50" />
-            <Text style={[s.finalPriceText, { color: '#4CAF50' }]}>
-              قیمت نهایی برای مدل: {toPersianDigit(Math.round(finalPrice).toLocaleString())} تومان
-            </Text>
-          </View>
-        )}
-
-        <Input
-          label="حداکثر تعداد متقاضی *"
-          placeholder="مثال: ۵"
-          value={toPersianDigit(formData.maxApplicants)}
-          onChangeText={(t) => {
-            const cleaned = t.replace(/[^0-9]/g, '');
-            updateField('maxApplicants', cleaned);
-          }}
-          keyboardType="numeric"
-          error={errors.maxApplicants}
-          rightIcon={<Text style={s.unitText}>نفر</Text>}
-        />
-
-        <Divider spacing={12} />
-
-        <View style={s.switchRow}>
-          <View style={s.switchInfo}>
-            <Text style={[s.switchLabel, { color: colors.textMain }]}>وضعیت فعال</Text>
-            <Text style={[s.switchHint, { color: colors.textSecondary }]}>
-              در صورت غیرفعال بودن، متقاضیان جدید نمی‌توانند ثبت‌نام کنند
-            </Text>
-          </View>
-          <Switch
-            value={formData.isActive}
-            onValueChange={(val) => updateField('isActive', val)}
-            thumbColor={formData.isActive ? colors.primary : '#ccc'}
-            trackColor={{ true: colors.primary + '55', false: '#ddd' }}
-          />
-        </View>
+        /> */}
       </Card>
 
       {/* دکمه‌ها */}
@@ -235,7 +214,7 @@ export default function ModelRequestForm({ services, initialData, onSave, onClos
 const s = StyleSheet.create({
   scrollContent: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 140,
   },
   sectionTitle: {
     fontSize: 15,
@@ -243,71 +222,10 @@ const s = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
-  pricePreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 8,
-  },
-  priceInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  priceLabel: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  priceValue: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
-  unitText: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Medium',
-    color: '#999',
-  },
-  finalPriceBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginTop: 8,
-  },
-  finalPriceText: {
-    flex: 1,
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  switchInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  switchLabel: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-  },
-  switchHint: {
-    fontSize: 11,
-    fontFamily: 'Vazir',
-    lineHeight: 17,
-  },
   footer: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 20,
+    marginTop: 24,
   },
   halfBtn: {
     flex: 1,
@@ -318,5 +236,42 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     marginTop: 4,
     textAlign: 'right',
+  },
+  charCounterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: -8,
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  charCounterText: {
+    fontSize: 11,
+    fontFamily: 'Vazir-Medium',
+  },
+  charProgressBar: {
+    width: 60,
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  charProgressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  phoneHint: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: -4,
+  },
+  phoneHintText: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    flex: 1,
+    lineHeight: 17,
   },
 });

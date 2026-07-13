@@ -1,6 +1,7 @@
 // src/screens/manageBusiness/ModelRequestsScreen.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';import Icon from 'react-native-vector-icons/MaterialIcons';
+import { View, StyleSheet, ScrollView, Alert, Text } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
@@ -18,13 +19,12 @@ const MOCK_MODEL_REQUESTS = [
     serviceName: 'فیشیال تخصصی پوست',
     serviceImage: 'https://picsum.photos/200/200?random=50',
     title: 'مدل برای فیشیال VIP عروس',
-    description: 'نیاز به مدل برای تست محصولات جدید فیشیال',
-    duration: 90,
-    discount: 70,
-    maxApplicants: 3,
-    applicants: 2,
+    description: 'نیاز به مدل برای تست محصولات جدید فیشیال. این خدمت شامل پاکسازی عمیق پوست، استفاده از ماسک طلای ۲۴ عیار و ماساژ صورت با روغن‌های طبیعی است.',
+    requirements: 'سن ۲۰ تا ۳۵ سال، پوست سالم',
     status: 'active',
-    isActive: true,
+    contactPhone: '09121234567',
+    createdAt: '1405/01/22',
+    expiresAt: '1405/02/21',
   },
   {
     id: 'mr_2',
@@ -32,13 +32,12 @@ const MOCK_MODEL_REQUESTS = [
     serviceName: 'کاشت ناخن ژله‌ای',
     serviceImage: 'https://picsum.photos/200/200?random=51',
     title: 'مدل برای طراحی ناخن جدید',
-    description: 'طراحی‌های جدید و خاص برای نمونه‌کار',
-    duration: 120,
-    discount: 60,
-    maxApplicants: 5,
-    applicants: 4,
+    description: 'طراحی‌های جدید و خاص برای نمونه‌کار با تکنیک‌های روز دنیا.',
+    requirements: 'ناخن‌های طبیعی و سالم',
     status: 'active',
-    isActive: true,
+    contactPhone: '09129876543',
+    createdAt: '1405/01/20',
+    expiresAt: '1405/02/19',
   },
   {
     id: 'mr_3',
@@ -46,13 +45,12 @@ const MOCK_MODEL_REQUESTS = [
     serviceName: 'رنگ و لایت مو',
     serviceImage: 'https://picsum.photos/200/200?random=52',
     title: 'مدل برای تکنیک جدید بالیاژ',
-    description: 'تست تکنیک جدید بالیاژ فرانسوی',
-    duration: 180,
-    discount: 50,
-    maxApplicants: 2,
-    applicants: 2,
-    status: 'completed',
-    isActive: false,
+    description: 'تست تکنیک جدید بالیاژ فرانسوی با مواد اورجینال ایتالیایی.',
+    requirements: 'موهای بلند و سالم',
+    status: 'inactive',
+    contactPhone: '09121112233',
+    createdAt: '1404/12/15',
+    expiresAt: '1405/01/14',
   },
 ];
 
@@ -92,11 +90,6 @@ export default function ModelRequestsScreen({ navigation }) {
     );
   };
 
-  const handlePress = (request) => {
-    // در آینده: نمایش لیست متقاضیان
-    Alert.alert('متقاضیان', `${request.applicants} متقاضی برای این درخواست وجود دارد`);
-  };
-
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="درخواست‌های مدل" onBackPress={() => navigation.goBack()} />
@@ -118,23 +111,8 @@ export default function ModelRequestsScreen({ navigation }) {
             {/* آمار */}
             <ModelRequestStats requests={requests} />
 
-            {/* دکمه ایجاد جدید */}
-            <TouchableOpacity
-              onPress={handleCreate}
-              activeOpacity={0.85}
-              style={s.createBtn}
-            >
-              <View style={s.createBtnIconBox}>
-                <Icon name="add" size={22} color="#fff" />
-              </View>
-              <View style={s.createBtnTextCol}>
-                <Text style={s.createBtnTitle}>ایجاد درخواست مدل جدید</Text>
-                <Text style={s.createBtnSubtitle}>
-                  برای خدمات خود مدل جذب کنید و نمونه‌کار بسازید
-                </Text>
-              </View>
-              <Icon name="chevron-left" size={24} color="#fff" />
-            </TouchableOpacity>
+            {/* ❌ دکمه سبز "ایجاد درخواست مدل جدید" حذف شد */}
+            {/* ❌ FAB (دکمه شناور بعلاوه) حذف شد */}
 
             {/* لیست درخواست‌ها */}
             <View style={s.listContainer}>
@@ -142,7 +120,6 @@ export default function ModelRequestsScreen({ navigation }) {
                 <ModelRequestCard
                   key={request.id}
                   request={request}
-                  onPress={handlePress}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -156,16 +133,7 @@ export default function ModelRequestsScreen({ navigation }) {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* FAB */}
-      {requests.length > 0 && (
-        <TouchableOpacity
-          style={[s.fab, { backgroundColor: colors.primary }]}
-          onPress={handleCreate}
-          activeOpacity={0.85}
-        >
-          <Icon name="add" size={28} color="#fff" />
-        </TouchableOpacity>
-      )}
+      {/* ❌ FAB کاملاً حذف شد */}
 
       <Toast
         visible={toast.visible}
@@ -206,60 +174,8 @@ const s = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
   },
-  createBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  createBtnIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  createBtnTextCol: {
-    flex: 1,
-    gap: 2,
-  },
-  createBtnTitle: {
-    color: '#fff',
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-  },
-  createBtnSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 11,
-    fontFamily: 'Vazir',
-  },
   listContainer: {
     paddingHorizontal: 16,
     gap: 12,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 100,
-    left: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
   },
 });

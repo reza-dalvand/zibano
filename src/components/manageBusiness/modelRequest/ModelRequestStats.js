@@ -13,10 +13,12 @@ export default function ModelRequestStats({ requests }) {
   const stats = {
     total: requests.length,
     active: requests.filter((r) => r.status === 'active').length,
-    completed: requests.filter((r) => r.status === 'completed').length,
-    totalApplicants: requests.reduce((sum, r) => sum + (r.applicants || 0), 0),
+    inactive: requests.filter((r) => r.status === 'inactive').length,
   };
 
+  // ✅ تغییرات:
+  // 1. حذف "کل متقاضیان"
+  // 2. تغییر "تکمیل شده" به "غیرفعال" با آیکون جدید
   const STAT_ITEMS = [
     {
       icon: 'assignment',
@@ -31,21 +33,15 @@ export default function ModelRequestStats({ requests }) {
       color: '#4CAF50',
     },
     {
-      icon: 'task-alt',
-      label: 'تکمیل شده',
-      value: toPersianDigit(stats.completed),
-      color: '#2196F3',
-    },
-    {
-      icon: 'people',
-      label: 'کل متقاضیان',
-      value: toPersianDigit(stats.totalApplicants),
-      color: '#FF9800',
+      icon: 'visibility-off', // ✅ آیکون جدید برای غیرفعال
+      label: 'غیرفعال',        // ✅ تغییر عنوان
+      value: toPersianDigit(stats.inactive),
+      color: '#E53935',        // ✅ رنگ قرمز برای غیرفعال
     },
   ];
 
   return (
-    <View style={s.container}>
+    <View style={[s.container, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
       {STAT_ITEMS.map((item, index) => (
         <React.Fragment key={item.label}>
           <View style={s.statItem}>
@@ -72,6 +68,7 @@ const s = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 16,
+    borderWidth: 1,
   },
   statItem: {
     flex: 1,
