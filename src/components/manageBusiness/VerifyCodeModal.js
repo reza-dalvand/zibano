@@ -14,11 +14,9 @@ import { useTheme } from '../../theme/ThemeContext';
 import Button from '../common/Button';
 import Avatar from '../common/Avatar';
 
-const CODE_LENGTH = 6;
-
+const CODE_LENGTH = 4; // ✅ تغییر از 6 به 4
 const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
 const toEnglishDigits = (str) =>
   String(str)
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
@@ -26,26 +24,21 @@ const toEnglishDigits = (str) =>
 
 export default function VerifyCodeModal({ visible, appointment, onClose, onConfirm }) {
   const { colors } = useTheme();
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState(['', '', '', '']); // ✅ 4 خانه
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
 
-  // 🎯 useEffect فقط وقتی visible=true و appointment وجود دارد
   useEffect(() => {
     if (visible && appointment) {
-      setCode(['', '', '', '', '', '']);
+      setCode(['', '', '', '']); // ✅ ریست 4 تایی
       setError('');
       setTimeout(() => inputRefs.current[0]?.focus(), 300);
     }
   }, [visible, appointment]);
 
-  // 🎯 حذف return null از اینجا!
-  // به جاش داخل return شرط می‌ذاریم
-
   const handleChange = (text, index) => {
     if (!appointment) return;
-    
     const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
     if (cleaned.length > 1) {
       const digits = cleaned.slice(0, CODE_LENGTH).split('');
@@ -77,7 +70,6 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
 
   const handleConfirm = async () => {
     if (!appointment) return;
-    
     const enteredCode = code.join('');
     if (enteredCode.length < CODE_LENGTH) {
       setError(`کد تایید ${toPersianDigit(CODE_LENGTH)} رقمی را کامل وارد کنید`);
@@ -96,16 +88,15 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
 
   const isComplete = code.join('').length === CODE_LENGTH;
 
-  // 🎯 Modal همیشه رندر می‌شود ولی visible را کنترل می‌کنیم
   return (
     <Modal
-      visible={visible && !!appointment}  // ✅ شرط داخل visible
+      visible={visible && !!appointment}
       transparent
       animationType="fade"
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {appointment && (  // ✅ شرط داخل JSX برای محتوای مدال
+      {appointment && (
         <TouchableOpacity activeOpacity={1} onPress={onClose} style={s.backdrop}>
           <TouchableOpacity activeOpacity={1} style={s.container}>
             <View style={[s.modal, { backgroundColor: colors.cardBackground }]}>
@@ -192,7 +183,7 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
               <View style={[s.hintCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                 <Icon name="lightbulb" size={16} color="#FFC107" />
                 <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  مشتری می‌تواند کد تایید ۶ رقمی خود را از بخش «نوبت‌های من» مشاهده کند. این کد هر ۵ دقیقه تغییر می‌کند.
+                  مشتری می‌تواند کد تایید ۴ رقمی خود را از بخش «نوبت‌های من» مشاهده کند. این کد هر 1 روز یکبار قابل ارسال مجدد می‌باشد..
                 </Text>
               </View>
 
@@ -206,7 +197,7 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
                   style={s.halfButton}
                 />
                 <Button
-                  title={loading ? 'در حال تایید...' : 'تایید و آزادسازی بیعانه'}
+                  title={loading ? 'در حال تایید...' : 'تایید انجام خدمت'}
                   onPress={handleConfirm}
                   loading={loading}
                   disabled={!isComplete || loading}
@@ -289,14 +280,14 @@ const s = StyleSheet.create({
   codeContainer: {
     flexDirection: 'row-reverse',
     justifyContent: 'center',
-    gap: 8,
+    gap: 12, // ✅ فاصله بیشتر برای 4 باکس
     paddingVertical: 4,
   },
   codeBox: {
-    width: 46,
-    height: 56,
-    borderRadius: 12,
-    fontSize: 22,
+    width: 56, // ✅ بزرگ‌تر برای 4 باکس
+    height: 64,
+    borderRadius: 14,
+    fontSize: 26,
     fontFamily: 'Vazir-Bold',
     textAlign: 'center',
   },

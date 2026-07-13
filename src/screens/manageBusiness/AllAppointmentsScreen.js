@@ -5,7 +5,6 @@ import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
-
 import AppointmentFilters from '../../components/manageBusiness/AppointmentFilters';
 import AppointmentSearchBar from '../../components/manageBusiness/AppointmentSearchBar';
 import AppointmentCard from '../../components/manageBusiness/AppointmentCard';
@@ -25,7 +24,7 @@ const MOCK_APPOINTMENTS = [
     status: 'reserved',
     price: 675000,
     depositPaid: 200000,
-    verificationCode: '745892',
+    verificationCode: '5892', // ✅ 4 رقم
     bookedAt: '۱۴۰۳/۰۴/۱۰ - ۱۴:۳۲',
   },
   {
@@ -39,7 +38,7 @@ const MOCK_APPOINTMENTS = [
     status: 'reserved',
     price: 450000,
     depositPaid: 100000,
-    verificationCode: '382571',
+    verificationCode: '2571', // ✅ 4 رقم
     bookedAt: '۱۴۰۳/۰۴/۱۵ - ۱۱:۲۰',
   },
   {
@@ -53,7 +52,7 @@ const MOCK_APPOINTMENTS = [
     status: 'done',
     price: 2125000,
     depositPaid: 500000,
-    verificationCode: '917456',
+    verificationCode: '7456', // ✅ 4 رقم
     bookedAt: '۱۴۰۳/۰۴/۱۰ - ۰۹:۱۵',
     verifiedAt: '۱۴۰۳/۰۴/۱۸ - ۱۶:۴۵',
   },
@@ -84,35 +83,25 @@ const MOCK_APPOINTMENTS = [
     status: 'reserved',
     price: 950000,
     depositPaid: 300000,
-    verificationCode: '528147',
+    verificationCode: '8147', // ✅ 4 رقم
     bookedAt: '۱۴۰۳/۰۴/۱۸ - ۲۰:۳۰',
   },
 ];
 
 export default function AllAppointmentsScreen({ navigation }) {
   const { colors } = useTheme();
-
   const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState(null);
-
   const [selectedApt, setSelectedApt] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
-
   const [verifyModalVisible, setVerifyModalVisible] = useState(false);
   const [verifyTarget, setVerifyTarget] = useState(null);
-
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-  const [toast, setToast] = useState({
-    visible: false,
-    message: '',
-    type: 'info',
-  });
-
-  // ═══════════ فیلتر و جستجو ═══════════
   const filteredAppointments = useMemo(() => {
     let result = appointments;
     if (activeFilter !== 'all') {
@@ -144,9 +133,7 @@ export default function AllAppointmentsScreen({ navigation }) {
           );
         }
         if (dateFilter === 'week') {
-          return (
-            aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7
-          );
+          return aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7;
         }
         if (dateFilter === 'month') {
           return aptDate.jm === todayJalaali.jm;
@@ -161,26 +148,21 @@ export default function AllAppointmentsScreen({ navigation }) {
     return {
       all: appointments.length,
       reserved: appointments.filter(a => a.status === 'reserved').length,
-      cancelled: appointments.filter(a => a.status === 'cancelled_by_salon')
-        .length,
+      cancelled: appointments.filter(a => a.status === 'cancelled_by_salon').length,
       done: appointments.filter(a => a.status === 'done').length,
     };
   }, [appointments]);
 
-  // ═══════════ هندلرهای BottomSheet جزئیات ═══════════
   const openDetail = apt => {
     setSelectedApt(apt);
     setDetailVisible(true);
   };
-
   const closeDetail = () => {
     setDetailVisible(false);
     setTimeout(() => setSelectedApt(null), 300);
   };
 
-  // ═══════════ هندلرهای تایید انجام خدمت ═══════════
   const handleOpenVerify = apt => {
-    // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
     setVerifyTarget(apt);
     if (detailVisible) {
       setDetailVisible(false);
@@ -189,21 +171,15 @@ export default function AllAppointmentsScreen({ navigation }) {
       setVerifyModalVisible(true);
     }
   };
-
   const handleCloseVerify = () => {
     setVerifyModalVisible(false);
     setTimeout(() => setVerifyTarget(null), 300);
   };
-
   const handleConfirmVerify = aptId => {
     setAppointments(prev =>
       prev.map(a =>
         a.id === aptId
-          ? {
-              ...a,
-              status: 'done',
-              verifiedAt: new Date().toLocaleString('fa-IR'),
-            }
+          ? { ...a, status: 'done', verifiedAt: new Date().toLocaleString('fa-IR') }
           : a,
       ),
     );
@@ -216,9 +192,7 @@ export default function AllAppointmentsScreen({ navigation }) {
     });
   };
 
-  // ═══════════ هندلرهای لغو نوبت ═══════════
   const handleOpenCancel = apt => {
-    // ✅ اول target ست میشه، بعد visible — تا شرط رندر برقرار باشه
     setCancelTarget(apt);
     if (detailVisible) {
       setDetailVisible(false);
@@ -227,12 +201,10 @@ export default function AllAppointmentsScreen({ navigation }) {
       setCancelModalVisible(true);
     }
   };
-
   const handleCloseCancel = () => {
     setCancelModalVisible(false);
     setTimeout(() => setCancelTarget(null), 300);
   };
-
   const handleConfirmCancel = (aptId, reason) => {
     setAppointments(prev =>
       prev.map(a =>
@@ -255,7 +227,6 @@ export default function AllAppointmentsScreen({ navigation }) {
     });
   };
 
-  // ═══════════ EmptyState ═══════════
   const getEmptyStateConfig = () => {
     if (searchQuery || dateFilter) {
       return {
@@ -268,8 +239,7 @@ export default function AllAppointmentsScreen({ navigation }) {
       all: {
         icon: '📅',
         title: 'هنوز نوبتی ثبت نشده است',
-        description:
-          'پس از رزرو اولین نوبت توسط مشتریان، نوبت‌ها اینجا نمایش داده می‌شود',
+        description: 'پس از رزرو اولین نوبت توسط مشتریان، نوبت‌ها اینجا نمایش داده می‌شود',
       },
       reserved: {
         icon: '📋',
@@ -298,17 +268,8 @@ export default function AllAppointmentsScreen({ navigation }) {
         dateFilter={dateFilter}
         onDateFilterChange={setDateFilter}
       />
-
-      <AppointmentFilters
-        activeFilter={activeFilter}
-        counts={counts}
-        onChange={setActiveFilter}
-      />
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.listContainer}
-      >
+      <AppointmentFilters activeFilter={activeFilter} counts={counts} onChange={setActiveFilter} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.listContainer}>
         {filteredAppointments.length > 0 ? (
           <View style={s.list}>
             {filteredAppointments.map(apt => (
@@ -326,33 +287,19 @@ export default function AllAppointmentsScreen({ navigation }) {
         )}
       </ScrollView>
 
-      {/* BottomSheet جزئیات */}
-      <AppointmentDetailSheet
-        visible={detailVisible}
-        appointment={selectedApt}
-        onClose={closeDetail}
-      />
-
-      {/*
-        ✅ اصلاح اصلی:
-        - شرط {verifyTarget && ...} حذف شد
-        - مدال همیشه mount شده و فقط با visible کنترل میشه
-        - داخل مدال‌ها if (!appointment) return null اضافه کن
-      */}
+      <AppointmentDetailSheet visible={detailVisible} appointment={selectedApt} onClose={closeDetail} />
       <VerifyCodeModal
         visible={verifyModalVisible}
         appointment={verifyTarget}
         onClose={handleCloseVerify}
         onConfirm={handleConfirmVerify}
       />
-
       <CancelReasonModal
         visible={cancelModalVisible}
         appointment={cancelTarget}
         onClose={handleCloseCancel}
         onConfirm={handleConfirmCancel}
       />
-
       <Toast
         visible={toast.visible}
         message={toast.message}
@@ -365,11 +312,6 @@ export default function AllAppointmentsScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  listContainer: {
-    padding: 16,
-    paddingBottom: 120,
-  },
-  list: {
-    gap: 12,
-  },
+  listContainer: { padding: 16, paddingBottom: 120 },
+  list: { gap: 12 },
 });

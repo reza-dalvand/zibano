@@ -1,13 +1,9 @@
 // src/constants/payment.js
-
-// ============ توابع کمکی ============
 export const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
 export const formatPrice = (num) =>
   `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
-// ============ متا دیتای وضعیت‌ها ============
 export const STATUS_META = {
   success: { label: 'موفق', color: '#43A047', icon: 'check-circle', bg: '#43A04715' },
   failed: { label: 'ناموفق', color: '#E53935', icon: 'cancel', bg: '#E5393515' },
@@ -34,7 +30,6 @@ export const PAYMENT_TYPE_META = {
   refund: { label: 'استرداد', color: '#1E88E5', icon: 'undo' },
 };
 
-// ============ داده‌های موقت ============
 export const MOCK_PAYMENTS = [
   {
     id: 'pay_1',
@@ -64,7 +59,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک ملی',
     trackingCode: 'TRK-1234567890',
     refNumber: 'REF-2024-001',
-    verificationCode: '۷۴۵۸۹۲',
+    verificationCode: '۵۸۹۲', // ✅ 4 رقم
   },
   {
     id: 'pay_2',
@@ -94,7 +89,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-9876543210',
     refNumber: 'REF-2024-002',
-    verificationCode: '۳۸۲۵۷۱',
+    verificationCode: '۲۵۷۱', // ✅ 4 رقم
   },
   {
     id: 'pay_3',
@@ -124,7 +119,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-5555555555',
     refNumber: 'REF-2024-003',
-    verificationCode: '۹۱۷۴۵۶',
+    verificationCode: '۷۴۵۶', // ✅ 4 رقم
   },
   {
     id: 'pay_4',

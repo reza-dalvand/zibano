@@ -181,7 +181,7 @@ export default function AppointmentCard({
             <View style={s.verifyTextCol}>
               <Text style={[s.verifyBtnTitle, { color: '#fff' }]}>تایید انجام خدمت</Text>
               <Text style={[s.verifyBtnSubtitle, { color: '#ffffffcc' }]}>
-                وارد کردن کد ۶ رقمی مشتری
+                وارد کردن کد ۴ رقمی مشتری
               </Text>
             </View>
             <Icon name="chevron-left" size={20} color="#fff" />

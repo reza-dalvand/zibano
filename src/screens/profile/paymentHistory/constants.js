@@ -1,6 +1,4 @@
 // src/screens/profile/paymentHistory/constants.js
-
-// ============ داده‌های موقت گسترده ============
 export const MOCK_PAYMENTS = [
   {
     id: 'pay_1',
@@ -32,7 +30,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک ملی',
     trackingCode: 'TRK-1234567890',
     refNumber: 'REF-2024-001',
-    verificationCode: '۷۴۵۸۹۲',
+    verificationCode: '۵۸۹۲', // ✅ 4 رقم
   },
   {
     id: 'pay_2',
@@ -64,7 +62,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-9876543210',
     refNumber: 'REF-2024-002',
-    verificationCode: '۳۸۲۵۷۱',
+    verificationCode: '۲۵۷۱', // ✅ 4 رقم
   },
   {
     id: 'pay_3',
@@ -96,7 +94,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-5555555555',
     refNumber: 'REF-2024-003',
-    verificationCode: '۹۱۷۴۵۶',
+    verificationCode: '۷۴۵۶', // ✅ 4 رقم
   },
   {
     id: 'pay_4',
@@ -161,7 +159,6 @@ export const MOCK_PAYMENTS = [
   },
 ];
 
-// ============ متا دیتای وضعیت‌ها ============
 export const STATUS_META = {
   success:  { label: 'موفق',       color: '#43A047', icon: 'check-circle', bg: '#43A04715' },
   failed:   { label: 'ناموفق',     color: '#E53935', icon: 'cancel',       bg: '#E5393515' },
@@ -188,7 +185,6 @@ export const PAYMENT_TYPE_META = {
   refund:           { label: 'استرداد',        color: '#1E88E5', icon: 'undo' },
 };
 
-// ============ 🆕 گزینه‌های فیلتر ماه و سال ============
 export const MONTHS = [
   { id: 0,  label: 'همه ماه‌ها' },
   { id: 1,  label: 'فروردین' },

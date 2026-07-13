@@ -120,7 +120,7 @@ export default function AppointmentDetailSheet({ visible, appointment, onClose }
               <Text style={[s.helpTitle, { color: colors.textMain }]}>راهنمای تکمیل خدمت</Text>
             </View>
             <View style={s.helpSteps}>
-              {['خدمت را برای مشتری انجام دهید', 'کد تایید ۶ رقمی مشتری را از او بپرسید', 'کد را وارد کرده و خدمت را تایید کنید تا بیعانه آزاد شود'].map((text, i) => (
+              {['خدمت را برای مشتری انجام دهید', 'کد تایید ۴ رقمی مشتری را از او بپرسید', 'کد را وارد کرده و خدمت را تایید کنید تا بیعانه آزاد شود'].map((text, i) => (
                 <View key={i} style={s.helpStep}>
                   <View style={[s.stepNumber, { backgroundColor: colors.primary }]}>
                     <Text style={s.stepNumberText}>{toPersianDigit(i + 1)}</Text>

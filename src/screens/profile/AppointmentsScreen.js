@@ -19,19 +19,18 @@ import Toast from '../../components/common/Toast';
 
 const toPersianDigit = str =>
   String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
 const formatPrice = num =>
   `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
 // ⏱️ زمان بین دریافت مجدد کد (۵ دقیقه = ۳۰۰ ثانیه)
 const REGENERATE_INTERVAL = 300;
 
-// تولید کد تایید ۶ رقمی
+// ✅ تولید کد تایید ۴ رقمی
 const generateVerificationCode = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return Math.floor(1000 + Math.random() * 9000).toString();
 };
 
-// MOCK داده‌های نوبت‌ها با ساختار جدید
+// MOCK داده‌های نوبت‌ها با کدهای ۴ رقمی
 const MOCK_APPOINTMENTS = [
   {
     id: 'apt_1',
@@ -48,8 +47,8 @@ const MOCK_APPOINTMENTS = [
     discountPercent: 10,
     hasDeposit: true,
     isUpcoming: true,
-    verificationCode: '۷۴۵۸۹۲',
-    lastRegeneratedAt: Date.now() - 120000, // 2 دقیقه پیش
+    verificationCode: '۵۸۹۲', // ✅ 4 رقم
+    lastRegeneratedAt: Date.now() - 120000,
   },
   {
     id: 'apt_2',
@@ -66,8 +65,8 @@ const MOCK_APPOINTMENTS = [
     discountPercent: 15,
     hasDeposit: true,
     isUpcoming: true,
-    verificationCode: '۳۸۲۵۷۱',
-    lastRegeneratedAt: Date.now() - 240000, // 4 دقیقه پیش
+    verificationCode: '۲۵۷۱', // ✅ 4 رقم
+    lastRegeneratedAt: Date.now() - 240000,
   },
   {
     id: 'apt_3',
@@ -84,7 +83,7 @@ const MOCK_APPOINTMENTS = [
     discountPercent: 0,
     hasDeposit: false,
     isUpcoming: false,
-    verificationCode: '۹۱۷۴۵۶',
+    verificationCode: '۷۴۵۶', // ✅ 4 رقم
   },
   {
     id: 'apt_4',
@@ -107,7 +106,6 @@ const MOCK_APPOINTMENTS = [
   },
 ];
 
-// 🎨 سیستم تگ‌های جدید
 const STATUS_META = {
   reserved: {
     label: 'رزرو',
@@ -151,31 +149,14 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
   const canRegenerate = remainingSeconds === 0;
 
   const handleRegenerate = () => {
-    // انیمیشن تغییر کد
     Animated.sequence([
       Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.9,
-          duration: 200,
-          useNativeDriver: true,
-        }),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 0.9, duration: 200, useNativeDriver: true }),
       ]),
       Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          bounciness: 10,
-          useNativeDriver: true,
-        }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, bounciness: 10, useNativeDriver: true }),
       ]),
     ]).start();
 
@@ -213,31 +194,20 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
       radius={18}
       style={[s.verificationCard, { borderColor: colors.primary + '40' }]}
     >
-      {/* هدر کارت کد تایید */}
-      <View
-        style={[
-          s.verificationHeader,
-          { backgroundColor: colors.primary + '15' },
-        ]}
-      >
-        <View
-          style={[s.verificationIconBox, { backgroundColor: colors.primary }]}
-        >
+      <View style={[s.verificationHeader, { backgroundColor: colors.primary + '15' }]}>
+        <View style={[s.verificationIconBox, { backgroundColor: colors.primary }]}>
           <Icon name="verified-user" size={18} color="#fff" />
         </View>
         <View style={s.verificationHeaderInfo}>
           <Text style={[s.verificationTitle, { color: colors.textMain }]}>
             کد تایید نوبت
           </Text>
-          <Text
-            style={[s.verificationSubtitle, { color: colors.textSecondary }]}
-          >
+          <Text style={[s.verificationSubtitle, { color: colors.textSecondary }]}>
             این کد را پس از انجام خدمت به سالن‌دار ارائه دهید
           </Text>
         </View>
       </View>
 
-      {/* نمایش کد تایید */}
       <View style={s.verificationCodeArea}>
         <Animated.View
           style={[
@@ -261,14 +231,11 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
                 },
               ]}
             >
-              <Text style={[s.codeDigit, { color: colors.primary }]}>
-                {digit}
-              </Text>
+              <Text style={[s.codeDigit, { color: colors.primary }]}>{digit}</Text>
             </View>
           ))}
         </Animated.View>
 
-        {/* دکمه کپی */}
         <TouchableOpacity
           style={[s.copyCodeBtn, { backgroundColor: colors.primary }]}
           onPress={handleCopyCode}
@@ -278,13 +245,7 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
         </TouchableOpacity>
       </View>
 
-      {/* بخش دریافت مجدد کد */}
-      <View
-        style={[
-          s.regenFooter,
-          { backgroundColor: colors.background, borderTopColor: colors.border },
-        ]}
-      >
+      <View style={[s.regenFooter, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
         {canRegenerate ? (
           <TouchableOpacity
             style={[s.regenBtn, { backgroundColor: colors.primary }]}
@@ -292,9 +253,7 @@ function VerificationCodeCard({ appointment, colors, onToast }) {
             activeOpacity={0.85}
           >
             <Icon name="refresh" size={16} color="#fff" />
-            <Text style={[s.regenBtnText, { color: '#fff' }]}>
-              دریافت کد جدید
-            </Text>
+            <Text style={[s.regenBtnText, { color: '#fff' }]}>دریافت کد جدید</Text>
           </TouchableOpacity>
         ) : (
           <View style={s.regenTimerRow}>
@@ -317,16 +276,10 @@ export default function AppointmentsScreen({ navigation }) {
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
-  const [toast, setToast] = useState({
-    visible: false,
-    message: '',
-    type: 'info',
-  });
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
   const filteredAppointments = useMemo(() => {
-    if (activeTab === 'upcoming') {
-      return appointments.filter(a => a.isUpcoming);
-    }
+    if (activeTab === 'upcoming') return appointments.filter(a => a.isUpcoming);
     return appointments.filter(a => !a.isUpcoming);
   }, [appointments, activeTab]);
 
@@ -346,90 +299,50 @@ export default function AppointmentsScreen({ navigation }) {
     return (
       <View key={apt.id} style={s.aptWrapper}>
         <Card variant="elevated" padding={16} radius={18} style={s.aptCard}>
-          {/* هدر: کسب‌وکار + تگ وضعیت */}
           <View style={s.aptHeader}>
             <View style={s.aptBusiness}>
-              <Avatar
-                uri={apt.businessLogo}
-                name={apt.businessName}
-                size="md"
-              />
+              <Avatar uri={apt.businessLogo} name={apt.businessName} size="md" />
               <View style={s.aptBusinessInfo}>
-                <Text
-                  style={[s.aptBusinessName, { color: colors.textMain }]}
-                  numberOfLines={1}
-                >
+                <Text style={[s.aptBusinessName, { color: colors.textMain }]} numberOfLines={1}>
                   {apt.businessName}
                 </Text>
-                <Text
-                  style={[s.aptServiceName, { color: colors.textSecondary }]}
-                  numberOfLines={1}
-                >
+                <Text style={[s.aptServiceName, { color: colors.textSecondary }]} numberOfLines={1}>
                   {apt.serviceName}
                 </Text>
               </View>
             </View>
-            <View
-              style={[s.statusBadge, { backgroundColor: meta.color + '20' }]}
-            >
+            <View style={[s.statusBadge, { backgroundColor: meta.color + '20' }]}>
               <Icon name={meta.icon} size={12} color={meta.color} />
-              <Text style={[s.statusBadgeText, { color: meta.color }]}>
-                {meta.label}
-              </Text>
+              <Text style={[s.statusBadgeText, { color: meta.color }]}>{meta.label}</Text>
             </View>
           </View>
 
-          {/* دیوایدر */}
           <View style={[s.divider, { backgroundColor: colors.border }]} />
 
-          {/* جزئیات: کارمند، تاریخ، ساعت */}
           <View style={s.aptDetails}>
             <View style={s.detailItem}>
               <Icon name="person" size={14} color={colors.textSecondary} />
-              <Text style={[s.detailText, { color: colors.textMain }]}>
-                {apt.employeeName}
-              </Text>
+              <Text style={[s.detailText, { color: colors.textMain }]}>{apt.employeeName}</Text>
             </View>
             <View style={s.detailItem}>
               <Icon name="event" size={14} color={colors.textSecondary} />
-              <Text style={[s.detailText, { color: colors.textMain }]}>
-                {apt.date}
-              </Text>
+              <Text style={[s.detailText, { color: colors.textMain }]}>{apt.date}</Text>
             </View>
             <View style={s.detailItem}>
               <Icon name="schedule" size={14} color={colors.textSecondary} />
-              <Text style={[s.detailText, { color: colors.textMain }]}>
-                {apt.time}
-              </Text>
+              <Text style={[s.detailText, { color: colors.textMain }]}>{apt.time}</Text>
             </View>
           </View>
 
-          {/* کارت مالی: مبلغ کل، بیعانه، تخفیف */}
-          <View
-            style={[
-              s.priceBox,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            {/* ردیف مبلغ کل */}
+          <View style={[s.priceBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <View style={s.priceRow}>
               <View style={s.priceLabelRow}>
                 <Icon name="payments" size={14} color={colors.textSecondary} />
-                <Text style={[s.priceLabel, { color: colors.textSecondary }]}>
-                  مبلغ کل خدمت
-                </Text>
+                <Text style={[s.priceLabel, { color: colors.textSecondary }]}>مبلغ کل خدمت</Text>
               </View>
               <View style={s.priceValueRow}>
                 {apt.discountPercent > 0 && (
-                  <Text
-                    style={[
-                      s.originalPriceText,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
+                  <Text style={[s.originalPriceText, { color: colors.textSecondary }]}>
                     {formatPrice(apt.originalPrice)}
                   </Text>
                 )}
@@ -439,19 +352,14 @@ export default function AppointmentsScreen({ navigation }) {
               </View>
             </View>
 
-            {/* ردیف تخفیف */}
             {apt.discountPercent > 0 && (
               <View style={s.priceRow}>
                 <View style={s.priceLabelRow}>
                   <Icon name="local-offer" size={14} color="#43A047" />
-                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>
-                    تخفیف اعمال‌شده
-                  </Text>
+                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>تخفیف اعمال‌شده</Text>
                 </View>
                 <View style={s.priceValueRow}>
-                  <View
-                    style={[s.discountBadge, { backgroundColor: '#43A04720' }]}
-                  >
+                  <View style={[s.discountBadge, { backgroundColor: '#43A04720' }]}>
                     <Text style={[s.discountBadgeText, { color: '#43A047' }]}>
                       {toPersianDigit(apt.discountPercent)}٪
                     </Text>
@@ -463,18 +371,11 @@ export default function AppointmentsScreen({ navigation }) {
               </View>
             )}
 
-            {/* ردیف بیعانه */}
             {apt.hasDeposit && (
               <View style={s.priceRow}>
                 <View style={s.priceLabelRow}>
-                  <Icon
-                    name="account-balance-wallet"
-                    size={14}
-                    color={colors.primary}
-                  />
-                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>
-                    بیعانه پرداختی
-                  </Text>
+                  <Icon name="account-balance-wallet" size={14} color={colors.primary} />
+                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>بیعانه پرداختی</Text>
                 </View>
                 <Text style={[s.priceValue, { color: colors.primary }]}>
                   {formatPrice(apt.depositPaid)}
@@ -482,51 +383,29 @@ export default function AppointmentsScreen({ navigation }) {
               </View>
             )}
 
-            {/* ردیف مسترد شده (فقط در صورت لغو توسط سالن) */}
-            {apt.status === 'cancelled_by_salon' &&
-              apt.refundAmount !== undefined && (
-                <View style={[s.priceRow, { marginTop: 4 }]}>
-                  <View style={s.priceLabelRow}>
-                    <Icon name="undo" size={14} color="#43A047" />
-                    <Text
-                      style={[s.priceLabel, { color: colors.textSecondary }]}
-                    >
-                      مبلغ مسترد شده
-                    </Text>
-                  </View>
-                  <Text style={[s.priceValue, { color: '#43A047' }]}>
-                    {formatPrice(apt.refundAmount)}
-                  </Text>
+            {apt.status === 'cancelled_by_salon' && apt.refundAmount !== undefined && (
+              <View style={[s.priceRow, { marginTop: 4 }]}>
+                <View style={s.priceLabelRow}>
+                  <Icon name="undo" size={14} color="#43A047" />
+                  <Text style={[s.priceLabel, { color: colors.textSecondary }]}>مبلغ مسترد شده</Text>
                 </View>
-              )}
+                <Text style={[s.priceValue, { color: '#43A047' }]}>
+                  {formatPrice(apt.refundAmount)}
+                </Text>
+              </View>
+            )}
           </View>
 
-          {/* پیام لغو توسط سالن */}
           {apt.status === 'cancelled_by_salon' && apt.cancellationReason && (
-            <View
-              style={[
-                s.cancelReasonBox,
-                {
-                  backgroundColor: '#E5393515',
-                  borderColor: '#E5393540',
-                },
-              ]}
-            >
+            <View style={[s.cancelReasonBox, { backgroundColor: '#E5393515', borderColor: '#E5393540' }]}>
               <Icon name="info-outline" size={16} color="#E53935" />
-              <Text style={[s.cancelReasonText, { color: '#E53935' }]}>
-                {apt.cancellationReason}
-              </Text>
+              <Text style={[s.cancelReasonText, { color: '#E53935' }]}>{apt.cancellationReason}</Text>
             </View>
           )}
         </Card>
 
-        {/* کارت کد تایید (فقط برای نوبت‌های آینده و رزرو شده) */}
         {showVerificationCard && (
-          <VerificationCodeCard
-            appointment={apt}
-            colors={colors}
-            onToast={setToast}
-          />
+          <VerificationCodeCard appointment={apt} colors={colors} onToast={setToast} />
         )}
       </View>
     );
@@ -540,28 +419,10 @@ export default function AppointmentsScreen({ navigation }) {
         style={[s.tabButton, isActive && { backgroundColor: colors.primary }]}
         onPress={() => setActiveTab(tabId)}
       >
-        <Icon
-          name={iconName}
-          size={16}
-          color={isActive ? '#fff' : colors.textSecondary}
-        />
-        <Text
-          style={[s.tabText, { color: isActive ? '#fff' : colors.textMain }]}
-        >
-          {label}
-        </Text>
-        <View
-          style={[
-            s.tabBadge,
-            { backgroundColor: isActive ? '#fff' : colors.primary + '20' },
-          ]}
-        >
-          <Text
-            style={[
-              s.tabBadgeText,
-              { color: isActive ? colors.primary : colors.primary },
-            ]}
-          >
+        <Icon name={iconName} size={16} color={isActive ? '#fff' : colors.textSecondary} />
+        <Text style={[s.tabText, { color: isActive ? '#fff' : colors.textMain }]}>{label}</Text>
+        <View style={[s.tabBadge, { backgroundColor: isActive ? '#fff' : colors.primary + '20' }]}>
+          <Text style={[s.tabBadgeText, { color: isActive ? colors.primary : colors.primary }]}>
             {toPersianDigit(count)}
           </Text>
         </View>
@@ -572,45 +433,30 @@ export default function AppointmentsScreen({ navigation }) {
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <View style={[s.tabsWrapper, { backgroundColor: colors.background }]}>
-        <View
-          style={[
-            s.tabsContainer,
-            {
-              backgroundColor: colors.cardBackground,
-              borderColor: colors.border,
-            },
-          ]}
-        >
+        <View style={[s.tabsContainer, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
           {renderTabButton('upcoming', 'آینده', 'event-available')}
           {renderTabButton('past', 'گذشته', 'history')}
         </View>
       </View>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.listContainer}
-      >
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.listContainer}>
         {filteredAppointments.length > 0 ? (
           filteredAppointments.map(renderAppointment)
         ) : (
           <EmptyState
             icon={activeTab === 'upcoming' ? '📅' : '📜'}
-            title={
-              activeTab === 'upcoming'
-                ? 'نوبت آینده‌ای ندارید'
-                : 'سابقه‌ای ثبت نشده'
-            }
+            title={activeTab === 'upcoming' ? 'نوبت آینده‌ای ندارید' : 'سابقه‌ای ثبت نشده'}
             description={
               activeTab === 'upcoming'
                 ? 'با رزرو نوبت از کسب‌وکارهای زیبانو، نوبت‌های آینده شما اینجا نمایش داده می‌شود'
                 : 'پس از انجام اولین نوبت، سوابق شما اینجا نمایش داده خواهد شد'
             }
-            actionLabel={
-              activeTab === 'upcoming' ? 'رزرو نوبت جدید' : 'بازگشت به خانه'
-            }
+            actionLabel={activeTab === 'upcoming' ? 'رزرو نوبت جدید' : 'بازگشت به خانه'}
             onAction={() => navigation.navigate('Home')}
           />
         )}
       </ScrollView>
+
       <Toast
         visible={toast.visible}
         message={toast.message}
@@ -723,8 +569,6 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
-
-  // ========== کد تایید ==========
   verificationCard: {
     borderWidth: 1.5,
     overflow: 'hidden',
@@ -762,7 +606,7 @@ const s = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 10, // ✅ فاصله بیشتر برای 4 باکس
     flex: 1,
     paddingVertical: 12,
     borderRadius: 12,
@@ -770,15 +614,15 @@ const s = StyleSheet.create({
     borderStyle: 'dashed',
   },
   codeDigitBox: {
-    width: 36,
-    height: 44,
-    borderRadius: 10,
+    width: 44, // ✅ بزرگ‌تر
+    height: 52,
+    borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   codeDigit: {
-    fontSize: 20,
+    fontSize: 24, // ✅ بزرگ‌تر
     fontFamily: 'Vazir-Bold',
   },
   copyCodeBtn: {

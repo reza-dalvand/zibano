@@ -1,12 +1,11 @@
 // src/screens/manageBusiness/EditServiceScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Switch, Alert, TextInput,
+  View, Text, StyleSheet, ScrollView, Switch, Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useBusiness } from '../../context/BusinessContext';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕 اضافه شد
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Input from '../../components/common/Input';
@@ -33,10 +32,7 @@ const SERVICE_TYPES = [
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
-const MAX_REMINDER_DAYS = 480;
-
-// 🎯 ارتفاع تقریبی Tab Bar شناور (از AppNavigator)
-const NAVBAR_HEIGHT = 80;
+const MAX_DESCRIPTION_LENGTH = 300;
 
 const toEnglishDigits = (str) =>
   String(str)
@@ -63,7 +59,7 @@ const formatPriceInput = (text) => {
 export default function EditServiceScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { addService, updateService } = useBusiness();
-  const insets = useSafeAreaInsets(); // 🆕 برای محاسبه bottom دقیق
+
   const existingService = route.params?.service || null;
   const isEditMode = !!existingService;
 
@@ -81,25 +77,16 @@ export default function EditServiceScreen({ navigation, route }) {
   );
   const [isActive, setIsActive] = useState(existingService?.isActive !== false);
   const [description, setDescription] = useState(existingService?.description || '');
-  const [duration, setDuration] = useState(
-    existingService?.duration ? String(existingService.duration) : '60'
-  );
-  const [reminderDays, setReminderDays] = useState(
-    existingService?.reminderDays !== undefined
-      ? String(existingService.reminderDays)
-      : '2'
-  );
+
   const [errors, setErrors] = useState({});
 
   const originalNum = parseNumber(originalPrice);
   const discountNum = Math.min(parseNumber(discountPercent), 100);
   const discountAmount = Math.round((originalNum * discountNum) / 100);
   const finalPrice = Math.max(0, originalNum - discountAmount);
-  const reminderDaysNum = Math.max(0, Math.min(MAX_REMINDER_DAYS, parseNumber(reminderDays)));
 
   const handleSave = () => {
     const newErrors = {};
-
     if (!name.trim()) newErrors.name = 'نام خدمت الزامی است';
     if (!typeId) newErrors.typeId = 'نوع خدمت را انتخاب کنید';
     if (typeId === 'other' && !customTypeName.trim())
@@ -109,17 +96,12 @@ export default function EditServiceScreen({ navigation, route }) {
     if (finalPrice > 0 && finalPrice < MIN_FINAL_PRICE) {
       newErrors.originalPrice = `قیمت نهایی خدمت باید حداقل ${formatPrice(MIN_FINAL_PRICE)} تومان باشد`;
     }
-
     const depositNum = parseNumber(depositAmount);
     if (depositNum > 0 && depositNum < MIN_DEPOSIT) {
       newErrors.depositAmount = `حداقل مبلغ بیعانه ${formatPrice(MIN_DEPOSIT)} تومان است`;
     }
     if (depositNum > finalPrice) {
       newErrors.depositAmount = 'مبلغ بیعانه نمی‌تواند بیشتر از قیمت نهایی باشد';
-    }
-
-    if (reminderDaysNum > MAX_REMINDER_DAYS) {
-      newErrors.reminderDays = `زمان یادآوری نمی‌تواند بیشتر از ${toPersianDigits(MAX_REMINDER_DAYS)} روز باشد`;
     }
 
     setErrors(newErrors);
@@ -139,8 +121,7 @@ export default function EditServiceScreen({ navigation, route }) {
       depositAmount: depositNum,
       isActive,
       description: description.trim(),
-      duration: parseNumber(duration) || 60,
-      reminderDays: reminderDaysNum,
+      duration: 60,
     };
 
     if (isEditMode) {
@@ -156,19 +137,18 @@ export default function EditServiceScreen({ navigation, route }) {
     }
   };
 
-  // 🎯 محاسبه bottom دقیق برای دکمه ذخیره
-  // = insets.bottom + ارتفاع Tab Bar شناور + فاصله اضافی
-  const stickyBottomOffset = Math.max(insets.bottom, 12) + NAVBAR_HEIGHT + 10;
+  // محاسبه تعداد کاراکترهای باقی‌مانده
+  const descLength = (description || '').length;
+  const remainingChars = MAX_DESCRIPTION_LENGTH - descLength;
+  const isNearLimit = remainingChars <= 50 && remainingChars > 0;
+  const isAtLimit = remainingChars === 0;
 
   return (
-    // ✅ حذف edges - ScreenWrapper به صورت پیش‌فرض bottom را مدیریت می‌کند
-    // و Header خودش insets.top را اضافه می‌کند
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <Header
         title={isEditMode ? 'ویرایش خدمت' : 'افزودن خدمت جدید'}
         onBackPress={() => navigation.goBack()}
       />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -197,7 +177,6 @@ export default function EditServiceScreen({ navigation, route }) {
               اطلاعات پایه
             </Text>
           </View>
-
           <Card variant="elevated" padding={16} radius={18}>
             <Input
               label="نام خدمت *"
@@ -207,7 +186,6 @@ export default function EditServiceScreen({ navigation, route }) {
               error={errors.name}
               rightIcon={<Icon name="label" size={22} color={colors.textSecondary} />}
             />
-
             <Dropdown
               label="نوع خدمت *"
               placeholder="نوع خدمت را انتخاب کنید"
@@ -215,7 +193,6 @@ export default function EditServiceScreen({ navigation, route }) {
               options={SERVICE_TYPES}
               onSelect={(val) => { setTypeId(val); if (errors.typeId) setErrors({ ...errors, typeId: '' }); }}
             />
-
             {typeId === 'other' && (
               <Input
                 label="نام نوع خدمت *"
@@ -225,15 +202,6 @@ export default function EditServiceScreen({ navigation, route }) {
                 error={errors.customTypeName}
               />
             )}
-
-            <Input
-              label="مدت زمان (دقیقه)"
-              placeholder="مثال: ۶۰"
-              value={toPersianDigits(duration)}
-              onChangeText={(t) => setDuration(toEnglishDigits(t).replace(/[^0-9]/g, ''))}
-              keyboardType="numeric"
-              rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>دقیقه</Text>}
-            />
           </Card>
         </View>
 
@@ -247,7 +215,6 @@ export default function EditServiceScreen({ navigation, route }) {
               قیمت‌گذاری
             </Text>
           </View>
-
           <Card variant="elevated" padding={16} radius={18}>
             <Input
               label="قیمت اصلی (تومان) *"
@@ -261,7 +228,6 @@ export default function EditServiceScreen({ navigation, route }) {
               error={errors.originalPrice}
               rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
             />
-
             <Input
               label="درصد تخفیف (اختیاری)"
               placeholder="مثال: ۲۰"
@@ -278,7 +244,6 @@ export default function EditServiceScreen({ navigation, route }) {
               error={errors.discountPercent}
               rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>٪</Text>}
             />
-
             {originalNum > 0 && (
               <Card
                 variant="default"
@@ -341,7 +306,6 @@ export default function EditServiceScreen({ navigation, route }) {
               بیعانه رزرو
             </Text>
           </View>
-
           <Card variant="elevated" padding={16} radius={18}>
             <Input
               label="مبلغ بیعانه (تومان)"
@@ -359,100 +323,6 @@ export default function EditServiceScreen({ navigation, route }) {
           </Card>
         </View>
 
-        {/* بخش یادآوری خودکار */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: '#9C27B015' }]}>
-              <Icon name="notifications-active" size={18} color="#9C27B0" />
-            </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              یادآوری خودکار
-            </Text>
-          </View>
-
-          <Card variant="elevated" padding={16} radius={18}>
-            <Text style={[s.reminderLabel, { color: colors.textMain }]}>
-              زمان ارسال یادآوری
-            </Text>
-
-            <Divider spacing={12} />
-            <Text style={[s.reminderCustomLabel, { color: colors.textSecondary }]}>
-             چند روز بعد:
-            </Text>
-            <View style={s.reminderCustomRow}>
-              <TouchableOpacity
-                onPress={() => {
-                  if (reminderDaysNum > 0) setReminderDays(String(reminderDaysNum - 1));
-                }}
-                style={[s.reminderStepperBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '40' }]}
-              >
-                <Icon name="remove" size={20} color={colors.primary} />
-              </TouchableOpacity>
-              <View style={[s.reminderValueBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <Icon name="notifications-active" size={18} color="#9C27B0" />
-                <TextInput
-                  value={toPersianDigits(reminderDays)}
-                  onChangeText={(t) => {
-                    const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '');
-                    const num = Math.min(MAX_REMINDER_DAYS, parseInt(cleaned, 10) || 0);
-                    setReminderDays(String(num));
-                    if (errors.reminderDays) setErrors({ ...errors, reminderDays: '' });
-                  }}
-                  keyboardType="numeric"
-                  maxLength={3}
-                  style={[s.reminderValueInput, { color: colors.textMain }]}
-                />
-                <Text style={[s.reminderValueUnit, { color: colors.textSecondary }]}>روز</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  if (reminderDaysNum < MAX_REMINDER_DAYS) setReminderDays(String(reminderDaysNum + 1));
-                }}
-                style={[s.reminderStepperBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '40' }]}
-              >
-                <Icon name="add" size={20} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-
-            {errors.reminderDays && (
-              <View style={s.reminderErrorRow}>
-                <Icon name="error-outline" size={14} color="#E53935" />
-                <Text style={[s.reminderErrorText, { color: '#E53935' }]}>{errors.reminderDays}</Text>
-              </View>
-            )}
-
-            <View
-              style={[
-                s.reminderPreview,
-                {
-                  backgroundColor: reminderDaysNum > 0 ? '#43A04710' : colors.border + '40',
-                  borderColor: reminderDaysNum > 0 ? '#43A04740' : colors.border,
-                },
-              ]}
-            >
-              <Icon
-                name={reminderDaysNum > 0 ? 'sms' : 'notifications-off'}
-                size={16}
-                color={reminderDaysNum > 0 ? '#43A047' : colors.textSecondary}
-              />
-              <Text
-                style={[
-                  s.reminderPreviewText,
-                  {
-                    color: reminderDaysNum > 0 ? '#43A047' : colors.textSecondary,
-                  },
-                ]}
-              >
-                {reminderDaysNum === 0
-                  ? '🔕 یادآوری خودکار غیرفعال است - هیچ پیامکی برای مشتری ارسال نمی‌شود'
-                  : reminderDaysNum === 1
-                    ? '📱 پیامک یادآوری ۱ روز قبل از نوبت برای مشتری ارسال می‌شود'
-                    : `📱 پیامک یادآوری ${toPersianDigits(reminderDaysNum - 3)} روز قبل از نوبت برای مشتری ارسال می‌شود`}
-              </Text>
-            </View>
-          </Card>
-        </View>
-
         {/* بخش تنظیمات */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
@@ -463,7 +333,6 @@ export default function EditServiceScreen({ navigation, route }) {
               تنظیمات
             </Text>
           </View>
-
           <Card variant="elevated" padding={16} radius={18}>
             <View style={s.switchRow}>
               <View style={s.switchInfo}>
@@ -479,50 +348,96 @@ export default function EditServiceScreen({ navigation, route }) {
                 trackColor={{ true: colors.primary + '55', false: '#ddd' }}
               />
             </View>
-
             <Divider spacing={12} />
 
-            <Input
-              label="توضیحات (اختیاری)"
-              placeholder="توضیحات بیشتری درباره این خدمت..."
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-            />
+            {/* فیلد توضیحات با محدودیت ۳۰۰ کاراکتر */}
+            <View style={s.descriptionWrapper}>
+              <Input
+                label="توضیحات (اختیاری)"
+                placeholder="توضیحاتی درباره این خدمت... (حداکثر ۳۰۰ کاراکتر)"
+                value={description}
+                onChangeText={(t) => {
+                  if (t.length <= MAX_DESCRIPTION_LENGTH) {
+                    setDescription(t);
+                  }
+                }}
+                multiline
+                numberOfLines={3}
+                maxLength={MAX_DESCRIPTION_LENGTH}
+              />
+              {/* شمارنده کاراکتر */}
+              <View style={s.charCounterRow}>
+                <View style={s.charCounterLeft}>
+                  <Icon
+                    name="text-fields"
+                    size={12}
+                    color={isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary}
+                  />
+                  <Text
+                    style={[
+                      s.charCounterText,
+                      {
+                        color: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    {toPersianDigits(descLength)} از {toPersianDigits(MAX_DESCRIPTION_LENGTH)} کاراکتر
+                  </Text>
+                </View>
+                {/* نوار پیشرفت */}
+                <View style={[s.charProgressBar, { backgroundColor: colors.border }]}>
+                  <View
+                    style={[
+                      s.charProgressFill,
+                      {
+                        width: `${(descLength / MAX_DESCRIPTION_LENGTH) * 100}%`,
+                        backgroundColor: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.primary,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+              {/* هشدار نزدیک به محدودیت */}
+              {isNearLimit && !isAtLimit && (
+                <View style={[s.charWarning, { backgroundColor: '#FF980010', borderColor: '#FF980030' }]}>
+                  <Icon name="warning" size={12} color="#FF9800" />
+                  <Text style={s.charWarningText}>
+                    فقط {toPersianDigits(remainingChars)} کاراکتر باقی مانده است
+                  </Text>
+                </View>
+              )}
+              {/* پیام محدودیت کامل */}
+              {isAtLimit && (
+                <View style={[s.charWarning, { backgroundColor: '#E5393510', borderColor: '#E5393530' }]}>
+                  <Icon name="error-outline" size={12} color="#E53935" />
+                  <Text style={[s.charWarningText, { color: '#E53935' }]}>
+                    به حداکثر تعداد کاراکتر رسیدید
+                  </Text>
+                </View>
+              )}
+            </View>
           </Card>
         </View>
 
-        {/* 🆕 فضای خالی در انتهای اسکرول برای جلوگیری از overlap با دکمه شناور */}
-        <View style={{ height: stickyBottomOffset + 80 }} />
-      </ScrollView>
+        {/* دکمه ذخیره در انتهای فرم (غیر شناور) */}
+        <View style={s.saveContainer}>
+          <Button
+            title={isEditMode ? 'ذخیره تغییرات' : 'افزودن خدمت'}
+            onPress={handleSave}
+            variant="primary"
+            size="lg"
+            fullWidth
+            icon={<Icon name="check" size={20} color="#fff" />}
+            iconPosition="right"
+          />
+        </View>
 
-      {/* 🎯 دکمه ذخیره به صورت Sticky در پایین صفحه */}
-      <View
-        style={[
-          s.stickyFooter,
-          {
-            backgroundColor: colors.background,
-            borderTopColor: colors.border,
-            bottom: stickyBottomOffset,
-          },
-        ]}
-      >
-        <Button
-          title={isEditMode ? 'ذخیره تغییرات' : 'افزودن خدمت'}
-          onPress={handleSave}
-          variant="primary"
-          size="lg"
-          fullWidth
-          icon={<Icon name="check" size={20} color="#fff" />}
-          iconPosition="right"
-        />
-      </View>
+        {/* فضای خالی برای جلوگیری از overlap با Navbar */}
+        <View style={{ height: 120 }} />
+      </ScrollView>
     </ScreenWrapper>
   );
 }
-
-const { TouchableOpacity } = require('react-native');
 
 const s = StyleSheet.create({
   scrollContent: {
@@ -610,156 +525,53 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 17,
   },
-
-  // ═══════════ 🎯 Sticky Footer ═══════════
-  stickyFooter: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 12,
-    borderTopWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-
-  // ═══════════ استایل‌های یادآوری خودکار ═══════════
-  reminderInfoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 14,
-  },
-  reminderInfoText: {
-    flex: 1,
-    fontSize: 11.5,
-    fontFamily: 'Vazir',
-    lineHeight: 20,
-    textAlign: 'right',
-  },
-  reminderLabel: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
+  // ═══════════ شمارنده کاراکتر توضیحات ═══════════
+  descriptionWrapper: {
     marginBottom: 4,
   },
-  reminderHint: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-    marginBottom: 12,
-  },
-  reminderChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  reminderChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
-  reminderChipText: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
-  },
-  reminderCustomLabel: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Medium',
-    marginBottom: 8,
-  },
-  reminderCustomRow: {
+  charCounterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 12,
-  },
-  reminderStepperBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  reminderValueBox: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
-  reminderValueInput: {
-    fontSize: 18,
-    fontFamily: 'Vazir-Bold',
-    textAlign: 'center',
-    minWidth: 30,
-    paddingVertical: 0,
-  },
-  reminderValueUnit: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Medium',
-  },
-  reminderErrorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    marginTop: -10,
+    marginBottom: 6,
     paddingHorizontal: 4,
   },
-  reminderErrorText: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-    flex: 1,
-  },
-  reminderPreview: {
+  charCounterLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 12,
-  },
-  reminderPreviewText: {
-    flex: 1,
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
-    lineHeight: 19,
-  },
-  reminderTipsBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,193,7,0.08)',
-  },
-  reminderTipsContent: {
-    flex: 1,
     gap: 4,
   },
-  reminderTipsTitle: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
+  charCounterText: {
+    fontSize: 11,
+    fontFamily: 'Vazir-Medium',
+  },
+  charProgressBar: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  charProgressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  charWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: -2,
     marginBottom: 4,
   },
-  reminderTipsText: {
+  charWarningText: {
     fontSize: 11,
-    fontFamily: 'Vazir',
-    lineHeight: 20,
+    fontFamily: 'Vazir-Medium',
+  },
+  saveContainer: {
+    marginTop: 24,
   },
 });
