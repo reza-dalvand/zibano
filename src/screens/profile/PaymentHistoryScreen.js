@@ -9,10 +9,14 @@ import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 import Dropdown from '../../components/common/Dropdown';
 
-import { MOCK_PAYMENTS, MONTHS, YEARS } from './paymentHistory/constants';
-import { formatPrice } from './paymentHistory/helpers';
-import PaymentCard from './paymentHistory/PaymentCard';
-import InvoiceModal from './paymentHistory/InvoiceModal';
+import {
+  MOCK_PAYMENTS,
+  MONTHS,
+  YEARS,
+} from '../../components/profile/support/constants';
+import { formatPrice } from '../../components/profile/paymentHistory/helpers';
+import PaymentCard from '../../components/profile/paymentHistory/PaymentCard';
+import InvoiceModal from '../../components/profile/paymentHistory/InvoiceModal';
 
 export default function PaymentHistoryScreen() {
   const { colors } = useTheme();

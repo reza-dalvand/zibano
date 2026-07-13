@@ -11,7 +11,7 @@ import {
   APPOINTMENT_STATUS_META,
   PAYMENT_METHOD_META,
   PAYMENT_TYPE_META,
-} from './constants';
+} from '../support/constants';
 
 export default function PaymentCard({ payment, onOpenInvoice, onCopyCode }) {
   const { colors } = useTheme();

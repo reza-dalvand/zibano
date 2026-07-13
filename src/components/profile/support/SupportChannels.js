@@ -1,6 +1,13 @@
 // src/screens/profile/support/SupportChannels.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Alert,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../theme/ThemeContext';
 import { SUPPORT_CHANNELS } from './constants';
@@ -8,7 +15,7 @@ import { SUPPORT_CHANNELS } from './constants';
 export default function SupportChannels() {
   const { colors } = useTheme();
 
-  const handlePress = async (channel) => {
+  const handlePress = async channel => {
     try {
       if (channel.type === 'phone') {
         await Linking.openURL(channel.link);
@@ -20,10 +27,7 @@ export default function SupportChannels() {
           Alert.alert(
             'اپلیکیشن مورد نیاز',
             `برای استفاده از ${channel.title}، ابتدا اپلیکیشن آن را نصب کنید.`,
-            [
-              { text: 'انصراف', style: 'cancel' },
-              { text: 'باشه' },
-            ]
+            [{ text: 'انصراف', style: 'cancel' }, { text: 'باشه' }],
           );
         }
       }
@@ -36,7 +40,9 @@ export default function SupportChannels() {
     <View style={s.section}>
       {/* هدر بخش */}
       <View style={s.sectionHeader}>
-        <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}>
+        <View
+          style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}
+        >
           <Icon name="support-agent" size={20} color={colors.primary} />
         </View>
         <View style={s.sectionHeaderText}>
@@ -51,7 +57,7 @@ export default function SupportChannels() {
 
       {/* شبکه کانال‌ها - ۲ در ۲ */}
       <View style={s.channelsGrid}>
-        {SUPPORT_CHANNELS.map((channel) => (
+        {SUPPORT_CHANNELS.map(channel => (
           <TouchableOpacity
             key={channel.id}
             activeOpacity={0.85}
@@ -67,10 +73,7 @@ export default function SupportChannels() {
             {/* Badge برای ایرانی بودن */}
             {channel.badge && (
               <View
-                style={[
-                  s.badge,
-                  { backgroundColor: channel.color + '20' },
-                ]}
+                style={[s.badge, { backgroundColor: channel.color + '20' }]}
               >
                 <Text style={[s.badgeText, { color: channel.color }]}>
                   {channel.badge}
@@ -102,12 +105,7 @@ export default function SupportChannels() {
             </Text>
 
             {/* دکمه اکشن */}
-            <View
-              style={[
-                s.actionRow,
-                { borderTopColor: colors.border },
-              ]}
-            >
+            <View style={[s.actionRow, { borderTopColor: colors.border }]}>
               <Text style={[s.actionText, { color: channel.color }]}>
                 {channel.actionLabel}
               </Text>

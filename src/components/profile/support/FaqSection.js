@@ -1,13 +1,25 @@
 // src/screens/profile/support/FaqSection.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../theme/ThemeContext';
-import Card from '../../../components/common/Card';
+import Card from '../../common/Card';
 import { FAQ_ITEMS, FAQ_CATEGORIES } from './constants';
 
 // فعال‌سازی LayoutAnimation در اندروید
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -22,27 +34,27 @@ export default function FaqSection() {
     let items = FAQ_ITEMS;
 
     if (activeCategory !== 'all') {
-      items = items.filter((item) => item.categoryId === activeCategory);
+      items = items.filter(item => item.categoryId === activeCategory);
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       items = items.filter(
-        (item) =>
+        item =>
           item.question.toLowerCase().includes(q) ||
-          item.answer.toLowerCase().includes(q)
+          item.answer.toLowerCase().includes(q),
       );
     }
 
     return items;
   }, [activeCategory, searchQuery]);
 
-  const toggleFaq = (id) => {
+  const toggleFaq = id => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const handleCategoryPress = (categoryId) => {
+  const handleCategoryPress = categoryId => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setActiveCategory(categoryId);
     setExpandedId(null);
@@ -110,8 +122,12 @@ export default function FaqSection() {
           style={[
             s.categoryChip,
             {
-              backgroundColor: activeCategory === 'all' ? colors.primary : colors.cardBackground,
-              borderColor: activeCategory === 'all' ? colors.primary : colors.border,
+              backgroundColor:
+                activeCategory === 'all'
+                  ? colors.primary
+                  : colors.cardBackground,
+              borderColor:
+                activeCategory === 'all' ? colors.primary : colors.border,
             },
           ]}
         >
@@ -130,8 +146,8 @@ export default function FaqSection() {
           </Text>
         </TouchableOpacity>
 
-        {FAQ_CATEGORIES.map((cat) => {
-          const count = FAQ_ITEMS.filter((f) => f.categoryId === cat.id).length;
+        {FAQ_CATEGORIES.map(cat => {
+          const count = FAQ_ITEMS.filter(f => f.categoryId === cat.id).length;
           const isActive = activeCategory === cat.id;
           return (
             <TouchableOpacity
@@ -167,8 +183,8 @@ export default function FaqSection() {
       {/* لیست سوالات */}
       <View style={s.faqList}>
         {filteredFaqs.length > 0 ? (
-          filteredFaqs.map((item) => {
-            const category = FAQ_CATEGORIES.find((c) => c.id === item.categoryId);
+          filteredFaqs.map(item => {
+            const category = FAQ_CATEGORIES.find(c => c.id === item.categoryId);
             const isExpanded = expandedId === item.id;
             return (
               <Card
@@ -220,7 +236,9 @@ export default function FaqSection() {
                     ]}
                   >
                     <Icon
-                      name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                      name={
+                        isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'
+                      }
                       size={18}
                       color={isExpanded ? colors.primary : colors.textSecondary}
                     />
@@ -228,8 +246,12 @@ export default function FaqSection() {
                 </TouchableOpacity>
 
                 {isExpanded && (
-                  <View style={[s.faqAnswerBox, { borderTopColor: colors.border }]}>
-                    <Text style={[s.faqAnswerText, { color: colors.textSecondary }]}>
+                  <View
+                    style={[s.faqAnswerBox, { borderTopColor: colors.border }]}
+                  >
+                    <Text
+                      style={[s.faqAnswerText, { color: colors.textSecondary }]}
+                    >
                       {item.answer}
                     </Text>
 
@@ -255,7 +277,12 @@ export default function FaqSection() {
                           {category?.label}
                         </Text>
                       </View>
-                      <Text style={[s.faqHelpfulText, { color: colors.textSecondary }]}>
+                      <Text
+                        style={[
+                          s.faqHelpfulText,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
                         آیا این پاسخ مفید بود؟
                       </Text>
                     </View>
@@ -266,7 +293,11 @@ export default function FaqSection() {
           })
         ) : (
           <View style={s.emptyBox}>
-            <Icon name="search-off" size={48} color={colors.textSecondary + '60'} />
+            <Icon
+              name="search-off"
+              size={48}
+              color={colors.textSecondary + '60'}
+            />
             <Text style={[s.emptyTitle, { color: colors.textMain }]}>
               نتیجه‌ای یافت نشد
             </Text>

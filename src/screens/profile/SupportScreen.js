@@ -4,23 +4,27 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import SupportChannels from './support/SupportChannels';
-import FaqSection from './support/FaqSection';
-import { SUPPORT_HOURS_SIMPLE } from './support/constants';
+import SupportChannels from '../../components/profile/support/SupportChannels';
+import FaqSection from '../../components/profile/support/FaqSection';
+import { SUPPORT_HOURS_SIMPLE } from '../../components/profile/support/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
-
 
 export default function SupportScreen() {
   const { colors } = useTheme();
-    const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets(); // 🆕
 
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       {/* ═══════════ هدر ساده ═══════════ */}
-      <View style={[s.heroSection, {
-        backgroundColor: colors.primary,
-        paddingTop: insets.top + 8, // 🎯 insets.top
-      }]}>
+      <View
+        style={[
+          s.heroSection,
+          {
+            backgroundColor: colors.primary,
+            paddingTop: insets.top + 8, // 🎯 insets.top
+          },
+        ]}
+      >
         <View style={s.heroContent}>
           <View style={s.heroIconWrapper}>
             <View style={s.heroIconCircle}>

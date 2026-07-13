@@ -13,7 +13,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import Avatar from '../../../components/common/Avatar';
 import Button from '../../../components/common/Button';
 import { toPersianDigit, formatPrice } from './helpers';
-import { APPOINTMENT_STATUS_META } from './constants';
+import { APPOINTMENT_STATUS_META } from '../support/constants';
 
 export default function InvoiceModal({ visible, payment, onClose, onShare }) {
   const { colors } = useTheme();
