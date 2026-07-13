@@ -3,6 +3,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeContext';
 import Header from '../components/common/Header';
+
+// صفحات موجود
 import ManageBusinessScreen from '../screens/manageBusiness/ManageBusinessScreen';
 import AllAppointmentsScreen from '../screens/manageBusiness/AllAppointmentsScreen';
 import ManageServicesScreen from '../screens/manageBusiness/ManageServicesScreen';
@@ -11,9 +13,13 @@ import ManageScheduleScreen from '../screens/manageBusiness/ManageScheduleScreen
 import ManagePortfolioScreen from '../screens/manageBusiness/ManagePortfolioScreen';
 import BusinessSettingsScreen from '../screens/manageBusiness/BusinessSettingsScreen';
 import ReviewsScreen from '../screens/manageBusiness/ReviewsScreen';
-// 🆕 صفحه جدید
 import EditServiceScreen from '../screens/manageBusiness/EditServiceScreen';
 import FinancialManagementScreen from '../screens/manageBusiness/FinancialManagementScreen';
+
+// 🆕 صفحات جدید - حتماً اضافه شوند
+import BookingLinkScreen from '../screens/manageBusiness/BookingLinkScreen';
+import ModelRequestsScreen from '../screens/manageBusiness/ModelRequestsScreen';
+import CreateModelRequestScreen from '../screens/manageBusiness/CreateModelRequestScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,7 +52,6 @@ export default function ManageStackNavigator() {
         component={ManageServicesScreen}
         options={{ headerShown: false }}
       />
-      {/* 🆕 صفحه ویرایش خدمت */}
       <Stack.Screen
         name="EditService"
         component={EditServiceScreen}
@@ -65,7 +70,7 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="ManagePortfolio"
         component={ManagePortfolioScreen}
-        options={{ title: 'نمونه‌کارها', headerShown: false}}
+        options={{ title: 'نمونه‌کارها', headerShown: false }}
       />
       <Stack.Screen
         name="BusinessSettings"
@@ -76,6 +81,23 @@ export default function ManageStackNavigator() {
         name="Reviews"
         component={ReviewsScreen}
         options={{ title: 'نظرات و امتیازات' }}
+      />
+      
+      {/* 🆕 صفحات جدید - حتماً اضافه شوند */}
+      <Stack.Screen
+        name="BookingLink"
+        component={BookingLinkScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ModelRequests"
+        component={ModelRequestsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreateModelRequest"
+        component={CreateModelRequestScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

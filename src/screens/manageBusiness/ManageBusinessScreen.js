@@ -115,7 +115,7 @@ export default function ManageBusinessScreen({ navigation }) {
     },
   ];
 
-  // ============ اقدامات سریع (۴ آیتم - بدون تیم) ============
+// ═══════════ اقدامات سریع (۶ آیتم) ═══════════
   const QUICK_ACTIONS = [
     {
       id: 'appointments',
@@ -149,6 +149,24 @@ export default function ManageBusinessScreen({ navigation }) {
       icon: 'photo-library',
       route: 'ManagePortfolio',
       gradient: ['#fa709a', '#fee140'],
+    },
+    // 🆕 لینک اختصاصی رزرو
+    {
+      id: 'bookingLink',
+      label: 'لینک رزرو',
+      subtitle: 'لینک اختصاصی برای شبکه‌های اجتماعی',
+      icon: 'link',
+      route: 'BookingLink',
+      gradient: ['#0088cc', '#006699'],
+    },
+    // 🆕 درخواست مدل
+    {
+      id: 'modelRequests',
+      label: 'درخواست مدل',
+      subtitle: 'جذب مدل برای نمونه‌کار',
+      icon: 'face-retouching-natural',
+      route: 'ModelRequests',
+      gradient: ['#FF9800', '#F57C00'],
     },
   ];
 
