@@ -168,6 +168,14 @@ export default function ManageBusinessScreen({ navigation }) {
       route: 'ModelRequests',
       gradient: ['#FF9800', '#F57C00'],
     },
+    {
+      id: 'lineRental',
+      label: 'اجاره لاین',
+      subtitle: 'اجاره لاین و جذب همکار متخصص',
+      icon: 'storefront',
+      route: 'LineRental',
+      gradient: ['#667eea', '#764ba2'],
+    },
   ];
 
   return (

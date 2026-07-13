@@ -20,6 +20,7 @@ import FinancialManagementScreen from '../screens/manageBusiness/FinancialManage
 import BookingLinkScreen from '../screens/manageBusiness/BookingLinkScreen';
 import ModelRequestsScreen from '../screens/manageBusiness/ModelRequestsScreen';
 import CreateModelRequestScreen from '../screens/manageBusiness/CreateModelRequestScreen';
+import LineRentalScreen from '../screens/manageBusiness/LineRentalScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -97,6 +98,11 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="CreateModelRequest"
         component={CreateModelRequestScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="LineRental"
+        component={LineRentalScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
