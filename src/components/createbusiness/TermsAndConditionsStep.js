@@ -59,14 +59,14 @@ export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeig
 
   const handleScroll = (event) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    
+
     // 🎯 محاسبه دقیق پیشرفت
     const currentProgress = (contentOffset.y + layoutMeasurement.height) / contentSize.height;
     setScrollProgress(Math.min(currentProgress, 1));
-    
+
     // 🎯 فاصله تا انتهای صفحه
     const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height);
-    
+
     // 🎯 آستانه تشخیص: 150 پیکسل قبل از انتها
     if (distanceFromBottom <= 150 && !scrolledToBottom) {
       console.log('✅ Reached bottom!');
@@ -75,8 +75,6 @@ export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeig
   };
 
   const canProceed = accepted && scrolledToBottom;
-
-  const footerBottomPadding = navbarHeight + 40;
 
   const getHintMessage = () => {
     if (!scrolledToBottom) {
@@ -118,12 +116,13 @@ export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeig
         />
       </View>
 
-      {/* لیست قوانین در اسکرول */}
+      {/* 🎯 یک ScrollView واحد که هم قوانین و هم فوتر را شامل می‌شود */}
       <ScrollView
         showsVerticalScrollIndicator={true}
         onScroll={handleScroll}
         scrollEventThrottle={50}
         contentContainerStyle={s.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
         {TERMS_SECTIONS.map((section, index) => (
           <Card
@@ -166,78 +165,74 @@ export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeig
           </View>
         )}
 
-        {/* فضای خالی برای فوتر شناور */}
-        <View style={{ height: footerBottomPadding + 120 }} />
-      </ScrollView>
+        {/* 🎯 فاصله بین آخرین قانون و فوتر دکمه‌ها */}
+        <View style={{ height: 24 }} />
 
-      {/* فوتر با چک‌باکس و دکمه‌ها */}
-      <View
-        style={[
-          s.footer,
-          {
-            backgroundColor: colors.background,
-            borderTopColor: colors.border,
-            paddingBottom: footerBottomPadding,
-          },
-        ]}
-      >
-        {/* چک‌باکس قوانین */}
-        <TouchableOpacity
-          onPress={() => setAccepted(!accepted)}
-          activeOpacity={0.8}
-          style={[
-            s.acceptBox,
-            {
-              backgroundColor: accepted ? colors.primary + '15' : colors.cardBackground,
-              borderColor: accepted ? colors.primary : colors.border,
-            },
-          ]}
-        >
-          <View
+        {/* 🎯 فوتر دکمه‌ها - در جریان طبیعی اسکرول */}
+        <View style={s.footer}>
+          {/* چک‌باکس قوانین */}
+          <TouchableOpacity
+            onPress={() => setAccepted(!accepted)}
+            activeOpacity={0.8}
             style={[
-              s.checkbox,
+              s.acceptBox,
               {
-                backgroundColor: accepted ? colors.primary : 'transparent',
+                backgroundColor: accepted ? colors.primary + '15' : colors.cardBackground,
                 borderColor: accepted ? colors.primary : colors.border,
               },
             ]}
           >
-            {accepted && <Icon name="check" size={16} color="#fff" />}
-          </View>
-          <Text style={[s.acceptText, { color: colors.textMain }]}>
-            تمامی قوانین و مقررات فوق را{' '}
-            <Text style={{ color: colors.primary, fontFamily: 'Vazir-Bold' }}>
-              مطالعه کرده و می‌پذیرم.
+            <View
+              style={[
+                s.checkbox,
+                {
+                  backgroundColor: accepted ? colors.primary : 'transparent',
+                  borderColor: accepted ? colors.primary : colors.border,
+                },
+              ]}
+            >
+              {accepted && <Icon name="check" size={16} color="#fff" />}
+            </View>
+            <Text style={[s.acceptText, { color: colors.textMain }]}>
+              تمامی قوانین و مقررات فوق را{' '}
+              <Text style={{ color: colors.primary, fontFamily: 'Vazir-Bold' }}>
+                مطالعه کرده و می‌پذیرم.
+              </Text>
             </Text>
-          </Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        {/* دکمه‌های ناوبری */}
-        <View style={s.footerRow}>
-          <Button
-            title="انصراف"
-            onPress={onDecline}
-            variant="outline"
-            size="md"
-            style={s.halfButton}
-          />
-          <Button
-            title="ادامه و شروع ثبت"
-            onPress={onAccept}
-            variant="primary"
-            size="md"
-            disabled={!canProceed}
-            icon={<Icon name="arrow-back" size={18} color="#fff" />}
-            iconPosition="left"
-            style={[s.halfButton, { opacity: canProceed ? 1 : 0.5 }]}
-          />
+          {/* دکمه‌های ناوبری */}
+          <View style={s.footerRow}>
+            <Button
+              title="انصراف"
+              onPress={onDecline}
+              variant="outline"
+              size="lg"
+              style={s.halfButton}
+            />
+            <Button
+              title="ادامه و شروع ثبت"
+              onPress={onAccept}
+              variant="primary"
+              size="lg"
+              disabled={!canProceed}
+              icon={<Icon name="arrow-back" size={18} color="#fff" />}
+              iconPosition="left"
+              style={[s.halfButton, { opacity: canProceed ? 1 : 0.5 }]}
+            />
+          </View>
+
+          {/* پیام راهنما */}
+          {!canProceed && getHintMessage() !== '' && (
+            <Text style={[s.footerHint, { color: colors.textSecondary }]}>
+              {getHintMessage()}
+            </Text>
+          )}
         </View>
 
-        {/* پیام راهنما */}
-        {!canProceed && getHintMessage() !== '' && (
-          <Text style={[s.footerHint, { color: colors.textSecondary }]}>{getHintMessage()}</Text>
-        )}
-      </View>
+        {/* 🎯 فضای خالی در انتها برای جلوگیری از چسبیدن به Navbar شناور */}
+        <View style={{ height: navbarHeight + 40 }} />
+      </ScrollView>
     </View>
   );
 }
@@ -373,15 +368,12 @@ const s = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Vazir-Bold',
   },
+  // 🎯 فوتر دکمه‌ها - دیگر position: absolute نیست!
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    gap: 10,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    gap: 12,
   },
   acceptBox: {
     flexDirection: 'row',

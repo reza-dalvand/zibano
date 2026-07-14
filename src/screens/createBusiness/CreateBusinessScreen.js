@@ -189,19 +189,17 @@ export default function CreateBusinessScreen({ navigation }) {
           >
             <Icon name="arrow-forward" size={22} color="#fff" />
           </TouchableOpacity>
-
           <Text style={s.headerTitle}>ثبت کسب‌وکار جدید</Text>
-
           <View style={{ width: 36 }} />
         </View>
       </View>
 
       {/* 🎯 اسکرول‌ویو اصلی با key={currentStep} برای scroll to top خودکار */}
       <ScrollView
-        key={currentStep} // ⬅️ تغییر کلیدی! با تغییر step، صفحه از بالا شروع می‌شود
+        key={currentStep}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + NAVBAR_HEIGHT + 20,
+          paddingBottom: insets.bottom + 40,
         }}
         keyboardShouldPersistTaps="handled"
       >
@@ -211,7 +209,10 @@ export default function CreateBusinessScreen({ navigation }) {
         {/* محتوای مرحله */}
         {renderCurrentStep()}
 
-        {/* 🎯 فوتر با دکمه‌های ناوبری */}
+        {/* 🎯 فاصله بین محتوا و دکمه‌ها */}
+        <View style={{ height: 32 }} />
+
+        {/* 🎯 فوتر با دکمه‌های ناوبری - در انتهای جریان طبیعی اسکرول */}
         <View style={s.footerControls}>
           <View style={s.footerRow}>
             {!isFirstStep && (
@@ -219,7 +220,7 @@ export default function CreateBusinessScreen({ navigation }) {
                 title="مرحله قبل"
                 onPress={handleBackFromWizard}
                 variant="outline"
-                size="md"
+                size="lg"
                 style={s.halfButton}
                 icon={
                   <Icon name="arrow-forward" size={18} color={colors.primary} />
@@ -231,7 +232,7 @@ export default function CreateBusinessScreen({ navigation }) {
               title={isLastStep ? 'ثبت نهایی' : 'مرحله بعد'}
               onPress={handleNextStep}
               variant="primary"
-              size="md"
+              size="lg"
               style={isFirstStep ? s.fullButton : s.halfButton}
               disabled={!canGoNext()}
               icon={
@@ -257,6 +258,9 @@ export default function CreateBusinessScreen({ navigation }) {
             </View>
           )}
         </View>
+
+        {/* 🎯 فضای خالی در انتها برای جلوگیری از چسبیدن به Navbar شناور */}
+        <View style={{ height: NAVBAR_HEIGHT + insets.bottom + 20 }} />
       </ScrollView>
 
       <SuccessModal
@@ -303,10 +307,12 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
+  // 🎯 فوتر دکمه‌ها - دیگر position: absolute نیست!
   footerControls: {
     paddingHorizontal: 20,
-    paddingTop: 24,
-    gap: 8,
+    paddingTop: 16,
+    paddingBottom: 20,
+    gap: 12,
   },
   footerRow: {
     flexDirection: 'row',
@@ -323,11 +329,15 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: 8,
-    paddingVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: '#FFA00010',
+    borderWidth: 1,
+    borderColor: '#FFA00030',
   },
   warningText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Vazir',
     textAlign: 'center',
     flex: 1,
