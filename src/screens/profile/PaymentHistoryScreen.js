@@ -13,7 +13,7 @@ import {
   MOCK_PAYMENTS,
   MONTHS,
   YEARS,
-} from '../../components/profile/support/constants';
+} from '../../components/profile/paymentHistory/constants';
 import { formatPrice } from '../../components/profile/paymentHistory/helpers';
 import PaymentCard from '../../components/profile/paymentHistory/PaymentCard';
 import InvoiceModal from '../../components/profile/paymentHistory/InvoiceModal';
