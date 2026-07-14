@@ -20,6 +20,7 @@ import Dropdown from '../../components/common/Dropdown';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import MapPicker from '../../components/common/MapPicker';
+import { PROVINCES, CITIES } from '../../constants/exploreFilters';
 
 const CATEGORIES = [
   { id: '1', label: 'سالن زیبایی (چند منظوره)' },
@@ -32,10 +33,11 @@ const CATEGORIES = [
 export default function BusinessSettingsScreen({ navigation }) {
   const { colors } = useTheme();
   const { businessData, updateBusinessInfo } = useBusiness();
-
   const [formData, setFormData] = useState({
     name: '',
     categoryId: null,
+    provinceId: null,
+    cityId: null,
     address: '',
     phone: '',
     coverUrl: null,
@@ -48,6 +50,8 @@ export default function BusinessSettingsScreen({ navigation }) {
     setFormData({
       name: businessData.name || '',
       categoryId: businessData.categoryId || null,
+      provinceId: businessData.provinceId || null,
+      cityId: businessData.cityId || null,
       address: businessData.address || '',
       phone: businessData.phone || '',
       coverUrl: businessData.coverUrl || businessData.logo || null,
@@ -58,6 +62,17 @@ export default function BusinessSettingsScreen({ navigation }) {
 
   const updateField = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // 🎯 هندلر تغییر استان - ریست کردن شهر
+  const handleProvinceChange = (provinceId) => {
+    updateField('provinceId', provinceId);
+    updateField('cityId', null);
+  };
+
+  // 🎯 هندلر تغییر شهر
+  const handleCityChange = (cityId) => {
+    updateField('cityId', cityId);
   };
 
   const pickCover = async () => {
@@ -87,29 +102,49 @@ export default function BusinessSettingsScreen({ navigation }) {
       Alert.alert('خطا', 'دسته‌بندی را انتخاب کنید');
       return;
     }
-
+    if (!formData.provinceId) {
+      Alert.alert('خطا', 'استان را انتخاب کنید');
+      return;
+    }
+    if (!formData.cityId) {
+      Alert.alert('خطا', 'شهر را انتخاب کنید');
+      return;
+    }
     updateBusinessInfo({
       name: formData.name.trim(),
       categoryId: formData.categoryId,
       category:
         CATEGORIES.find((c) => c.id === formData.categoryId)?.label || '',
+      provinceId: formData.provinceId,
+      cityId: formData.cityId,
       address: formData.address.trim(),
       phone: formData.phone.trim(),
       coverUrl: formData.coverUrl,
-      logo: formData.coverUrl, // سازگاری با ساختار قبلی
+      logo: formData.coverUrl,
       workingHours: formData.workingHours.trim(),
       location: formData.location,
     });
-
     Alert.alert('موفقیت', 'اطلاعات کسب‌وکار با موفقیت بروزرسانی شد', [
       { text: 'باشه', onPress: () => navigation.goBack() },
     ]);
   };
 
+  // 🎯 پیدا کردن label استان و شهر برای نمایش
+  const getProvinceLabel = () => {
+    const province = PROVINCES.find((p) => p.id === formData.provinceId);
+    return province ? province.label : null;
+  };
+
+  const getCityLabel = () => {
+    if (!formData.provinceId) return null;
+    const cities = CITIES[formData.provinceId] || [];
+    const city = cities.find((c) => c.id === formData.cityId);
+    return city ? city.label : null;
+  };
+
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <Header title="تنظیمات کسب‌وکار" onBackPress={() => navigation.goBack()} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -125,12 +160,10 @@ export default function BusinessSettingsScreen({ navigation }) {
               تصویر کاور
             </Text>
           </View>
-
           <Card variant="default" padding={14} radius={16}>
             <Text style={[s.coverHint, { color: colors.textSecondary }]}>
               تصویر کاور در بالای صفحه پروفایل نمایش داده می‌شود
             </Text>
-
             <TouchableOpacity
               style={[
                 s.coverPicker,
@@ -172,7 +205,7 @@ export default function BusinessSettingsScreen({ navigation }) {
                   </View>
                   <Text
                     style={[s.coverPlaceholderTitle, { color: colors.textMain }]}
-                    numberOfLines={1}  // ✅ اضافه شد
+                    numberOfLines={1}
                   >
                     آپلود کاور کسب‌وکار
                   </Text>
@@ -200,7 +233,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               اطلاعات پایه
             </Text>
           </View>
-
           <Card variant="default" padding={16} radius={16}>
             <Input
               label="نام کسب‌وکار *"
@@ -209,7 +241,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               onChangeText={(t) => updateField('name', t)}
               rightIcon={<Icon name="store" size={22} color={colors.textSecondary} />}
             />
-
             <Dropdown
               label="دسته‌بندی اصلی *"
               placeholder="انتخاب نوع خدمات"
@@ -217,7 +248,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               options={CATEGORIES}
               onSelect={(v) => updateField('categoryId', v)}
             />
-
             <Input
               label="شماره تماس"
               placeholder="مثال: ۰۲۱-۲۲۳۳۴۴۵۵"
@@ -226,7 +256,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               keyboardType="phone-pad"
               rightIcon={<Icon name="phone" size={22} color={colors.textSecondary} />}
             />
-
             <Input
               label="ساعات کاری"
               placeholder="مثال: شنبه تا پنج‌شنبه ۱۰ الی ۲۰"
@@ -236,6 +265,58 @@ export default function BusinessSettingsScreen({ navigation }) {
                 <Icon name="schedule" size={22} color={colors.textSecondary} />
               }
             />
+          </Card>
+        </View>
+
+        {/* ═══════════════ موقعیت مکانی (جدید!) ═══════════════ */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View style={[s.sectionIconBox, { backgroundColor: '#2196F318' }]}>
+              <Icon name="location-city" size={18} color="#2196F3" />
+            </View>
+            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+              موقعیت مکانی
+            </Text>
+          </View>
+          <Card variant="default" padding={16} radius={16}>
+            <Dropdown
+              label="استان *"
+              placeholder="انتخاب استان"
+              value={formData.provinceId}
+              options={PROVINCES}
+              onSelect={handleProvinceChange}
+            />
+            <Dropdown
+              label="شهر *"
+              placeholder={
+                formData.provinceId
+                  ? 'انتخاب شهر'
+                  : 'ابتدا استان را انتخاب کنید'
+              }
+              value={formData.cityId}
+              options={
+                formData.provinceId ? CITIES[formData.provinceId] || [] : []
+              }
+              onSelect={handleCityChange}
+            />
+            {/* نمایش انتخاب‌ها */}
+            {(getProvinceLabel() || getCityLabel()) && (
+              <View
+                style={[
+                  s.locationSummaryBox,
+                  {
+                    backgroundColor: colors.primary + '10',
+                    borderColor: colors.primary + '30',
+                  },
+                ]}
+              >
+                <Icon name="location-on" size={14} color={colors.primary} />
+                <Text style={[s.locationSummaryText, { color: colors.primary }]}>
+                  {getProvinceLabel()}
+                  {getCityLabel() && ` > ${getCityLabel()}`}
+                </Text>
+              </View>
+            )}
           </Card>
         </View>
 
@@ -249,7 +330,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               آدرس و موقعیت مکانی
             </Text>
           </View>
-
           <Card variant="default" padding={16} radius={16}>
             <Input
               label="آدرس دقیق"
@@ -262,7 +342,6 @@ export default function BusinessSettingsScreen({ navigation }) {
                 <Icon name="location-on" size={22} color="#E53935" />
               }
             />
-
             {/* راهنمای نقشه */}
             <View
               style={[
@@ -281,7 +360,6 @@ export default function BusinessSettingsScreen({ navigation }) {
                 خود را مشخص کنید
               </Text>
             </View>
-
             {/* MapPicker */}
             <View
               style={[
@@ -295,7 +373,6 @@ export default function BusinessSettingsScreen({ navigation }) {
                 height={260}
               />
             </View>
-
             {/* نمایش مختصات */}
             {formData.location && (
               <View
@@ -334,7 +411,6 @@ export default function BusinessSettingsScreen({ navigation }) {
             تغییرات پس از ذخیره در پروفایل عمومی کسب‌وکار نمایش داده می‌شود
           </Text>
         </View>
-
         <View style={{ height: 80 }} />
       </ScrollView>
     </ScreenWrapper>
@@ -346,7 +422,6 @@ const s = StyleSheet.create({
     padding: 16,
     paddingTop: 12,
   },
-
   // ═══════════════ بخش‌ها ═══════════════
   section: {
     marginBottom: 20,
@@ -366,11 +441,10 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   sectionTitle: {
-    width:'100%',
+    width: '100%',
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-
   // ═══════════════ کاور ═══════════════
   coverHint: {
     fontSize: 12,
@@ -379,10 +453,10 @@ const s = StyleSheet.create({
     lineHeight: 18,
   },
   coverPicker: {
-  width: '100%',
-    aspectRatio: 2,  // ✅ تغییر از 3 به 2.4 — ارتفاع بیشتر
-    minHeight: 170,    // ✅ حداقل ارتفاع تضمین‌شده
-    borderRadius: 16,  // ✅ کمی گردتر
+    width: '100%',
+    aspectRatio: 2,
+    minHeight: 170,
+    borderRadius: 16,
     borderWidth: 2,
     overflow: 'hidden',
   },
@@ -417,7 +491,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingHorizontal: 20,  // ✅ اضافه شد - فضای بیشتر برای متن
+    paddingHorizontal: 20,
   },
   coverPlaceholderIcon: {
     width: 60,
@@ -428,16 +502,31 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   coverPlaceholderTitle: {
-    fontSize: 14,  // ✅ کمی بزرگ‌تر
+    fontSize: 14,
     fontFamily: 'Vazir-Bold',
-    textAlign: 'center',  // ✅ اضافه شد - center کردن
-    width: '100%',  // ✅ اضافه شد - عرض کامل
+    textAlign: 'center',
+    width: '100%',
   },
   coverPlaceholderHint: {
     fontSize: 10,
     fontFamily: 'Vazir',
   },
-
+  // ═══════════════ 🎯 موقعیت مکانی (جدید) ═══════════════
+  locationSummaryBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 8,
+  },
+  locationSummaryText: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+    flex: 1,
+  },
   // ═══════════════ نقشه ═══════════════
   mapHintBox: {
     flexDirection: 'row',
@@ -473,7 +562,6 @@ const s = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Vazir-Medium',
   },
-
   // ═══════════════ دکمه ذخیره ═══════════════
   saveContainer: {
     marginTop: 8,
