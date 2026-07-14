@@ -19,7 +19,7 @@ import Input from '../../components/common/Input';
 import Dropdown from '../../components/common/Dropdown';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
-import Divider from '../../components/common/Divider';
+import MapPicker from '../../components/common/MapPicker';
 
 const CATEGORIES = [
   { id: '1', label: 'سالن زیبایی (چند منظوره)' },
@@ -38,38 +38,44 @@ export default function BusinessSettingsScreen({ navigation }) {
     categoryId: null,
     address: '',
     phone: '',
-    logoUrl: null,
-    instagram: '',
-    telegram: '',
+    coverUrl: null,
     workingHours: '',
+    location: null,
   });
 
-  // مقداردهی اولیه
+  // مقداردهی اولیه از Context
   useEffect(() => {
     setFormData({
       name: businessData.name || '',
       categoryId: businessData.categoryId || null,
       address: businessData.address || '',
       phone: businessData.phone || '',
-      logoUrl: businessData.logo || null,
-      instagram: businessData.socialMedia?.instagram || '',
-      telegram: businessData.socialMedia?.telegram || '',
+      coverUrl: businessData.coverUrl || businessData.logo || null,
       workingHours: businessData.workingHours || '',
+      location: businessData.location || null,
     });
   }, [businessData]);
 
   const updateField = (key, value) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const pickLogo = async () => {
+  const pickCover = async () => {
     const result = await launchImageLibrary({
       mediaType: 'photo',
       quality: 0.8,
     });
     if (!result.didCancel && result.assets) {
-      updateField('logoUrl', result.assets[0].uri);
+      updateField('coverUrl', result.assets[0].uri);
     }
+  };
+
+  const handleLocationSelect = (location, mapAddress) => {
+    setFormData((prev) => ({
+      ...prev,
+      location,
+      address: mapAddress || prev.address,
+    }));
   };
 
   const handleSave = () => {
@@ -85,15 +91,14 @@ export default function BusinessSettingsScreen({ navigation }) {
     updateBusinessInfo({
       name: formData.name.trim(),
       categoryId: formData.categoryId,
-      category: CATEGORIES.find(c => c.id === formData.categoryId)?.label || '',
+      category:
+        CATEGORIES.find((c) => c.id === formData.categoryId)?.label || '',
       address: formData.address.trim(),
       phone: formData.phone.trim(),
-      logo: formData.logoUrl,
+      coverUrl: formData.coverUrl,
+      logo: formData.coverUrl, // سازگاری با ساختار قبلی
       workingHours: formData.workingHours.trim(),
-      socialMedia: {
-        instagram: formData.instagram.trim(),
-        telegram: formData.telegram.trim(),
-      },
+      location: formData.location,
     });
 
     Alert.alert('موفقیت', 'اطلاعات کسب‌وکار با موفقیت بروزرسانی شد', [
@@ -102,137 +107,219 @@ export default function BusinessSettingsScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper
-      padding={0}
-      edges={['bottom', 'left', 'right']}
-      keyboardAware
-    >
-      <Header title="تنظیمات سالن" onBackPress={() => navigation.goBack()} />
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
+      <Header title="تنظیمات کسب‌وکار" onBackPress={() => navigation.goBack()} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* لوگو */}
-        <View style={s.logoSection}>
-          <TouchableOpacity
-            style={[
-              s.logoPicker,
-              {
-                backgroundColor: colors.cardBackground,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={pickLogo}
-            activeOpacity={0.8}
-          >
-            {formData.logoUrl ? (
-              <Image source={{ uri: formData.logoUrl }} style={s.logoImage} />
-            ) : (
-              <View style={s.logoPlaceholder}>
-                <Icon name="add-a-photo" size={32} color={colors.primary} />
-                <Text
-                  style={[
-                    s.logoPlaceholderText,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  آپلود لوگو
-                </Text>
-              </View>
-            )}
-            {formData.logoUrl && (
-              <View style={s.changeLogoBadge}>
-                <Icon name="edit" size={12} color="#fff" />
-                <Text style={s.changeLogoText}>تغییر</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+        {/* ═══════════════ کاور کسب‌وکار ═══════════════ */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View style={[s.sectionIconBox, { backgroundColor: '#E91E6318' }]}>
+              <Icon name="panorama" size={18} color="#E91E63" />
+            </View>
+            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+              تصویر کاور
+            </Text>
+          </View>
+
+          <Card variant="default" padding={14} radius={16}>
+            <Text style={[s.coverHint, { color: colors.textSecondary }]}>
+              تصویر کاور در بالای صفحه پروفایل نمایش داده می‌شود
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                s.coverPicker,
+                {
+                  borderColor: formData.coverUrl
+                    ? colors.primary
+                    : colors.border,
+                  borderStyle: formData.coverUrl ? 'solid' : 'dashed',
+                },
+              ]}
+              onPress={pickCover}
+              activeOpacity={0.85}
+            >
+              {formData.coverUrl ? (
+                <View style={s.coverImageWrap}>
+                  <Image
+                    source={{ uri: formData.coverUrl }}
+                    style={s.coverImage}
+                  />
+                  <View
+                    style={[
+                      s.coverEditBadge,
+                      { backgroundColor: colors.primary },
+                    ]}
+                  >
+                    <Icon name="edit" size={12} color="#fff" />
+                    <Text style={s.coverEditText}>تغییر کاور</Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={s.coverPlaceholder}>
+                  <View
+                    style={[
+                      s.coverPlaceholderIcon,
+                      { backgroundColor: colors.primary + '20' },
+                    ]}
+                  >
+                    <Icon name="add-a-photo" size={36} color={colors.primary} />
+                  </View>
+                  <Text
+                    style={[s.coverPlaceholderTitle, { color: colors.textMain }]}
+                    numberOfLines={1}  // ✅ اضافه شد
+                  >
+                    آپلود کاور کسب‌وکار
+                  </Text>
+                  <Text
+                    style={[
+                      s.coverPlaceholderHint,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    ابعاد پیشنهادی: ۱۲۰۰×۴۰۰ پیکسل
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </Card>
         </View>
 
-        {/* اطلاعات پایه */}
-        <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-          اطلاعات پایه
-        </Text>
-        <Card variant="elevated" padding={16} radius={16}>
-          <Input
-            label="نام کسب‌وکار"
-            placeholder="مثال: سالن زیبایی نیلارام"
-            value={formData.name}
-            onChangeText={t => updateField('name', t)}
-            rightIcon={
-              <Icon name="store" size={22} color={colors.textSecondary} />
-            }
-          />
+        {/* ═══════════════ اطلاعات پایه ═══════════════ */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '18' }]}>
+              <Icon name="info" size={18} color={colors.primary} />
+            </View>
+            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+              اطلاعات پایه
+            </Text>
+          </View>
 
-          <Dropdown
-            label="دسته‌بندی اصلی"
-            placeholder="انتخاب نوع خدمات"
-            value={formData.categoryId}
-            options={CATEGORIES}
-            onSelect={v => updateField('categoryId', v)}
-          />
+          <Card variant="default" padding={16} radius={16}>
+            <Input
+              label="نام کسب‌وکار *"
+              placeholder="مثال: سالن زیبایی نیلارام"
+              value={formData.name}
+              onChangeText={(t) => updateField('name', t)}
+              rightIcon={<Icon name="store" size={22} color={colors.textSecondary} />}
+            />
 
-          <Input
-            label="شماره تماس"
-            placeholder="مثال: ۰۲۱-۲۲۳۳۴۴۵۵"
-            value={formData.phone}
-            onChangeText={t => updateField('phone', t)}
-            keyboardType="phone-pad"
-            rightIcon={
-              <Icon name="phone" size={22} color={colors.textSecondary} />
-            }
-          />
+            <Dropdown
+              label="دسته‌بندی اصلی *"
+              placeholder="انتخاب نوع خدمات"
+              value={formData.categoryId}
+              options={CATEGORIES}
+              onSelect={(v) => updateField('categoryId', v)}
+            />
 
-          <Input
-            label="ساعات کاری"
-            placeholder="مثال: شنبه تا پنج‌شنبه ۱۰ الی ۲۰"
-            value={formData.workingHours}
-            onChangeText={t => updateField('workingHours', t)}
-            rightIcon={
-              <Icon name="schedule" size={22} color={colors.textSecondary} />
-            }
-          />
+            <Input
+              label="شماره تماس"
+              placeholder="مثال: ۰۲۱-۲۲۳۳۴۴۵۵"
+              value={formData.phone}
+              onChangeText={(t) => updateField('phone', t)}
+              keyboardType="phone-pad"
+              rightIcon={<Icon name="phone" size={22} color={colors.textSecondary} />}
+            />
 
-          <Input
-            label="آدرس کامل"
-            placeholder="آدرس دقیق سالن"
-            value={formData.address}
-            onChangeText={t => updateField('address', t)}
-            multiline
-            numberOfLines={3}
-            rightIcon={
-              <Icon name="location-on" size={22} color={colors.textSecondary} />
-            }
-          />
-        </Card>
+            <Input
+              label="ساعات کاری"
+              placeholder="مثال: شنبه تا پنج‌شنبه ۱۰ الی ۲۰"
+              value={formData.workingHours}
+              onChangeText={(t) => updateField('workingHours', t)}
+              rightIcon={
+                <Icon name="schedule" size={22} color={colors.textSecondary} />
+              }
+            />
+          </Card>
+        </View>
 
-        <Divider spacing={20} />
+        {/* ═══════════════ آدرس و موقعیت ═══════════════ */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View style={[s.sectionIconBox, { backgroundColor: '#E5393518' }]}>
+              <Icon name="location-on" size={18} color="#E53935" />
+            </View>
+            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+              آدرس و موقعیت مکانی
+            </Text>
+          </View>
 
-        {/* شبکه‌های اجتماعی */}
-        <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-          شبکه‌های اجتماعی
-        </Text>
-        <Card variant="elevated" padding={16} radius={16}>
-          <Input
-            label="اینستاگرام"
-            placeholder="آیدی اینستاگرام (بدون @)"
-            value={formData.instagram}
-            onChangeText={t => updateField('instagram', t)}
-            rightIcon={<Icon name="photo-camera" size={22} color="#E1306C" />}
-          />
+          <Card variant="default" padding={16} radius={16}>
+            <Input
+              label="آدرس دقیق"
+              placeholder="آدرس کسب‌وکار خود را وارد کنید"
+              value={formData.address}
+              onChangeText={(t) => updateField('address', t)}
+              multiline
+              numberOfLines={2}
+              rightIcon={
+                <Icon name="location-on" size={22} color="#E53935" />
+              }
+            />
 
-          <Input
-            label="تلگرام"
-            placeholder="آیدی یا لینک تلگرام"
-            value={formData.telegram}
-            onChangeText={t => updateField('telegram', t)}
-            rightIcon={<Icon name="send" size={22} color="#0088cc" />}
-          />
-        </Card>
+            {/* راهنمای نقشه */}
+            <View
+              style={[
+                s.mapHintBox,
+                {
+                  backgroundColor: colors.primary + '08',
+                  borderColor: colors.primary + '25',
+                },
+              ]}
+            >
+              <Icon name="info-outline" size={14} color={colors.primary} />
+              <Text
+                style={[s.mapHintText, { color: colors.textSecondary }]}
+              >
+                با تپ روی نقشه یا جابه‌جا کردن پین، موقعیت دقیق کسب‌وکار
+                خود را مشخص کنید
+              </Text>
+            </View>
 
-        {/* دکمه ذخیره */}
+            {/* MapPicker */}
+            <View
+              style={[
+                s.mapWrapper,
+                { borderColor: colors.border },
+              ]}
+            >
+              <MapPicker
+                initialLocation={formData.location}
+                onLocationSelect={handleLocationSelect}
+                height={260}
+              />
+            </View>
+
+            {/* نمایش مختصات */}
+            {formData.location && (
+              <View
+                style={[
+                  s.coordsBox,
+                  {
+                    backgroundColor: colors.primary + '10',
+                    borderColor: colors.primary + '30',
+                  },
+                ]}
+              >
+                <Icon name="my-location" size={14} color={colors.primary} />
+                <Text style={[s.coordsText, { color: colors.primary }]}>
+                  مختصات: {formData.location.latitude.toFixed(5)},{' '}
+                  {formData.location.longitude.toFixed(5)}
+                </Text>
+                <View style={{ flex: 1 }} />
+                <Icon name="check-circle" size={16} color="#4CAF50" />
+              </View>
+            )}
+          </Card>
+        </View>
+
+        {/* ═══════════════ دکمه ذخیره ═══════════════ */}
         <View style={s.saveContainer}>
           <Button
             title="ذخیره تغییرات"
@@ -243,7 +330,12 @@ export default function BusinessSettingsScreen({ navigation }) {
             icon={<Icon name="check" size={20} color="#fff" />}
             iconPosition="right"
           />
+          <Text style={[s.saveHint, { color: colors.textSecondary }]}>
+            تغییرات پس از ذخیره در پروفایل عمومی کسب‌وکار نمایش داده می‌شود
+          </Text>
         </View>
+
+        <View style={{ height: 80 }} />
       </ScrollView>
     </ScreenWrapper>
   );
@@ -252,58 +344,145 @@ export default function BusinessSettingsScreen({ navigation }) {
 const s = StyleSheet.create({
   scrollContent: {
     padding: 16,
-    paddingBottom: 100,
+    paddingTop: 12,
   },
-  logoSection: {
+
+  // ═══════════════ بخش‌ها ═══════════════
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    gap: 8,
+    marginBottom: 10,
+    paddingHorizontal: 2,
   },
-  logoPicker: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+  sectionIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    width:'100%',
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  // ═══════════════ کاور ═══════════════
+  coverHint: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  coverPicker: {
+  width: '100%',
+    aspectRatio: 2,  // ✅ تغییر از 3 به 2.4 — ارتفاع بیشتر
+    minHeight: 170,    // ✅ حداقل ارتفاع تضمین‌شده
+    borderRadius: 16,  // ✅ کمی گردتر
     borderWidth: 2,
-    borderStyle: 'dashed',
     overflow: 'hidden',
-    position: 'relative',
   },
-  logoImage: {
+  coverImageWrap: {
     width: '100%',
     height: '100%',
+    position: 'relative',
   },
-  logoPlaceholder: {
+  coverImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  coverEditBadge: {
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  coverEditText: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: 'Vazir-Bold',
+  },
+  coverPlaceholder: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 8,
+    paddingHorizontal: 20,  // ✅ اضافه شد - فضای بیشتر برای متن
   },
-  logoPlaceholderText: {
-    fontSize: 11,
+  coverPlaceholderIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  coverPlaceholderTitle: {
+    fontSize: 14,  // ✅ کمی بزرگ‌تر
+    fontFamily: 'Vazir-Bold',
+    textAlign: 'center',  // ✅ اضافه شد - center کردن
+    width: '100%',  // ✅ اضافه شد - عرض کامل
+  },
+  coverPlaceholderHint: {
+    fontSize: 10,
     fontFamily: 'Vazir',
   },
-  changeLogoBadge: {
-    position: 'absolute',
-    bottom: 6,
-    right: 6,
+
+  // ═══════════════ نقشه ═══════════════
+  mapHintBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    gap: 8,
+    padding: 10,
     borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 12,
   },
-  changeLogoText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: 'Vazir-Bold',
+  mapHintText: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    flex: 1,
+    lineHeight: 17,
   },
-  sectionTitle: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-    marginBottom: 10,
+  mapWrapper: {
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
+  coordsBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  coordsText: {
+    fontSize: 11,
+    fontFamily: 'Vazir-Medium',
+  },
+
+  // ═══════════════ دکمه ذخیره ═══════════════
   saveContainer: {
-    marginTop: 24,
+    marginTop: 8,
+    gap: 10,
+    alignItems: 'center',
+  },
+  saveHint: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
   },
 });

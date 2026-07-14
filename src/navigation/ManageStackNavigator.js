@@ -76,7 +76,7 @@ export default function ManageStackNavigator() {
       <Stack.Screen
         name="BusinessSettings"
         component={BusinessSettingsScreen}
-        options={{ title: 'تنظیمات سالن' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Reviews"
