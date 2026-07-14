@@ -2,10 +2,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import SearchBar from '../common/SearchBar';
 import Avatar from '../common/Avatar';
+
+const toPersianDigit = (str) =>
+  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function HomeHeader({
   userName,
@@ -15,17 +18,28 @@ export default function HomeHeader({
   onSearchSubmit,
   onNotificationPress,
   notificationCount = 0,
+  onFilterPress,
+  hasActiveFilter = false,
 }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[s.headerContainer, {
-      backgroundColor: colors.primary,
-      paddingTop: insets.top + 8, // 🎯 insets.top + فاصله اضافی
-    }]}>
+    <View
+      style={[
+        s.headerContainer,
+        {
+          paddingTop: insets.top + 8,
+          backgroundColor: colors.primary,
+        },
+      ]}
+    >
+      {/* دایره‌های تزئینی پس‌زمینه */}
+      <View style={[s.decorCircle1, { borderColor: 'rgba(255,255,255,0.12)' }]} />
+      <View style={[s.decorCircle2, { borderColor: 'rgba(255,255,255,0.08)' }]} />
+
       <View style={s.headerContent}>
-        {/* ردیف بالا: آواتار + خوشامدگویی + نوتیفیکیشن */}
+        {/* ردیف بالا: آواتار + خوشامدگویی + اکشن‌ها */}
         <View style={s.topRow}>
           <View style={s.welcomeSection}>
             <Avatar
@@ -42,21 +56,42 @@ export default function HomeHeader({
               </Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={s.notificationBtn}
-            onPress={onNotificationPress}
-            activeOpacity={0.7}
-          >
-            <Icon name="notifications" size={24} color="#fff" />
-            {notificationCount > 0 && (
-              <View style={s.notificationBadge}>
-                <Text style={s.notificationBadgeText}>
-                  {notificationCount > 9 ? '۹+' : notificationCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+
+          {/* دکمه‌های فیلتر و زنگوله */}
+          <View style={s.actionsRow}>
+            {/* فیلتر */}
+            <TouchableOpacity
+              style={[
+                s.actionBtn,
+                hasActiveFilter && { backgroundColor: 'rgba(255,255,255,0.32)' },
+              ]}
+              onPress={onFilterPress}
+              activeOpacity={0.7}
+            >
+              <Icon name="tune" size={22} color="#fff" />
+              {hasActiveFilter && (
+                <View style={s.filterIndicator} />
+              )}
+            </TouchableOpacity>
+
+            {/* زنگوله با Badge */}
+            <TouchableOpacity
+              style={s.actionBtn}
+              onPress={onNotificationPress}
+              activeOpacity={0.7}
+            >
+              <Icon name="notifications" size={22} color="#fff" />
+              {notificationCount > 0 && (
+                <View style={s.notificationBadge}>
+                  <Text style={s.notificationBadgeText}>
+                    {notificationCount > 9 ? '۹+' : toPersianDigit(notificationCount)}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* نوار جستجو */}
         <View style={s.searchWrapper}>
           <SearchBar
@@ -73,15 +108,35 @@ export default function HomeHeader({
 
 const s = StyleSheet.create({
   headerContainer: {
-    // paddingTop حذف شد - الان داینامیک هست
-    paddingBottom: 30,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  // بقیه استایل‌ها بدون تغییر...
+  decorCircle1: {
+    position: 'absolute',
+    top: -40,
+    left: -40,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 2,
+  },
+  decorCircle2: {
+    position: 'absolute',
+    bottom: -50,
+    right: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 2,
+  },
   headerContent: {
     paddingHorizontal: 20,
-    gap: 20,
+    gap: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   topRow: {
     flexDirection: 'row',
@@ -103,23 +158,41 @@ const s = StyleSheet.create({
     gap: 2,
   },
   greetingText: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'Vazir',
-    color: '#ffffff90',
+    color: 'rgba(255,255,255,0.85)',
   },
   userName: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: 'Vazir-Bold',
-    color: '#ffffff',
+    color: '#fff',
   },
-  notificationBtn: {
-    width: 44,
-    height: 44,
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionBtn: {
+    width: 42,
+    height: 42,
     borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  filterIndicator: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FFD700',
+    borderWidth: 1.5,
+    borderColor: '#A88B7D',
   },
   notificationBadge: {
     position: 'absolute',
@@ -143,8 +216,8 @@ const s = StyleSheet.create({
   searchWrapper: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
     elevation: 4,
   },
 });

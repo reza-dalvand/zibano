@@ -7,28 +7,40 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
+import HomeHeader from '../../components/home/HomeHeader';
 import AdSlider from '../../components/home/AdSlider';
 import CategoryGrid from '../../components/home/CategoryGrid';
-import HomeHeader from '../../components/home/HomeHeader';
-import ServiceListCard from '../../components/home/ServiceListCard';
-import BusinessListCard from '../../components/home/BusinessListCard';
+import NotificationModal from '../../components/home/NotificationModal';
+import HomeFilterModal from '../../components/home/HomeFilterModal';
+import ModelRequestsSection from '../../components/home/ModelRequestsSection';
+import LineRentalSection from '../../components/home/LineRentalSection';
+import SeeAllButton from '../../components/home/SeeAllButton';
 import { useAuth } from '../../context/AuthContext';
 
-// ============ دیتای موقت ============
 const MOCK_ADS = [
   {
     id: 1,
     imageUrl: 'https://picsum.photos/800/400?random=1',
     title: 'جشنواره تخفیف‌های بهار کلینیک رُز',
     subtitle: 'تا ۳۰٪ تخفیف خدمات پوست',
+    badge: 'پیشنهاد ویژه',
   },
   {
     id: 2,
     imageUrl: 'https://picsum.photos/800/400?random=2',
     title: 'افتتاحیه سالن زیبایی لاویا',
     subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی',
+    badge: 'جدید',
+  },
+  {
+    id: 3,
+    imageUrl: 'https://picsum.photos/800/400?random=3',
+    title: 'لیزر با جدیدترین دستگاه ۲۰۲۴',
+    subtitle: 'مرکز رویال - تخفیف ویژه',
+    badge: 'پرفروش',
   },
 ];
 
@@ -43,78 +55,18 @@ const MOCK_CATEGORIES = [
   { id: 8, name: 'ماساژ', icon: 'self-improvement', color: '#607D8B' },
 ];
 
-const MOCK_SERVICES = [
-  {
-    id: 1,
-    name: 'فیشیال تخصصی پوست',
-    business: 'کلینیک صدف',
-    price: '۷۵۰,۰۰۰',
-    originalPrice: '۹۵۰,۰۰۰',
-    rating: '۴.۸',
-    image: 'https://picsum.photos/300/300?random=11',
-    discount: 20,
-    duration: '۶۰ دقیقه',
-  },
-  {
-    id: 2,
-    name: 'کاشت مژه هالیوودی',
-    business: 'سالن زیبایی افرا',
-    price: '۵۸۰,۰۰۰',
-    originalPrice: '۵۸۰,۰۰۰',
-    rating: '۴.۹',
-    image: 'https://picsum.photos/300/300?random=12',
-    discount: 0,
-    duration: '۹۰ دقیقه',
-  },
-  {
-    id: 3,
-    name: 'لیزر فول بادی',
-    business: 'مرکز لیزر رویال',
-    price: '۲,۵۰۰,۰۰۰',
-    originalPrice: '۳,۲۰۰,۰۰۰',
-    rating: '۴.۷',
-    image: 'https://picsum.photos/300/300?random=13',
-    discount: 22,
-    duration: '۱۲۰ دقیقه',
-  },
-];
-
-const MOCK_BUSINESSES = [
-  {
-    id: 1,
-    name: 'مجموعه زیبایی و سلامت نیلارام',
-    address: 'تهران، سعادت آباد',
-    rating: '۵.۰',
-    reviewsCount: 142,
-    VIP: true,
-    logo: 'https://picsum.photos/200?random=21',
-    servicesCount: 24,
-    category: 'کلینیک پوست و مو',
-  },
-  {
-    id: 2,
-    name: 'سالن تخصصی کراتین و رنگ موی النا',
-    address: 'تهران، نیاوران',
-    rating: '۴.۷',
-    reviewsCount: 89,
-    VIP: false,
-    logo: 'https://picsum.photos/200?random=22',
-    servicesCount: 18,
-    category: 'سالن زیبایی',
-  },
-];
-// =================================
-
-// کامپوننت سکشن با عنوان و "مشاهده همه"
-function SectionHeader({ title, onSeeAll, colors }) {
+function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
   return (
     <View style={s.sectionHeader}>
-      <Text style={[s.sectionTitle, { color: colors.textMain }]}>{title}</Text>
-      {onSeeAll && (
-        <TouchableOpacity onPress={onSeeAll}>
-          <Text style={[s.seeAll, { color: colors.primary }]}>مشاهده همه</Text>
-        </TouchableOpacity>
-      )}
+      <View style={s.titleRow}>
+        {icon && (
+          <View style={[s.iconBox, { backgroundColor: (iconColor || colors.primary) + '15' }]}>
+            <Icon name={icon} size={18} color={iconColor || colors.primary} />
+          </View>
+        )}
+        <Text style={[s.sectionTitle, { color: colors.textMain }]}>{title}</Text>
+      </View>
+      {onSeeAll && <SeeAllButton onPress={onSeeAll} count={count} />}
     </View>
   );
 }
@@ -124,10 +76,17 @@ export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filters, setFilters] = useState({});
+
+  const hasActiveFilter = Object.values(filters).some(
+    (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0)
+  );
+  const notificationCount = 3;
 
   return (
     <ScreenWrapper scrollable padding={0} edges={['bottom', 'left', 'right']}>
-      {/* هدر مدرن */}
       <HomeHeader
         userName={user?.name}
         userAvatar={user?.avatar}
@@ -136,8 +95,10 @@ export default function HomeScreen({ navigation }) {
         onSearchSubmit={() =>
           navigation?.navigate('SearchFilter', { query: searchQuery })
         }
-        onNotificationPress={() => console.log('Notifications')}
-        notificationCount={3}
+        onNotificationPress={() => setNotificationModalVisible(true)}
+        notificationCount={notificationCount}
+        onFilterPress={() => setFilterModalVisible(true)}
+        hasActiveFilter={hasActiveFilter}
       />
 
       <View style={s.bodyContainer}>
@@ -145,17 +106,23 @@ export default function HomeScreen({ navigation }) {
         <View style={s.section}>
           <AdSlider
             ads={MOCK_ADS}
-            onPress={ad => console.log('Ad pressed:', ad.id)}
+            onPress={(ad) => console.log('Ad pressed:', ad.id)}
           />
         </View>
 
         {/* ۲. دسته‌بندی خدمات */}
         <View style={s.section}>
-          <SectionHeader title="دسته‌بندی خدمات" colors={colors} />
+          <SectionHeader
+            title="دسته‌بندی خدمات"
+            colors={colors}
+            icon="category"
+            iconColor="#FF9800"
+            count={MOCK_CATEGORIES.length}
+          />
           <CategoryGrid
             categories={MOCK_CATEGORIES}
             selectedId={selectedCategory}
-            onSelect={item => {
+            onSelect={(item) => {
               setSelectedCategory(item.id);
               navigation.navigate('CategoryBusinesses', {
                 categoryId: item.id,
@@ -165,50 +132,33 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* ۳. محبوب‌ترین خدمات */}
-        <View style={s.section}>
-          <SectionHeader
-            title="🔥 محبوب‌ترین خدمات"
-            onSeeAll={() => console.log('See all services')}
-            colors={colors}
-          />
+        {/* ۳. فرصت‌های مدلینگ */}
+        <ModelRequestsSection
+          onSeeAll={() => console.log('See all model requests')}
+          onItemPress={(item) => console.log('Model request:', item.id)}
+        />
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={s.servicesScroll}
-          >
-            {MOCK_SERVICES.map(service => (
-              <ServiceListCard
-                key={service.id}
-                service={service}
-                onPress={() =>
-                  navigation?.navigate('ServiceDetail', { id: service.id })
-                }
-              />
-            ))}
-          </ScrollView>
-        </View>
+        {/* ۴. فرصت‌های همکاری / اجاره لاین */}
+        <LineRentalSection
+          onSeeAll={() => console.log('See all line rentals')}
+          onItemPress={(item) => console.log('Line rental:', item.id)}
+        />
 
-        {/* ۴. سالن‌های برتر */}
-        <View style={[s.section, s.lastSection]}>
-          <SectionHeader
-            title="⭐ سالن‌ها و کلینیک‌های برتر"
-            onSeeAll={() => console.log('See all businesses')}
-            colors={colors}
-          />
+        {/* ❌ بخش سالن‌ها و کلینیک‌های برتر حذف شد */}
 
-          {MOCK_BUSINESSES.map(biz => (
-            <BusinessListCard
-              key={biz.id}
-              business={biz}
-              onPress={() =>
-                navigation?.navigate('BusinessDetails', { id: biz.id })
-              }
-            />
-          ))}
-        </View>
       </View>
+
+      <NotificationModal
+        visible={notificationModalVisible}
+        onClose={() => setNotificationModalVisible(false)}
+      />
+
+      <HomeFilterModal
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        onApply={setFilters}
+        currentFilters={filters}
+      />
     </ScreenWrapper>
   );
 }
@@ -216,30 +166,33 @@ export default function HomeScreen({ navigation }) {
 const s = StyleSheet.create({
   bodyContainer: {
     paddingHorizontal: 20,
+    paddingTop: 16,
     paddingBottom: 120,
   },
   section: {
-    marginTop: 24,
-  },
-  lastSection: {
-    marginBottom: 40,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
+    gap: 8,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: 'Vazir-Bold',
-  },
-  seeAll: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Medium',
-  },
-  servicesScroll: {
-    gap: 12,
-    paddingRight: 4,
   },
 });
