@@ -14,10 +14,8 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import EmptyState from '../../components/common/EmptyState';
 import CategoryHeader from '../../components/home/CategoryHeader';
 import BusinessListCard from '../../components/home/BusinessListCard';
-import CategoryFilterModal from '../../components/home/CategoryFilterModal';
-import ActiveFiltersBar from '../../components/home/ActiveFiltersBar';
+import { getSubServicesForCategory } from '../../constants/categorySubServices';
 
-// مپ کردن آیکون‌ها و رنگ‌ها برای دسته‌بندی‌های مختلف
 const CATEGORY_META = {
   1: { icon: 'face', color: '#E91E63' },
   2: { icon: 'brush', color: '#9C27B0' },
@@ -29,23 +27,17 @@ const CATEGORY_META = {
   8: { icon: 'self-improvement', color: '#607D8B' },
 };
 
-const INITIAL_FILTERS = {
-  province: null,
-  city: null,
-  minRating: '0',
-  sortBy: 'top_rated',
-};
-
-// ============ دیتای موقت با فیلدهای جدید ============
 const MOCK_BUSINESSES = [
   {
     id: '1',
-    name: 'مجموعه زیبایی و سلامت نیلارام',
+    name: 'کلینیک زیبایی صدف',
+    serviceType: 'فیشیال VIP عروس',
+    subServiceId: 'facial_vip',
     address: 'تهران، سعادت آباد، خیابان سرو غربی',
     rating: '۵.۰',
     ratingNum: 5.0,
     reviewsCount: 142,
-    VIP: true,
+    discount: 20,
     logo: 'https://picsum.photos/200?random=21',
     servicesCount: 24,
     category: 'کلینیک پوست و مو',
@@ -54,12 +46,14 @@ const MOCK_BUSINESSES = [
   },
   {
     id: '2',
-    name: 'سالن تخصصی کراتین و رنگ موی النا',
+    name: 'سالن زیبایی ماهرو',
+    serviceType: 'میکاپ عروس اروپایی',
+    subServiceId: 'makeup_bride',
     address: 'تهران، نیاوران',
     rating: '۴.۷',
     ratingNum: 4.7,
     reviewsCount: 89,
-    VIP: false,
+    discount: 15,
     logo: 'https://picsum.photos/200?random=22',
     servicesCount: 18,
     category: 'سالن زیبایی',
@@ -68,40 +62,46 @@ const MOCK_BUSINESSES = [
   },
   {
     id: '3',
-    name: 'کلینیک زیبایی صدف',
+    name: 'کلینیک رویال لیزر',
+    serviceType: 'لیزر الکساندرایت فول بادی',
+    subServiceId: 'laser_alex',
     address: 'اصفهان، خیابان چهارباغ',
     rating: '۴.۹',
     ratingNum: 4.9,
     reviewsCount: 215,
-    VIP: true,
+    discount: 30,
     logo: 'https://picsum.photos/200?random=23',
     servicesCount: 32,
-    category: 'کلینیک پوست و مو',
+    category: 'مرکز لیزر',
     provinceId: 'isfahan',
     cityId: 'isfahan-city',
   },
   {
     id: '4',
-    name: 'سالن زیبایی افرا',
+    name: 'سالن افرا',
+    serviceType: 'کاشت ناخن ژله‌ای طرح‌دار',
+    subServiceId: 'nail_gel',
     address: 'کرج، میدان کرج',
     rating: '۴.۶',
     ratingNum: 4.6,
     reviewsCount: 67,
-    VIP: false,
+    discount: 0,
     logo: 'https://picsum.photos/200?random=24',
     servicesCount: 15,
-    category: 'سالن زیبایی',
+    category: 'مرکز کاشت ناخن',
     provinceId: 'alborz',
     cityId: 'karaj',
   },
   {
     id: '5',
-    name: 'مرکز لیزر رویال',
+    name: 'مرکز لیزر پارسه',
+    serviceType: 'لیزر دایود صورت',
+    subServiceId: 'laser_diode',
     address: 'تهران، شهرک غرب',
     rating: '۴.۸',
     ratingNum: 4.8,
     reviewsCount: 178,
-    VIP: true,
+    discount: 25,
     logo: 'https://picsum.photos/200?random=25',
     servicesCount: 12,
     category: 'مرکز لیزر',
@@ -111,87 +111,82 @@ const MOCK_BUSINESSES = [
   {
     id: '6',
     name: 'ناخن گالری پریا',
+    serviceType: 'ژلیش ناخن مینیمال',
+    subServiceId: 'nail_gelish',
     address: 'کرج، فردیس',
     rating: '۴.۴',
     ratingNum: 4.4,
     reviewsCount: 56,
-    VIP: false,
+    discount: 0,
     logo: 'https://picsum.photos/200?random=26',
     servicesCount: 8,
     category: 'مرکز کاشت ناخن',
     provinceId: 'alborz',
     cityId: 'fardis',
   },
+  {
+    id: '7',
+    name: 'سالن النا',
+    serviceType: 'میکاپ مجلسی شاین',
+    subServiceId: 'makeup_party',
+    address: 'تهران، ونک',
+    rating: '۴.۹',
+    ratingNum: 4.9,
+    reviewsCount: 124,
+    discount: 10,
+    logo: 'https://picsum.photos/200?random=27',
+    servicesCount: 20,
+    category: 'سالن زیبایی',
+    provinceId: 'tehran',
+    cityId: 'tehran-city',
+  },
+  {
+    id: '8',
+    name: 'کلینیک ماه',
+    serviceType: 'هیدروفیشیال تخصصی',
+    subServiceId: 'facial_hydro',
+    address: 'مشهد، بلوار وکیل‌آباد',
+    rating: '۴.۷',
+    ratingNum: 4.7,
+    reviewsCount: 98,
+    discount: 0,
+    logo: 'https://picsum.photos/200?random=28',
+    servicesCount: 14,
+    category: 'کلینیک پوست و مو',
+    provinceId: 'khorasan',
+    cityId: 'mashhad',
+  },
 ];
-// =================================
 
 export default function CategoryBusinessesScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { categoryId, categoryName } = route.params || {};
-
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedSubService, setSelectedSubService] = useState(null);
 
-  // گرفتن متای دسته (آیکون و رنگ)
   const categoryMeta = CATEGORY_META[categoryId] || {
     icon: 'spa',
     color: colors.primary,
   };
+  const subServices = getSubServicesForCategory(categoryId);
 
-  // محاسبه تعداد فیلترهای فعال
-  const activeFiltersCount =
-    (filters.province ? 1 : 0) +
-    (filters.city ? 1 : 0) +
-    (filters.minRating !== '0' ? 1 : 0) +
-    (filters.sortBy && filters.sortBy !== 'top_rated' ? 1 : 0);
-
-  // فیلتر و مرتب‌سازی داده‌ها
   const filteredData = useMemo(() => {
     let data = [...MOCK_BUSINESSES];
-
-    // فیلتر بر اساس جستجو
     if (search.trim()) {
+      const q = search.trim().toLowerCase();
       data = data.filter(
-        item => item.name.includes(search) || item.address.includes(search),
+        item =>
+          item.name.toLowerCase().includes(q) ||
+          item.address.toLowerCase().includes(q) ||
+          (item.serviceType && item.serviceType.toLowerCase().includes(q)),
       );
     }
-
-    // فیلتر بر اساس استان
-    if (filters.province) {
-      data = data.filter(item => item.provinceId === filters.province);
+    if (selectedSubService) {
+      data = data.filter(item => item.subServiceId === selectedSubService);
     }
-
-    // فیلتر بر اساس شهر
-    if (filters.city) {
-      data = data.filter(item => item.cityId === filters.city);
-    }
-
-    // فیلتر بر اساس امتیاز
-    if (filters.minRating !== '0') {
-      const minRatingNum = parseFloat(filters.minRating);
-      data = data.filter(item => item.ratingNum >= minRatingNum);
-    }
-
-    // مرتب‌سازی
-    switch (filters.sortBy) {
-      case 'top_rated':
-        data.sort((a, b) => b.ratingNum - a.ratingNum);
-        break;
-      case 'most_booked':
-        data.sort((a, b) => b.reviewsCount - a.reviewsCount);
-        break;
-      case 'highest_discount':
-        // شبیه‌سازی
-        break;
-      case 'nearest':
-        // شبیه‌سازی
-        break;
-    }
-
     return data;
-  }, [search, filters]);
+  }, [search, selectedSubService]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -202,15 +197,12 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
     navigation.navigate('BusinessDetails', { businessId: business.id });
   };
 
-  const handleClearFilters = () => setFilters(INITIAL_FILTERS);
-
   return (
     <ScreenWrapper
       scrollable={false}
       padding={0}
       edges={['bottom', 'left', 'right']}
     >
-      {/* هدر گرادیانی با آیکون و SearchBar */}
       <CategoryHeader
         categoryName={categoryName}
         categoryIcon={categoryMeta.icon}
@@ -221,50 +213,75 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
         onBackPress={() => navigation.goBack()}
       />
 
-      {/* دکمه فیلتر شناور */}
-      <View style={s.filterButtonContainer}>
-        <TouchableOpacity
-          style={[
-            s.filterButton,
-            {
-              backgroundColor:
-                activeFiltersCount > 0 ? colors.primary : colors.cardBackground,
-              borderColor:
-                activeFiltersCount > 0 ? colors.primary : colors.border,
-            },
-          ]}
-          onPress={() => setFilterModalVisible(true)}
-          activeOpacity={0.8}
-        >
-          <Icon
-            name="tune"
-            size={20}
-            color={activeFiltersCount > 0 ? '#fff' : colors.textMain}
-          />
-          <Text
-            style={[
-              s.filterButtonText,
-              {
-                color: activeFiltersCount > 0 ? '#fff' : colors.textMain,
-              },
-            ]}
+      {subServices.length > 0 && (
+        <View style={s.subServiceSection}>
+          <View style={s.subServiceHeader}>
+            <Icon name="filter-list" size={16} color={colors.textMain} />
+            <Text style={[s.subServiceTitle, { color: colors.textMain }]}>
+              نوع خدمت
+            </Text>
+            {selectedSubService && (
+              <TouchableOpacity
+                onPress={() => setSelectedSubService(null)}
+                style={[
+                  s.clearFilterBtn,
+                  { backgroundColor: colors.border + '30' },
+                ]}
+              >
+                <Icon name="close" size={12} color={colors.textSecondary} />
+                <Text style={[s.clearFilterText, { color: colors.textSecondary }]}>
+                  پاک کردن
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={s.subServiceChips}
           >
-            فیلتر و مرتب‌سازی
-          </Text>
-          {activeFiltersCount > 0 && (
-            <View style={s.filterBadge}>
-              <Text style={s.filterBadgeText}>{activeFiltersCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-
-      {/* چیپ‌های فیلتر فعال */}
-      <ActiveFiltersBar
-        filters={filters}
-        onChange={setFilters}
-        onClearAll={handleClearFilters}
-      />
+            {subServices.map(sub => {
+              const isSelected = selectedSubService === sub.id;
+              return (
+                <TouchableOpacity
+                  key={sub.id}
+                  onPress={() =>
+                    setSelectedSubService(isSelected ? null : sub.id)
+                  }
+                  style={[
+                    s.subServiceChip,
+                    {
+                      backgroundColor: isSelected
+                        ? colors.primary
+                        : colors.cardBackground,
+                      borderColor: isSelected
+                        ? colors.primary
+                        : colors.border,
+                    },
+                  ]}
+                  activeOpacity={0.8}
+                >
+                  {/* ✅ آیکون یکسان برای همه چیپ‌ها */}
+                  <Icon
+                    name={categoryMeta.icon}
+                    size={14}
+                    color={isSelected ? '#fff' : colors.textMain}
+                  />
+                  <Text
+                    style={[
+                      s.subServiceChipText,
+                      { color: isSelected ? '#fff' : colors.textMain },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {sub.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -277,13 +294,13 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
           />
         }
       >
-        {/* لیست کسب‌وکارها */}
         <View style={s.listContainer}>
           {filteredData.length > 0 ? (
             filteredData.map(business => (
               <BusinessListCard
                 key={business.id}
                 business={business}
+                categoryIcon={categoryMeta.icon}
                 onPress={() => handleBusinessPress(business)}
               />
             ))
@@ -293,19 +310,21 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
                 icon="🔍"
                 title="کسب‌وکاری یافت نشد"
                 description={
-                  search || activeFiltersCount > 0
-                    ? `با این فیلترها نتیجه‌ای پیدا نشد. لطفاً فیلترها را تغییر دهید.`
-                    : `در حال حاضر کسب‌وکاری در این دسته ثبت نشده است.`
+                  selectedSubService
+                    ? 'در این زیردسته نتیجه‌ای پیدا نشد. فیلتر را تغییر دهید.'
+                    : search
+                    ? 'با این عبارت جستجو نتیجه‌ای پیدا نشد.'
+                    : 'در حال حاضر کسب‌وکاری در این دسته ثبت نشده است.'
                 }
                 actionLabel={
-                  activeFiltersCount > 0
-                    ? 'حذف همه فیلترها'
+                  selectedSubService
+                    ? 'حذف فیلتر زیرخدمت'
                     : search
                     ? 'پاک کردن جستجو'
                     : 'بازگشت به خانه'
                 }
                 onAction={() => {
-                  if (activeFiltersCount > 0) handleClearFilters();
+                  if (selectedSubService) setSelectedSubService(null);
                   else if (search) setSearch('');
                   else navigation.goBack();
                 }}
@@ -314,66 +333,62 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
           )}
         </View>
       </ScrollView>
-
-      {/* مدال فیلتر */}
-      <CategoryFilterModal
-        visible={filterModalVisible}
-        onClose={() => setFilterModalVisible(false)}
-        onApply={setFilters}
-        currentFilters={filters}
-      />
     </ScreenWrapper>
   );
 }
 
 const s = StyleSheet.create({
-  filterButtonContainer: {
+  subServiceSection: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 4,
+    gap: 8,
   },
-  filterButton: {
+  subServiceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    gap: 6,
   },
-  filterButtonText: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Medium',
+  subServiceTitle: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+    flex: 1,
   },
-  filterBadge: {
-    backgroundColor: '#E53935',
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+  clearFilterBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-    borderWidth: 2,
-    borderColor: '#fff',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
-  filterBadgeText: {
+  clearFilterText: {
     fontSize: 11,
     fontFamily: 'Vazir-Bold',
-    color: '#fff',
+  },
+  subServiceChips: {
+    gap: 8,
+    paddingRight: 4,
+  },
+  subServiceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  subServiceChipText: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
   },
   scrollContent: {
     paddingBottom: 120,
   },
   listContainer: {
     paddingHorizontal: 20,
-    paddingTop: 4,
+    paddingTop: 8,
     gap: 4,
   },
   emptyContainer: {
