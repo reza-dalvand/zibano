@@ -8,9 +8,9 @@ import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';
 import Chip from '../common/Chip';
 import Divider from '../common/Divider';
-import { PROVINCES, CITIES, MIN_RATINGS } from '../../constants/exploreFilters';
+import { PROVINCES, CITIES } from '../../constants/exploreFilters';
 
-// گزینه‌های مرتب‌سازی
+// ✅ فقط گزینه‌های مرتب‌سازی (حذف MIN_RATINGS)
 const SORT_OPTIONS = [
   { id: 'top_rated', label: 'بیشترین امتیاز', icon: 'star' },
   { id: 'most_booked', label: 'بیشترین رزرو', icon: 'trending-up' },
@@ -25,42 +25,34 @@ export default function CategoryFilterModal({
   currentFilters,
 }) {
   const { colors } = useTheme();
-
-  // state موقت برای تغییرات قبل از Apply
   const [province, setProvince] = useState(null);
   const [city, setCity] = useState(null);
-  const [minRating, setMinRating] = useState('0');
   const [sortBy, setSortBy] = useState('top_rated');
 
-  // وقتی مدال باز می‌شود، مقادیر فعلی را کپی کن
   useEffect(() => {
     if (visible && currentFilters) {
       setProvince(currentFilters.province);
       setCity(currentFilters.city);
-      setMinRating(currentFilters.minRating || '0');
       setSortBy(currentFilters.sortBy || 'top_rated');
     }
   }, [visible, currentFilters]);
 
   const handleApply = () => {
-    onApply({ province, city, minRating, sortBy });
+    onApply({ province, city, minRating: '0', sortBy });
     onClose();
   };
 
   const handleClear = () => {
     setProvince(null);
     setCity(null);
-    setMinRating('0');
     setSortBy('top_rated');
     onApply({ province: null, city: null, minRating: '0', sortBy: 'top_rated' });
     onClose();
   };
 
-  // محاسبه تعداد فیلترهای فعال
   const activeFiltersCount =
     (province ? 1 : 0) +
     (city ? 1 : 0) +
-    (minRating !== '0' ? 1 : 0) +
     (sortBy !== 'top_rated' ? 1 : 0);
 
   return (
@@ -104,7 +96,6 @@ export default function CategoryFilterModal({
               موقعیت مکانی
             </Text>
           </View>
-
           <Dropdown
             label="استان"
             placeholder="انتخاب استان"
@@ -112,10 +103,9 @@ export default function CategoryFilterModal({
             options={PROVINCES}
             onSelect={(val) => {
               setProvince(val);
-              setCity(null); // با تغییر استان، شهر ریست شود
+              setCity(null);
             }}
           />
-
           <Dropdown
             label="شهر"
             placeholder={province ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
@@ -135,7 +125,6 @@ export default function CategoryFilterModal({
               مرتب‌سازی بر اساس
             </Text>
           </View>
-
           <View style={s.sortGrid}>
             {SORT_OPTIONS.map((option) => {
               const isSelected = option.id === sortBy;
@@ -144,7 +133,13 @@ export default function CategoryFilterModal({
                   key={option.id}
                   label={option.label}
                   selected={isSelected}
-                  icon={<Icon name={option.icon} size={14} color={isSelected ? colors.primary : colors.textSecondary} />}
+                  icon={
+                    <Icon
+                      name={option.icon}
+                      size={14}
+                      color={isSelected ? colors.primary : colors.textSecondary}
+                    />
+                  }
                   onPress={() => setSortBy(option.id)}
                 />
               );
@@ -152,28 +147,7 @@ export default function CategoryFilterModal({
           </View>
         </View>
 
-        <Divider spacing={16} />
-
-        {/* بخش ۳: حداقل امتیاز */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <Icon name="star" size={20} color={colors.primary} />
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              حداقل امتیاز
-            </Text>
-          </View>
-
-          <View style={s.ratingsRow}>
-            {MIN_RATINGS.map((r) => (
-              <Chip
-                key={r.id}
-                label={r.label}
-                selected={minRating === r.id}
-                onPress={() => setMinRating(r.id)}
-              />
-            ))}
-          </View>
-        </View>
+        {/* ❌ بخش حداقل امتیاز حذف شد */}
       </ScrollView>
     </BottomSheet>
   );
@@ -197,11 +171,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
   },
   sortGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  ratingsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,

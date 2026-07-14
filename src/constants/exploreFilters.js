@@ -34,6 +34,8 @@ export const BUSINESS_TYPES = [
   { id: 'makeup', label: 'میکاپ و گریم' },
 ];
 
+
+
 // ✅ جدید: فیلتر تخفیف‌ها (جایگزین حداقل امتیاز)
 export const DISCOUNT_FILTERS = [
   { id: '0', label: 'همه' },
