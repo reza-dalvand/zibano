@@ -37,8 +37,8 @@ const SERVICE_TYPES = [
 
 const COLLAB_TYPES = [
   { id: 'percent', label: 'درصدی', icon: 'pie-chart', color: '#9C27B0', hint: 'تقسیم درآمد با درصد توافقی' },
-  { id: 'fixed', label: 'اجاره ثابت', icon: 'attach-money', color: '#2196F3', hint: 'مبلغ ثابت ماهانه' },
-  { id: 'combined', label: 'ترکیبی', icon: 'balance', color: '#FF9800', hint: 'اجاره ثابت + درصد' },
+  { id: 'fixed', label: 'اجاره ثابت', icon: 'attach-money', color: '#2196F3', hint: 'مبلغ ثابت ماهانه + رهن (اختیاری)' },
+  { id: 'hourly', label: 'ساعتی', icon: 'schedule', color: '#FF9800', hint: 'به ازای هر ساعت' },
 ];
 
 const MAX_DESC_LENGTH = 300;
@@ -70,12 +70,11 @@ const formatPercentInput = (text) => {
   return toPersianDigits(String(num));
 };
 
-// 🎯 تابع کمکی برای گرفتن عنوان بخش قیمت
 const getPriceSectionTitle = (collabType) => {
   switch (collabType) {
     case 'percent': return 'درصد تقسیم درآمد';
-    case 'fixed': return 'مبلغ اجاره ماهانه';
-    case 'combined': return 'مبلغ ثابت + درصد';
+    case 'fixed': return 'مبلغ اجاره ماهانه + رهن';
+    case 'hourly': return 'نرخ ساعتی';
     default: return 'قیمت';
   }
 };
@@ -91,12 +90,11 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
   const [lineImage, setLineImage] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // فیلدهای قیمت
   const [percentSalon, setPercentSalon] = useState('');
   const [percentPartner, setPercentPartner] = useState('');
   const [fixedAmount, setFixedAmount] = useState('');
-  const [combinedFixed, setCombinedFixed] = useState('');
-  const [combinedPercent, setCombinedPercent] = useState('');
+  const [fixedDeposit, setFixedDeposit] = useState('');
+  const [hourlyRate, setHourlyRate] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -109,8 +107,8 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
         setPercentSalon(editingAd.percentSalon ? toPersianDigits(String(editingAd.percentSalon)) : '');
         setPercentPartner(editingAd.percentPartner ? toPersianDigits(String(editingAd.percentPartner)) : '');
         setFixedAmount(editingAd.fixedAmount ? formatPriceInput(String(editingAd.fixedAmount)) : '');
-        setCombinedFixed(editingAd.combinedFixed ? formatPriceInput(String(editingAd.combinedFixed)) : '');
-        setCombinedPercent(editingAd.combinedPercent ? toPersianDigits(String(editingAd.combinedPercent)) : '');
+        setFixedDeposit(editingAd.fixedDeposit ? formatPriceInput(String(editingAd.fixedDeposit)) : '');
+        setHourlyRate(editingAd.hourlyRate ? formatPriceInput(String(editingAd.hourlyRate)) : '');
       } else {
         setTitle('');
         setServiceTypeId(null);
@@ -120,8 +118,8 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
         setPercentSalon('');
         setPercentPartner('');
         setFixedAmount('');
-        setCombinedFixed('');
-        setCombinedPercent('');
+        setFixedDeposit('');
+        setHourlyRate('');
       }
       setErrors({});
     }
@@ -132,8 +130,8 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
     setPercentSalon('');
     setPercentPartner('');
     setFixedAmount('');
-    setCombinedFixed('');
-    setCombinedPercent('');
+    setFixedDeposit('');
+    setHourlyRate('');
     if (errors.collabType) setErrors((prev) => ({ ...prev, collabType: '' }));
     if (errors.price) setErrors((prev) => ({ ...prev, price: '' }));
   };
@@ -186,13 +184,13 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
     if (errors.price) setErrors((prev) => ({ ...prev, price: '' }));
   };
 
-  const handleCombinedFixedChange = (text) => {
-    setCombinedFixed(formatPriceInput(text));
+  const handleFixedDepositChange = (text) => {
+    setFixedDeposit(formatPriceInput(text));
     if (errors.price) setErrors((prev) => ({ ...prev, price: '' }));
   };
 
-  const handleCombinedPercentChange = (text) => {
-    setCombinedPercent(formatPercentInput(text));
+  const handleHourlyRateChange = (text) => {
+    setHourlyRate(formatPriceInput(text));
     if (errors.price) setErrors((prev) => ({ ...prev, price: '' }));
   };
 
@@ -222,22 +220,24 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
       }
     } else if (collabType === 'fixed') {
       const fixedNum = parseNumber(fixedAmount);
+      const depositNum = parseNumber(fixedDeposit);
       if (!fixedNum) {
         newErrors.price = 'مبلغ اجاره ماهانه را وارد کنید';
       } else {
-        priceData = { fixedAmount: fixedNum };
-        priceDisplay = `${toPersianDigits(fixedNum.toLocaleString('en-US'))} تومان`;
+        priceData = { fixedAmount: fixedNum, fixedDeposit: depositNum };
+        if (depositNum > 0) {
+          priceDisplay = `${toPersianDigits(fixedNum.toLocaleString('en-US'))} + ${toPersianDigits(depositNum.toLocaleString('en-US'))} رهن`;
+        } else {
+          priceDisplay = `${toPersianDigits(fixedNum.toLocaleString('en-US'))} تومان`;
+        }
       }
-    } else if (collabType === 'combined') {
-      const combFixedNum = parseNumber(combinedFixed);
-      const combPercentNum = parseNumber(combinedPercent);
-      if (!combFixedNum) {
-        newErrors.price = 'مبلغ ثابت را وارد کنید';
-      } else if (!combPercentNum) {
-        newErrors.price = 'درصد را وارد کنید';
+    } else if (collabType === 'hourly') {
+      const hourlyNum = parseNumber(hourlyRate);
+      if (!hourlyNum) {
+        newErrors.price = 'نرخ ساعتی را وارد کنید';
       } else {
-        priceData = { combinedFixed: combFixedNum, combinedPercent: combPercentNum };
-        priceDisplay = `${toPersianDigits(combFixedNum.toLocaleString('en-US'))} + ${toPersianDigits(String(combPercentNum))}٪`;
+        priceData = { hourlyRate: hourlyNum };
+        priceDisplay = `${toPersianDigits(hourlyNum.toLocaleString('en-US'))} / ساعت`;
       }
     }
 
@@ -271,10 +271,11 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
   const remainingChars = MAX_DESC_LENGTH - descLength;
   const isNearLimit = remainingChars <= 50 && remainingChars > 0;
   const isAtLimit = remainingChars === 0;
-
   const selectedService = SERVICE_TYPES.find((s) => s.id === serviceTypeId);
   const percentSum = parseNumber(percentSalon) + parseNumber(percentPartner);
   const isPercentValid = percentSum === 100 && parseNumber(percentSalon) > 0;
+
+  const hourlyNum = parseNumber(hourlyRate);
 
   return (
     <BottomSheet
@@ -282,17 +283,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
       onClose={onClose}
       title={isEditMode ? 'ویرایش آگهی لاین' : 'ثبت آگهی جدید لاین'}
       snapPoint={0.92}
-      footer={
-        <Button
-          title={isEditMode ? 'ذخیره تغییرات' : 'ثبت آگهی رایگان'}
-          onPress={handleSave}
-          variant="primary"
-          size="lg"
-          fullWidth
-          icon={<Icon name="check" size={20} color="#fff" />}
-          iconPosition="right"
-        />
-      }
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -441,7 +431,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                 <Text style={[s.priceHint, { color: colors.textSecondary }]}>
                   درصد سالن و همکار را وارد کنید (مجموع باید ۱۰۰٪ باشد)
                 </Text>
-
                 <View style={s.percentRow}>
                   <View style={s.percentField}>
                     <Text style={[s.percentFieldLabel, { color: colors.primary }]}>
@@ -460,7 +449,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                       <Text style={[s.percentSign, { color: colors.textSecondary }]}>٪</Text>
                     </View>
                   </View>
-
                   <View style={s.percentDivider}>
                     <View style={[s.percentDashLine, { backgroundColor: colors.border }]} />
                     <View style={[s.percentDash, { backgroundColor: colors.primary }]}>
@@ -468,7 +456,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                     </View>
                     <View style={[s.percentDashLine, { backgroundColor: colors.border }]} />
                   </View>
-
                   <View style={s.percentField}>
                     <Text style={[s.percentFieldLabel, { color: '#9C27B0' }]}>
                       سهم همکار
@@ -487,7 +474,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                     </View>
                   </View>
                 </View>
-
                 {parseNumber(percentSalon) > 0 ? (
                   <View style={[
                     s.percentSummary,
@@ -512,7 +498,6 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                     </Text>
                   </View>
                 ) : null}
-
                 <View style={[s.priceGuideBox, { backgroundColor: '#9C27B008', borderColor: '#9C27B025' }]}>
                   <Icon name="lightbulb" size={14} color="#9C27B0" />
                   <Text style={[s.priceGuideText, { color: colors.textSecondary }]}>
@@ -526,79 +511,121 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
             {collabType === 'fixed' ? (
               <Card variant="default" padding={14} radius={14}>
                 <Text style={[s.priceHint, { color: colors.textSecondary }]}>
-                  مبلغ ثابت ماهانه اجاره لاین را وارد کنید
+                  مبلغ ثابت ماهانه اجاره لاین را وارد کنید. مبلغ رهن اختیاری است (می‌تواند صفر باشد).
                 </Text>
                 <Input
-                  label="مبلغ اجاره ماهانه (تومان)"
+                  label="مبلغ اجاره ماهانه (تومان) *"
                   placeholder="مثال: ۵,۰۰۰,۰۰۰"
                   value={fixedAmount}
                   onChangeText={handleFixedAmountChange}
                   keyboardType="numeric"
                   rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
                 />
-                {fixedAmount ? (
-                  <View style={[s.priceGuideBox, { backgroundColor: '#2196F308', borderColor: '#2196F325' }]}>
-                    <Icon name="info-outline" size={14} color="#2196F3" />
-                    <Text style={[s.priceGuideText, { color: colors.textSecondary }]}>
-                      همکار ماهانه {fixedAmount} تومان به سالن پرداخت می‌کند و ۱۰۰٪ درآمد خدمات متعلق به خودش است
-                    </Text>
+                <Input
+                  label="مبلغ رهن (اختیاری)"
+                  placeholder="مثال: ۲۰,۰۰۰,۰۰۰ یا خالی بگذارید"
+                  value={fixedDeposit}
+                  onChangeText={handleFixedDepositChange}
+                  keyboardType="numeric"
+                  rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
+                />
+              {!!fixedAmount ? (
+                <View style={[s.priceGuideBox, { backgroundColor: '#2196F308', borderColor: '#2196F325' }]}>
+                  <Icon name="info-outline" size={14} color="#2196F3" />
+                  <Text style={[s.priceGuideText, { color: colors.textSecondary }]}>
+                    همکار ماهانه {fixedAmount} تومان به سالن پرداخت می‌کند و ۱۰۰٪ درآمد خدمات متعلق به خودش است.
+                    {parseNumber(fixedDeposit) > 0 ? <Text>{` همچنین ${fixedDeposit} تومان به عنوان رهن/ودیعه دریافت می‌کنید.`}</Text> : null}
+                  </Text>
+                </View>
+              ) : null}
+
+                {/* FIX: از !! استفاده شد تا string به boolean تبدیل بشه */}
+                {!!fixedAmount ? (
+                  <View style={[s.combinedPreview, { backgroundColor: '#2196F310', borderColor: '#2196F340' }]}>
+                    <View style={s.combinedPreviewHeader}>
+                      <Icon name="visibility" size={14} color="#2196F3" />
+                      <Text style={[s.combinedPreviewTitle, { color: '#2196F3' }]}>
+                        پیش‌نمایش قیمت در آگهی
+                      </Text>
+                    </View>
+                    <View style={s.combinedPreviewRow}>
+                      <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
+                        اجاره ماهانه:
+                      </Text>
+                      <Text style={[s.combinedPreviewValue, { color: colors.textMain }]}>
+                        {fixedAmount} تومان
+                      </Text>
+                    </View>
+                    {parseNumber(fixedDeposit) > 0 ? (
+                      <View style={s.combinedPreviewRow}>
+                        <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
+                          رهن / ودیعه:
+                        </Text>
+                        <Text style={[s.combinedPreviewValue, { color: colors.textMain }]}>
+                          {fixedDeposit} تومان
+                        </Text>
+                      </View>
+                    ) : null}
+                    {parseNumber(fixedDeposit) === 0 ? (
+                      <View style={s.combinedPreviewRow}>
+                        <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
+                          رهن / ودیعه:
+                        </Text>
+                        <Text style={[s.combinedPreviewValue, { color: colors.textSecondary, fontStyle: 'italic' }]}>
+                          بدون رهن
+                        </Text>
+                      </View>
+                    ) : null}
                   </View>
                 ) : null}
               </Card>
             ) : null}
 
-            {/* حالت ترکیبی */}
-            {collabType === 'combined' ? (
+            {/* حالت ساعتی */}
+            {collabType === 'hourly' ? (
               <Card variant="default" padding={14} radius={14}>
                 <Text style={[s.priceHint, { color: colors.textSecondary }]}>
-                  مبلغ ثابت ماهانه به علاوه درصدی از درآمد خدمات
+                  مبلغی که به ازای هر ساعت استفاده از لاین دریافت می‌کنید را وارد کنید
                 </Text>
-
                 <Input
-                  label="مبلغ ثابت ماهانه (تومان)"
-                  placeholder="مثال: ۳,۰۰۰,۰۰۰"
-                  value={combinedFixed}
-                  onChangeText={handleCombinedFixedChange}
+                  label="نرخ هر ساعت (تومان) *"
+                  placeholder="مثال: ۱۵۰,۰۰۰"
+                  value={hourlyRate}
+                  onChangeText={handleHourlyRateChange}
                   keyboardType="numeric"
                   rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
                 />
 
-                <View style={s.combinedPercentRow}>
-                  <View style={s.combinedPercentField}>
-                    <Input
-                      label="درصد از درآمد خدمات"
-                      placeholder="مثال: ۳۰"
-                      value={combinedPercent}
-                      onChangeText={handleCombinedPercentChange}
-                      keyboardType="numeric"
-                      maxLength={3}
-                      rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>٪</Text>}
-                    />
-                  </View>
-                </View>
-
-                {combinedFixed && combinedPercent ? (
+                {hourlyNum > 0 ? (
                   <View style={[s.combinedPreview, { backgroundColor: '#FF980010', borderColor: '#FF980040' }]}>
                     <View style={s.combinedPreviewHeader}>
-                      <Icon name="visibility" size={14} color="#FF9800" />
+                      <Icon name="schedule" size={14} color="#FF9800" />
                       <Text style={[s.combinedPreviewTitle, { color: '#FF9800' }]}>
-                        پیش‌نمایش پرداخت همکار
+                        پیش‌نمایش محاسبه
                       </Text>
                     </View>
                     <View style={s.combinedPreviewRow}>
                       <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
-                        ثابت ماهانه:
+                        ۲ ساعت:
                       </Text>
                       <Text style={[s.combinedPreviewValue, { color: colors.textMain }]}>
-                        {combinedFixed} تومان
+                        {toPersianDigits((hourlyNum * 2).toLocaleString('en-US'))} تومان
                       </Text>
                     </View>
                     <View style={s.combinedPreviewRow}>
                       <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
-                        درصد از درآمد:
+                        ۴ ساعت:
                       </Text>
                       <Text style={[s.combinedPreviewValue, { color: colors.textMain }]}>
-                        {toPersianDigits(String(parseNumber(combinedPercent)))}٪
+                        {toPersianDigits((hourlyNum * 4).toLocaleString('en-US'))} تومان
+                      </Text>
+                    </View>
+                    <View style={s.combinedPreviewRow}>
+                      <Text style={[s.combinedPreviewLabel, { color: colors.textSecondary }]}>
+                        ۸ ساعت (یک روز):
+                      </Text>
+                      <Text style={[s.combinedPreviewValue, { color: colors.textMain }]}>
+                        {toPersianDigits((hourlyNum * 8).toLocaleString('en-US'))} تومان
                       </Text>
                     </View>
                   </View>
@@ -607,7 +634,7 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
                 <View style={[s.priceGuideBox, { backgroundColor: '#FF980008', borderColor: '#FF980025' }]}>
                   <Icon name="lightbulb" size={14} color="#FF9800" />
                   <Text style={[s.priceGuideText, { color: colors.textSecondary }]}>
-                    ترکیب اجاره ثابت و درصدی، تعادل مناسبی بین درآمد تضمین‌شده و انگیزه همکار ایجاد می‌کند
+                    مدل ساعتی برای لاین‌هایی که به صورت موقت یا چند ساعت در روز استفاده می‌شوند مناسب است. همکار فقط به ازای ساعاتی که از لاین استفاده می‌کند پرداخت می‌کند.
                   </Text>
                 </View>
               </Card>
@@ -761,7 +788,26 @@ export default function CreateLineRentalAdSheet({ visible, onClose, onSave, edit
           </View>
         </Card>
 
-        <View style={{ height: 20 }} />
+        {/* دکمه ثبت/ذخیره */}
+        <View style={s.submitSection}>
+          <Button
+            title={isEditMode ? 'ذخیره تغییرات' : 'ثبت آگهی رایگان'}
+            onPress={handleSave}
+            variant="primary"
+            size="lg"
+            fullWidth
+            icon={<Icon name="check" size={20} color="#fff" />}
+            iconPosition="right"
+            style={s.submitBtn}
+          />
+          <Text style={[s.submitHint, { color: colors.textSecondary }]}>
+            {isEditMode
+              ? 'تغییرات شما بلافاصله اعمال خواهد شد'
+              : 'آگهی شما پس از ثبت، در بخش آگهی‌های لاین نمایش داده می‌شود'}
+          </Text>
+        </View>
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </BottomSheet>
   );
@@ -801,8 +847,6 @@ const s = StyleSheet.create({
   percentSummaryText: { fontSize: 11, fontFamily: 'Vazir-Medium', flex: 1 },
   priceGuideBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 10, padding: 10, borderRadius: 10, borderWidth: 1 },
   priceGuideText: { fontSize: 11, fontFamily: 'Vazir', flex: 1, lineHeight: 18 },
-  combinedPercentRow: { flexDirection: 'row', gap: 8 },
-  combinedPercentField: { flex: 1 },
   combinedPreview: { marginTop: 10, padding: 12, borderRadius: 12, borderWidth: 1, gap: 6 },
   combinedPreviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   combinedPreviewTitle: { fontSize: 12, fontFamily: 'Vazir-Bold' },
@@ -825,7 +869,7 @@ const s = StyleSheet.create({
   charProgressFill: { height: '100%', borderRadius: 2 },
   charWarning: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, marginTop: -2, marginBottom: 4 },
   charWarningText: { fontSize: 11, fontFamily: 'Vazir-Medium', color: '#FF9800' },
-  tipsCard: { borderWidth: 1 },
+  tipsCard: { borderWidth: 1, marginBottom: 16 },
   tipsHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
   tipsTitle: { fontSize: 14, fontFamily: 'Vazir-Bold' },
   tipsList: { gap: 8 },
@@ -833,4 +877,21 @@ const s = StyleSheet.create({
   tipText: { fontSize: 12, fontFamily: 'Vazir', flex: 1, lineHeight: 19 },
   errorRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, paddingHorizontal: 4 },
   errorText: { fontSize: 12, fontFamily: 'Vazir', flex: 1 },
+  submitSection: {
+    marginTop: 8,
+    gap: 10,
+    alignItems: 'center',
+  },
+  submitBtn: {
+    shadowColor: '#A88B7D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  submitHint: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+  },
 });

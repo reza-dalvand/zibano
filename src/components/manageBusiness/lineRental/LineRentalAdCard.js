@@ -10,7 +10,7 @@ const MAX_DESC_LENGTH = 300;
 const COLLAB_TYPE_META = {
   percent: { label: 'درصدی', color: '#9C27B0', bg: '#9C27B018', icon: 'pie-chart' },
   fixed: { label: 'اجاره ثابت', color: '#2196F3', bg: '#2196F318', icon: 'attach-money' },
-  combined: { label: 'ترکیبی', color: '#FF9800', bg: '#FF980018', icon: 'balance' },
+  hourly: { label: 'ساعتی', color: '#FF9800', bg: '#FF980018', icon: 'schedule' },
 };
 
 const toPersianDigit = (str) =>
@@ -20,6 +20,37 @@ const truncateDesc = (text) => {
   if (!text) return '';
   if (text.length <= MAX_DESC_LENGTH) return text;
   return text.slice(0, MAX_DESC_LENGTH).trim() + '...';
+};
+
+// 🎯 تابع فرمت تاریخ - پشتیبانی از string و object جلالی
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—';
+  
+  // حالت ۱: string با فرمت YYYY/MM/DD (مثل "1405/02/02" یا "۱۴۰۵/۰۲/۰۲")
+  if (typeof dateStr === 'string' && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))) {
+    // تبدیل ارقام فارسی/عربی به انگلیسی
+    const eng = dateStr
+      .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+      .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const parts = eng.split('/');
+    if (parts.length === 3) {
+      const jy = parts[0].padStart(4, '0');
+      const jm = parts[1].padStart(2, '0');
+      const jd = parts[2].padStart(2, '0');
+      return toPersianDigit(`${jy}/${jm}/${jd}`);
+    }
+  }
+  
+  // حالت ۲: object جلالی { jy, jm, jd }
+  if (typeof dateStr === 'object' && dateStr.jy) {
+    const jy = String(dateStr.jy).padStart(4, '0');
+    const jm = String(dateStr.jm).padStart(2, '0');
+    const jd = String(dateStr.jd).padStart(2, '0');
+    return toPersianDigit(`${jy}/${jm}/${jd}`);
+  }
+  
+  // حالت ۳: متن ساده (مثل "۳ روز پیش")
+  return toPersianDigit(String(dateStr));
 };
 
 export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
@@ -56,6 +87,8 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
   const isTruncated = !!(ad.description && ad.description.length > MAX_DESC_LENGTH);
   const hasPriceDisplay = !!(ad.priceDisplay && ad.priceDisplay.length > 0);
 
+  const hasDeposit = ad.collabType === 'fixed' && Number(ad.fixedDeposit) > 0;
+
   return (
     <Card variant="elevated" padding={0} radius={18} style={s.card}>
       {/* هدر کارت */}
@@ -91,7 +124,6 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
             </View>
           </View>
         </View>
-
         <View style={[s.statusBadge, { backgroundColor: statusConfig.bg }]}>
           <Icon name={statusConfig.icon} size={10} color={statusConfig.color} />
           <Text style={[s.statusText, { color: statusConfig.color }]}>
@@ -115,6 +147,25 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
           </View>
         ) : null}
       </View>
+
+      {/* نمایش اطلاعات بیشتر برای حالت‌های خاص */}
+      {ad.collabType === 'hourly' && ad.hourlyRate > 0 ? (
+        <View style={[s.hourlyDetailsBox, { backgroundColor: '#FF980010', borderColor: '#FF980030' }]}>
+          <Icon name="schedule" size={14} color="#FF9800" />
+          <Text style={[s.hourlyDetailsText, { color: colors.textSecondary }]}>
+            نرخ ساعتی: <Text style={[s.boldText, { color: '#FF9800' }]}>{toPersianDigit(ad.hourlyRate.toLocaleString('en-US'))} تومان</Text>
+          </Text>
+        </View>
+      ) : null}
+
+      {hasDeposit ? (
+        <View style={[s.depositBox, { backgroundColor: '#2196F310', borderColor: '#2196F330' }]}>
+          <Icon name="account-balance-wallet" size={14} color="#2196F3" />
+          <Text style={[s.depositText, { color: colors.textSecondary }]}>
+            ودیعه / رهن: <Text style={[s.boldText, { color: '#2196F3' }]}>{toPersianDigit(ad.fixedDeposit.toLocaleString('en-US'))} تومان</Text>
+          </Text>
+        </View>
+      ) : null}
 
       {/* شماره تماس */}
       {ad.contactPhone ? (
@@ -156,6 +207,24 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
           ) : null}
         </View>
       ) : null}
+
+      {/* 🎯 تاریخ ایجاد و انقضا - با فرمت کامل شمسی */}
+      <View style={[s.datesBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+        <View style={s.dateRow}>
+          <Icon name="event-note" size={14} color="#43A047" />
+          <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ ایجاد:</Text>
+          <Text style={[s.dateValue, { color: colors.textMain }]}>
+            {formatDate(ad.createdAt)}
+          </Text>
+        </View>
+        <View style={s.dateRow}>
+          <Icon name="event-busy" size={14} color="#FF9800" />
+          <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ انقضا:</Text>
+          <Text style={[s.dateValue, { color: colors.textMain }]}>
+            {formatDate(ad.expiresAt)}
+          </Text>
+        </View>
+      </View>
 
       {/* پیام غیرفعال */}
       {ad.status === 'inactive' ? (
@@ -209,6 +278,29 @@ const s = StyleSheet.create({
   priceSection: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   tagDot: { width: 4, height: 4, borderRadius: 2 },
   priceText: { fontSize: 12, fontFamily: 'Vazir-Bold' },
+  hourlyDetailsBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 14,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  hourlyDetailsText: { fontSize: 12, fontFamily: 'Vazir', flex: 1 },
+  depositBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 14,
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  depositText: { fontSize: 12, fontFamily: 'Vazir', flex: 1 },
+  boldText: { fontFamily: 'Vazir-Bold' },
   infoBox: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: 14, marginTop: 12, padding: 10, borderRadius: 12, borderWidth: 1 },
   infoIconBox: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   infoTextCol: { flex: 1, gap: 2 },
@@ -221,6 +313,30 @@ const s = StyleSheet.create({
   descTitle: { fontSize: 12, fontFamily: 'Vazir-Bold' },
   descText: { fontSize: 13, fontFamily: 'Vazir', lineHeight: 20 },
   truncatedHint: { fontSize: 11, fontFamily: 'Vazir', marginTop: 2 },
+  // 🎯 استایل‌های تاریخ
+  datesBox: {
+    marginHorizontal: 14,
+    marginTop: 10,
+    marginBottom: 12,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 6,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dateLabel: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+  },
+  dateValue: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
   inactiveBox: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 14, marginTop: 10, marginBottom: 12, padding: 12, borderRadius: 12, borderWidth: 1 },
   inactiveText: { flex: 1, fontSize: 12, fontFamily: 'Vazir-Medium', lineHeight: 18 },
   ownerActionsRow: { flexDirection: 'row', gap: 8, padding: 10, marginTop: 12, borderTopWidth: 1 },
