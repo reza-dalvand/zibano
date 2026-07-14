@@ -1,13 +1,13 @@
-// src/components/business/BusinessHero.js
-import React, { useState, useRef } from 'react';
+// src/components/home/BusinessHero.js
+import React from 'react';
 import {
   View,
   StyleSheet,
   Image,
-  ScrollView,
   TouchableOpacity,
   Dimensions,
   Share,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -16,35 +16,38 @@ const GALLERY_HEIGHT = 380;
 
 export default function BusinessHero({
   gallery = [],
+  businessId,
+  businessName,
   onBackPress,
   isFavorite,
   onFavoritePress,
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // 🎯 فقط اولین تصویر را نمایش بده
+  const coverImage = gallery[0] || 'https://picsum.photos/800/600?random=45';
 
+  // 🎯 تولید لینک اختصاصی کسب و کار
+  const bookingLink = `https://zibano.app/book/${businessId || 'biz_1'}`;
+
+  // 🎯 اشتراک‌گذاری لینک اختصاصی
   const handleShare = async () => {
     try {
-      await Share.share({ message: 'رزرو از اپلیکیشن زیبانو' });
-    } catch (e) {}
+      await Share.share({
+        message: `🌸 ${businessName || 'سالن زیبایی'}
+
+📱 با این لینک می‌توانید مستقیماً از من نوبت بگیرید:
+${bookingLink}
+
+✨ رزرو از اپلیکیشن زیبانو`,
+      });
+    } catch (error) {
+      Alert.alert('خطا', 'امکان اشتراک‌گذاری وجود ندارد');
+    }
   };
 
   return (
     <View style={s.heroContainer}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(
-            e.nativeEvent.contentOffset.x / width
-          );
-          setCurrentIndex(index);
-        }}
-      >
-        {gallery.map((img, i) => (
-          <Image key={i} source={{ uri: img }} style={s.heroImage} />
-        ))}
-      </ScrollView>
+      {/* 🎯 فقط یک Image ساده - بدون اسلایدر */}
+      <Image source={{ uri: coverImage }} style={s.heroImage} />
 
       {/* Gradient Overlay */}
       <View style={s.heroGradientTop} />
@@ -64,28 +67,11 @@ export default function BusinessHero({
           onPress={onFavoritePress}
         >
           <Icon
-            name={isFavorite ? 'favorite' : 'favorite-border'}
+            name={isFavorite ? 'bookmark' : 'bookmark-outline'}
             size={22}
-            color={isFavorite ? '#FF4B6E' : '#fff'}
+            color={isFavorite ? '#FFD700' : '#fff'}
           />
         </TouchableOpacity>
-      </View>
-
-      {/* Indicator */}
-      <View style={s.galleryIndicators}>
-        {gallery.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              s.galleryDot,
-              {
-                backgroundColor:
-                  i === currentIndex ? '#fff' : 'rgba(255,255,255,0.5)',
-                width: i === currentIndex ? 20 : 6,
-              },
-            ]}
-          />
-        ))}
       </View>
     </View>
   );
@@ -136,17 +122,5 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
-  },
-  galleryIndicators: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  galleryDot: {
-    height: 6,
-    borderRadius: 3,
   },
 });

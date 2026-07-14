@@ -17,6 +17,9 @@ import BookingModal from './BookingScreen';
 const MOCK_BUSINESS = {
   id: '1',
   name: 'مجموعه زیبایی و سلامت نیلارام',
+  ownerName: 'مریم حسینی',
+  ownerVerified: true,
+  memberSince: '۲ سال',
   category: 'کلینیک پوست و مو',
   city: 'تهران، سعادت‌آباد',
   address: 'سعادت‌آباد، خیابان سرو غربی، ساختمان پزشکان نگین، طبقه ۳',
@@ -24,8 +27,7 @@ const MOCK_BUSINESS = {
   workingHours: 'شنبه تا پنج‌شنبه: ۱۰:۰۰ الی ۲۰:۰۰',
   rating: 4.9,
   reviewsCount: 142,
-  bookingsCount: 1250,
-  experienceYears: 10,
+  servicesCount: 24,
   VIP: true,
   logo: 'https://picsum.photos/150?random=21',
   gallery: [
@@ -36,14 +38,11 @@ const MOCK_BUSINESS = {
   ],
   about:
     'مجموعه نیلارام با بیش از ۱۰ سال سابقه درخشان در زمینه خدمات تخصصی پوست، فیشیال، مژه و ناخن، با کادری مجرب و محیطی کاملاً بهداشتی و آرامش‌بخش میزبان شما بانوان عزیز است.',
-  socialMedia: {
-    instagram: '@nilaram_beauty',
-    telegram: '@nilaram_official',
-  },
   services: [
     {
       id: 's1',
       name: 'فیشیال تخصصی و پاکسازی پوست',
+      typeId: 'facial',
       price: 750000,
       originalPrice: 850000,
       discount: 12,
@@ -53,6 +52,7 @@ const MOCK_BUSINESS = {
     {
       id: 's2',
       name: 'کاشت مژه هالیوودی (تار به تار)',
+      typeId: 'eyelash',
       price: 580000,
       originalPrice: 580000,
       discount: 0,
@@ -62,6 +62,7 @@ const MOCK_BUSINESS = {
     {
       id: 's3',
       name: 'ژلیش و پدیکور VIP پا',
+      typeId: 'nail',
       price: 320000,
       originalPrice: 380000,
       discount: 15,
@@ -71,6 +72,7 @@ const MOCK_BUSINESS = {
     {
       id: 's4',
       name: 'کراتینه و احیای موهای آسیب‌دیده',
+      typeId: 'keratin',
       price: 1800000,
       originalPrice: 1900000,
       discount: 5,
@@ -142,7 +144,6 @@ export default function BusinessDetailsScreen({ navigation }) {
   const [selectedService, setSelectedService] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // 🎯 state مدال گالری نمونه‌کار
   const [portfolioModalVisible, setPortfolioModalVisible] = useState(false);
   const [activePortfolio, setActivePortfolio] = useState(null);
   const [portfolioInitialIndex, setPortfolioInitialIndex] = useState(0);
@@ -166,9 +167,11 @@ export default function BusinessDetailsScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        {/* ۱. گالری تصاویر */}
+        {/* ۱. گالری تصاویر - 🎯 با businessId و businessName */}
         <BusinessHero
           gallery={biz.gallery}
+          businessId={biz.id}
+          businessName={biz.name}
           onBackPress={() => navigation.goBack()}
           isFavorite={isFavorite}
           onFavoritePress={() => setIsFavorite(!isFavorite)}
@@ -177,7 +180,7 @@ export default function BusinessDetailsScreen({ navigation }) {
         {/* ۲. اطلاعات کسب‌وکار */}
         <BusinessInfoCard business={biz} />
 
-        {/* ۳. تب‌بار (فقط ۳ تب: خدمات، نمونه‌کار، درباره) */}
+        {/* ۳. تب‌بار */}
         <BusinessTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
@@ -208,15 +211,8 @@ export default function BusinessDetailsScreen({ navigation }) {
           {activeTab === 'about' && <BusinessAbout business={biz} />}
         </View>
 
-        {/* 🎯 فضای خالی بسیار زیاد برای جلوگیری از تداخل با StickyBookingBar و Navbar */}
         <View style={{ height: 240 }} />
       </ScrollView>
-
-      {/* ۵. نوار رزرو پایین - با فاصله کافی از Navbar */}
-      {/* <StickyBookingBar
-        minPrice={minServicePrice}
-        onBookPress={() => openBooking(biz.services[0])}
-      /> */}
 
       {/* ۶. مدال رزرو نوبت */}
       <BookingModal
@@ -225,7 +221,7 @@ export default function BusinessDetailsScreen({ navigation }) {
         service={selectedService}
       />
 
-      {/* 🎯 ۷. مدال گالری نمونه‌کار (جدید!) */}
+      {/* ۷. مدال گالری نمونه‌کار */}
       <PortfolioModal
         visible={portfolioModalVisible}
         onClose={() => {
