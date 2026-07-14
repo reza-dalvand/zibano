@@ -3,16 +3,14 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import Chip from '../common/Chip';
-import { PROVINCES, CITIES, BUSINESS_TYPES, MIN_RATINGS } from '../../constants/exploreFilters';
+import { PROVINCES, CITIES, BUSINESS_TYPES } from '../../constants/exploreFilters';
 
 export default function ActiveFilterChips({ filters, onChange }) {
   const { colors } = useTheme();
-
   const hasActive =
     filters.province ||
     filters.city ||
-    filters.businessType ||
-    filters.minRating !== '0';
+    filters.businessType;
 
   if (!hasActive) return null;
 
@@ -49,15 +47,6 @@ export default function ActiveFilterChips({ filters, onChange }) {
             }
             selected
             onRemove={() => onChange({ ...filters, businessType: null })}
-          />
-        )}
-        {filters.minRating !== '0' && (
-          <Chip
-            label={`⭐ ${
-              MIN_RATINGS.find((r) => r.id === filters.minRating)?.label
-            }`}
-            selected
-            onRemove={() => onChange({ ...filters, minRating: '0' })}
           />
         )}
       </ScrollView>

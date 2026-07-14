@@ -5,13 +5,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomSheet from '../common/BottomSheet';
 import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';
-import Chip from '../common/Chip';
 import Divider from '../common/Divider';
 import {
   PROVINCES,
   CITIES,
   BUSINESS_TYPES,
-  MIN_RATINGS,
 } from '../../constants/exploreFilters';
 
 export default function FilterModal({
@@ -20,24 +18,20 @@ export default function FilterModal({
   onApply,
   currentFilters,
 }) {
-  // state موقت برای تغییرات قبل از Apply
   const [province, setProvince] = useState(null);
   const [city, setCity] = useState(null);
   const [businessType, setBusinessType] = useState(null);
-  const [minRating, setMinRating] = useState('0');
 
-  // وقتی مدال باز میشه، مقادیر فعلی رو داخل state موقت کپی کن
   useEffect(() => {
     if (visible && currentFilters) {
       setProvince(currentFilters.province);
       setCity(currentFilters.city);
       setBusinessType(currentFilters.businessType);
-      setMinRating(currentFilters.minRating);
     }
   }, [visible, currentFilters]);
 
   const handleApply = () => {
-    onApply({ province, city, businessType, minRating });
+    onApply({ province, city, businessType });
     onClose();
   };
 
@@ -45,8 +39,7 @@ export default function FilterModal({
     setProvince(null);
     setCity(null);
     setBusinessType(null);
-    setMinRating('0');
-    onApply({ province: null, city: null, businessType: null, minRating: '0' });
+    onApply({ province: null, city: null, businessType: null });
     onClose();
   };
 
@@ -88,10 +81,9 @@ export default function FilterModal({
           options={PROVINCES}
           onSelect={(val) => {
             setProvince(val);
-            setCity(null); // با تغییر استان، شهر ریست شود
+            setCity(null);
           }}
         />
-
         <Dropdown
           label="شهر"
           placeholder={province ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
@@ -99,7 +91,6 @@ export default function FilterModal({
           options={CITIES[province] || []}
           onSelect={setCity}
         />
-
         <Dropdown
           label="نوع کسب‌وکار"
           placeholder="انتخاب نوع کسب‌وکار"
@@ -107,29 +98,10 @@ export default function FilterModal({
           options={BUSINESS_TYPES}
           onSelect={setBusinessType}
         />
-
-        <Divider label="حداقل امتیاز" spacing={20} />
-
-        <View style={styles.ratingsRow}>
-          {MIN_RATINGS.map((r) => (
-            <Chip
-              key={r.id}
-              label={r.label}
-              selected={minRating === r.id}
-              onPress={() => setMinRating(r.id)}
-            />
-          ))}
-        </View>
+        <Divider spacing={20} />
       </ScrollView>
     </BottomSheet>
   );
 }
 
-const styles = StyleSheet.create({
-  ratingsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  },
-});
+const styles = StyleSheet.create({});

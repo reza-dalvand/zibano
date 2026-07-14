@@ -14,7 +14,6 @@ import {
   Animated,
   Easing,
   TouchableWithoutFeedback,
-  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
@@ -23,8 +22,6 @@ import GallerySlider from './GallerySlider';
 import { toPersianDigit } from '../../constants/exploreFilters';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// 🎯 ابعاد ۹۲٪ × ۹۲٪ صفحه
 const MODAL_WIDTH = SCREEN_WIDTH * 0.92;
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.92;
 const MODAL_TOP = (SCREEN_HEIGHT - MODAL_HEIGHT) / 2;
@@ -40,14 +37,15 @@ export default function PostModal({
   const { colors, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
-  // 🎬 انیمیشن‌ها
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const modalScale = useRef(new Animated.Value(0.85)).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
 
-  // 🎯 state محلی برای ذخیره
   const [isSaved, setIsSaved] = useState(post?.saved || false);
+
+  // ✅ تشخیص نوع پست (مجله یا کسب‌وکار)
+  const isMagazine = post?.source === 'magazine';
 
   useEffect(() => {
     if (post) {
@@ -57,54 +55,18 @@ export default function PostModal({
 
   useEffect(() => {
     if (visible) {
-      // 🎬 انیمیشن ورود
       Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.spring(modalScale, {
-          toValue: 1,
-          bounciness: 8,
-          speed: 18,
-          useNativeDriver: true,
-        }),
-        Animated.timing(modalOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(contentTranslateY, {
-          toValue: 0,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
+        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.spring(modalScale, { toValue: 1, bounciness: 8, speed: 18, useNativeDriver: true }),
+        Animated.timing(modalOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.timing(contentTranslateY, { toValue: 0, duration: 400, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       ]).start();
     } else {
-      // 🎬 انیمیشن خروج
       Animated.parallel([
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(modalScale, {
-          toValue: 0.85,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(modalOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(contentTranslateY, {
-          toValue: 30,
-          duration: 200,
-          useNativeDriver: true,
-        }),
+        Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(modalScale, { toValue: 0.85, duration: 200, useNativeDriver: true }),
+        Animated.timing(modalOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(contentTranslateY, { toValue: 30, duration: 200, useNativeDriver: true }),
       ]).start();
     }
   }, [visible]);
@@ -114,7 +76,7 @@ export default function PostModal({
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `✨ ${post.businessName}\n${post.caption}\n\n📱 مشاهده در اپلیکیشن زیبانو`,
+        message: `✨ ${post.businessName}\n${post.caption}\n📱 مشاهده در اپلیکیشن زیبانو`,
       });
     } catch (error) {
       Alert.alert('خطا', 'امکان اشتراک‌گذاری وجود ندارد');
@@ -128,13 +90,13 @@ export default function PostModal({
     }, 300);
   };
 
-  // 🎯 هندلر ذخیره - فقط toggle می‌کند
   const handleSave = () => {
     const newState = !isSaved;
     setIsSaved(newState);
     onSave?.(post.id);
   };
 
+  // ✅ هندلر رزرو نوبت - هدایت به صفحه کسب‌وکار
   const handleBooking = () => {
     onClose();
     setTimeout(() => {
@@ -150,22 +112,18 @@ export default function PostModal({
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {/* 🎭 Backdrop با انیمیشن */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View
           style={[
             styles.backdrop,
             {
               opacity: backdropOpacity,
-              backgroundColor: isDark
-                ? 'rgba(0, 0, 0, 0.85)'
-                : 'rgba(0, 0, 0, 0.65)',
+              backgroundColor: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.65)',
             },
           ]}
         />
       </TouchableWithoutFeedback>
 
-      {/* 📦 محتوای اصلی مدال */}
       <Animated.View
         style={[
           styles.modal,
@@ -181,7 +139,7 @@ export default function PostModal({
           },
         ]}
       >
-        {/* 🔝 هدر مدال - بیرون از گالری (بالای تصاویر) */}
+        {/* هدر مدال */}
         <View
           style={[
             styles.modalHeader,
@@ -191,7 +149,6 @@ export default function PostModal({
             },
           ]}
         >
-          {/* 🎯 دکمه ذخیره (Bookmark) - کنار Share */}
           <TouchableOpacity
             onPress={handleSave}
             style={[
@@ -210,7 +167,6 @@ export default function PostModal({
             />
           </TouchableOpacity>
 
-          {/* 🎯 دکمه Share */}
           <TouchableOpacity
             onPress={handleShare}
             style={[
@@ -224,7 +180,6 @@ export default function PostModal({
 
           <View style={{ flex: 1 }} />
 
-          {/* 🎯 دکمه Close */}
           <TouchableOpacity
             onPress={onClose}
             style={[
@@ -237,11 +192,18 @@ export default function PostModal({
           </TouchableOpacity>
         </View>
 
-        {/* 🎨 اسلایدر تصاویر - بدون overlay */}
+        {/* اسلایدر تصاویر */}
         <View style={styles.galleryWrapper}>
           <GallerySlider gallery={post.gallery} containerWidth={MODAL_WIDTH} />
 
-          {/* 🔢 شمارنده تصاویر */}
+          {/* تگ منبع روی گالری (فقط برای مجله) */}
+          {isMagazine && (
+            <View style={styles.sourceBadgeOnGallery}>
+              <Icon name="auto-awesome" size={12} color="#fff" />
+              <Text style={styles.sourceBadgeText}>مجله زیبانو</Text>
+            </View>
+          )}
+
           {post.gallery && post.gallery.length > 1 && (
             <View
               style={[
@@ -257,34 +219,63 @@ export default function PostModal({
           )}
         </View>
 
-        {/* 🏢 اطلاعات کسب‌وکار - بیرون از گالری (پایین تصاویر) */}
-        <TouchableOpacity
-          onPress={handleProfilePress}
-          style={[
-            styles.businessInfoCard,
-            {
-              backgroundColor: colors.cardBackground,
-              borderBottomColor: colors.border,
-            },
-          ]}
-          activeOpacity={0.85}
-        >
-          <Image source={{ uri: post.businessLogo }} style={styles.bizAvatar} />
-          <View style={styles.bizInfoCol}>
-            <View style={styles.bizNameRow}>
-              <Text style={[styles.bizName, { color: colors.textMain }]} numberOfLines={1}>
-                {post.businessName}
+        {/* اطلاعات کسب‌وکار - فقط برای پست‌های کسب‌وکار */}
+        {!isMagazine && (
+          <TouchableOpacity
+            onPress={handleProfilePress}
+            style={[
+              styles.businessInfoCard,
+              {
+                backgroundColor: colors.cardBackground,
+                borderBottomColor: colors.border,
+              },
+            ]}
+            activeOpacity={0.85}
+          >
+            <Image source={{ uri: post.businessLogo }} style={styles.bizAvatar} />
+            <View style={styles.bizInfoCol}>
+              <View style={styles.bizNameRow}>
+                <Text style={[styles.bizName, { color: colors.textMain }]} numberOfLines={1}>
+                  {post.businessName}
+                </Text>
+                <Icon name="verified" size={16} color="#4FC3F7" />
+              </View>
+              <Text style={[styles.bizSubtitle, { color: colors.primary }]}>
+                مشاهده پروفایل کسب‌وکار
               </Text>
-              <Icon name="verified" size={16} color="#4FC3F7" />
             </View>
-            <Text style={[styles.bizSubtitle, { color: colors.primary }]}>
-              مشاهده پروفایل کسب‌وکار
-            </Text>
-          </View>
-          <Icon name="chevron-left" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
+            <Icon name="chevron-left" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
 
-        {/* 📋 محتوای اسکرولی */}
+        {/* هدر مجله زیبانو - فقط برای مجله */}
+        {isMagazine && (
+          <View
+            style={[
+              styles.magazineInfoCard,
+              {
+                backgroundColor: colors.cardBackground,
+                borderBottomColor: colors.border,
+              },
+            ]}
+          >
+            <View style={[styles.magazineIconBox, { backgroundColor: '#9C27B020' }]}>
+              <Icon name="auto-awesome" size={22} color="#9C27B0" />
+            </View>
+            <View style={styles.bizInfoCol}>
+              <View style={styles.bizNameRow}>
+                <Text style={[styles.bizName, { color: colors.textMain }]} numberOfLines={1}>
+                  {post.businessName}
+                </Text>
+              </View>
+              <Text style={[styles.magazineSubtitle, { color: '#9C27B0' }]}>
+                مقاله و محتوای آموزشی
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* محتوای اسکرولی */}
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
@@ -292,39 +283,45 @@ export default function PostModal({
             transform: [{ translateY: contentTranslateY }],
           }}
         >
-          {/* ⭐ امتیاز کسب‌وکار */}
-          <View
-            style={[
-              styles.ratingContainer,
-              { backgroundColor: colors.cardBackground, borderColor: colors.border },
-            ]}
-          >
-            <View style={styles.ratingLeft}>
-              <Icon name="star" size={20} color="#FFC107" />
-              <Text style={[styles.ratingNumber, { color: colors.textMain }]}>
-                {toPersianDigit(post.rating?.toFixed(1) || '0')}
-              </Text>
-              <Text style={[styles.ratingLabel, { color: colors.textSecondary }]}>
-                از {toPersianDigit(5)}
-              </Text>
+          {/* ⭐ امتیاز - فقط برای کسب‌وکار */}
+          {!isMagazine && post.rating > 0 && (
+            <View
+              style={[
+                styles.ratingContainer,
+                { backgroundColor: colors.cardBackground, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.ratingLeft}>
+                <Icon name="star" size={20} color="#FFC107" />
+                <Text style={[styles.ratingNumber, { color: colors.textMain }]}>
+                  {toPersianDigit(post.rating?.toFixed(1) || '0')}
+                </Text>
+                <Text style={[styles.ratingLabel, { color: colors.textSecondary }]}>
+                  از {toPersianDigit(5)}
+                </Text>
+              </View>
+              <View style={[styles.ratingDivider, { backgroundColor: colors.border }]} />
+              <StarRating value={post.rating} size="md" />
             </View>
-            <View style={[styles.ratingDivider, { backgroundColor: colors.border }]} />
-            <StarRating value={post.rating} size="md" />
-          </View>
+          )}
 
-          {/* 📝 کپشن پست */}
+          {/* 📝 کپشن / توضیحات */}
           <View style={[styles.captionCard, { borderColor: colors.border }]}>
             <View style={styles.captionHeader}>
               <View
                 style={[
                   styles.captionIconBox,
-                  { backgroundColor: colors.primary + '15' },
+                  { backgroundColor: isMagazine ? '#9C27B015' : colors.primary + '15' },
                 ]}
               >
-                <Icon name="description" size={16} color={colors.primary} />
+                <Icon
+                  name={isMagazine ? 'article' : 'description'}
+                  size={16}
+                  color={isMagazine ? '#9C27B0' : colors.primary}
+                />
               </View>
               <Text style={[styles.captionLabel, { color: colors.textSecondary }]}>
-                توضیحات
+                {isMagazine ? 'متن مقاله' : 'توضیحات'}
               </Text>
             </View>
             <Text style={[styles.captionText, { color: colors.textMain }]}>
@@ -332,100 +329,107 @@ export default function PostModal({
             </Text>
           </View>
 
-          {/* 🏷️ تگ‌های خدمت */}
-          <View style={styles.tagsSection}>
-            <Text style={[styles.tagsLabel, { color: colors.textSecondary }]}>
-              خدمات مرتبط
-            </Text>
-            <View style={styles.tagsRow}>
-              <View
-                style={[
-                  styles.tagChip,
-                  {
-                    backgroundColor: colors.primary + '15',
-                    borderColor: colors.primary + '30',
-                  },
-                ]}
-              >
-                <Icon name="spa" size={12} color={colors.primary} />
-                <Text style={[styles.tagText, { color: colors.primary }]}>
-                  فیشیال تخصصی
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.tagChip,
-                  {
-                    backgroundColor: colors.primary + '15',
-                    borderColor: colors.primary + '30',
-                  },
-                ]}
-              >
-                <Icon name="auto-awesome" size={12} color={colors.primary} />
-                <Text style={[styles.tagText, { color: colors.primary }]}>
-                  ماسک طلا
-                </Text>
+          {/* 🏷️ تگ‌های خدمت - فقط برای کسب‌وکار */}
+          {!isMagazine && (
+            <View style={styles.tagsSection}>
+              <Text style={[styles.tagsLabel, { color: colors.textSecondary }]}>
+                خدمات مرتبط
+              </Text>
+              <View style={styles.tagsRow}>
+                <View
+                  style={[
+                    styles.tagChip,
+                    {
+                      backgroundColor: colors.primary + '15',
+                      borderColor: colors.primary + '30',
+                    },
+                  ]}
+                >
+                  <Icon name="spa" size={12} color={colors.primary} />
+                  <Text style={[styles.tagText, { color: colors.primary }]}>
+                    فیشیال تخصصی
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.tagChip,
+                    {
+                      backgroundColor: colors.primary + '15',
+                      borderColor: colors.primary + '30',
+                    },
+                  ]}
+                >
+                  <Icon name="auto-awesome" size={12} color={colors.primary} />
+                  <Text style={[styles.tagText, { color: colors.primary }]}>
+                    ماسک طلا
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* 💡 راهنما */}
           <View
             style={[
               styles.hintCard,
               {
-                backgroundColor: colors.primary + '08',
-                borderColor: colors.primary + '25',
+                backgroundColor: isMagazine ? '#9C27B008' : colors.primary + '08',
+                borderColor: isMagazine ? '#9C27B025' : colors.primary + '25',
               },
             ]}
           >
-            <Icon name="lightbulb" size={18} color={colors.primary} />
+            <Icon
+              name={isMagazine ? 'menu-book' : 'lightbulb'}
+              size={18}
+              color={isMagazine ? '#9C27B0' : colors.primary}
+            />
             <Text style={[styles.hintText, { color: colors.textSecondary }]}>
-              با رزرو نوبت از این کسب‌وکار، از تخفیف‌های ویژه بهره‌مند شوید
+              {isMagazine
+                ? 'این مقاله توسط تیم تحریریه مجله زیبانو تهیه شده است'
+                : 'با رزرو نوبت از این کسب‌وکار، از تخفیف‌های ویژه بهره‌مند شوید'}
             </Text>
           </View>
 
           {/* فضای خالی برای دکمه CTA */}
-          <View style={{ height: 90 }} />
+          {!isMagazine && <View style={{ height: 100 }} />}
         </Animated.ScrollView>
 
-        {/* 🎯 دکمه رزرو نوبت (CTA) - فیکس در پایین */}
-        <View
-          style={[
-            styles.ctaContainer,
-            {
-              backgroundColor: colors.background,
-              borderTopColor: colors.border,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            onPress={handleBooking}
-            style={[styles.ctaButton, { backgroundColor: colors.primary }]}
-            activeOpacity={0.9}
+        {/* 🎯 دکمه CTA پایین - فقط برای کسب‌وکارها نمایش داده می‌شود */}
+        {!isMagazine && (
+          <View
+            style={[
+              styles.ctaContainer,
+              {
+                backgroundColor: colors.background,
+                borderTopColor: colors.border,
+              },
+            ]}
           >
-            <View style={styles.ctaIconBox}>
-              <Icon name="event-available" size={22} color={colors.primary} />
-            </View>
-            <View style={styles.ctaTextCol}>
-              <Text style={styles.ctaTitle}>رزرو نوبت</Text>
-              <Text style={styles.ctaSubtitle}>از {post.businessName}</Text>
-            </View>
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={handleBooking}
+              style={[styles.ctaButton, { backgroundColor: colors.primary }]}
+              activeOpacity={0.9}
+            >
+              <View style={styles.ctaIconBox}>
+                <Icon name="event-available" size={22} color={colors.primary} />
+              </View>
+              <View style={styles.ctaTextCol}>
+                <Text style={styles.ctaTitle}>رزرو نوبت</Text>
+                <Text style={styles.ctaSubtitle}>از {post.businessName}</Text>
+              </View>
+              <Icon name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
       </Animated.View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  // 🎭 Backdrop
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
-
-  // 📦 Modal Container
   modal: {
     position: 'absolute',
     borderRadius: 28,
@@ -437,8 +441,6 @@ const styles = StyleSheet.create({
     shadowRadius: 30,
     elevation: 20,
   },
-
-  // 🔝 هدر مدال - با سه دکمه: Save | Share | Close
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -455,16 +457,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
   },
-
-  // 🎨 Gallery
   galleryWrapper: {
     width: '100%',
-    height: MODAL_HEIGHT * 0.40,
+    height: '40%',
     position: 'relative',
     backgroundColor: '#000',
   },
-
-  // 🔢 Image Counter
+  sourceBadgeOnGallery: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(156, 39, 176, 0.85)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  sourceBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
   imageCounter: {
     position: 'absolute',
     top: 16,
@@ -486,14 +506,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
-
-  // 🏢 Business Info Card
   businessInfoCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     padding: 14,
     borderBottomWidth: 1,
+  },
+  magazineInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderBottomWidth: 1,
+  },
+  magazineIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  magazineSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Medium',
   },
   bizAvatar: {
     width: 56,
@@ -525,15 +561,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir-Medium',
   },
-
-  // 📋 Scroll Content
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 20,
   },
-
-  // ⭐ Rating Container
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -560,8 +592,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
   },
-
-  // 📝 Caption Card
   captionCard: {
     padding: 14,
     borderRadius: 16,
@@ -591,8 +621,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'justify',
   },
-
-  // 🏷️ Tags
   tagsSection: {
     marginBottom: 16,
     gap: 8,
@@ -620,8 +648,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Vazir-Bold',
   },
-
-  // 💡 Hint Card
   hintCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -629,7 +655,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 14,
     borderWidth: 1,
-    marginBottom:'10%',
+    marginBottom: '10%',
   },
   hintText: {
     flex: 1,
@@ -637,8 +663,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 20,
   },
-
-  // 🎯 CTA Button
   ctaContainer: {
     position: 'absolute',
     bottom: 0,

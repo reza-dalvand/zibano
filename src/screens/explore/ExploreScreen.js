@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   FilterModal,
   PostModal,
@@ -17,31 +17,23 @@ const INITIAL_FILTERS = {
   province: null,
   city: null,
   businessType: null,
-  minRating: '0',
 };
 
 export default function ExploreScreen({ navigation }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets();
 
-  // state ها
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [activePost, setActivePost] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
 
-  // ---------- منطق فیلتر ----------
   const filteredPosts = useMemo(() => {
     return posts.filter(post => {
       if (filters.province && post.provinceId !== filters.province)
         return false;
       if (filters.city && post.cityId !== filters.city) return false;
       if (filters.businessType && post.businessTypeId !== filters.businessType)
-        return false;
-      if (
-        filters.minRating !== '0' &&
-        post.rating < parseFloat(filters.minRating)
-      )
         return false;
       return true;
     });
@@ -50,10 +42,8 @@ export default function ExploreScreen({ navigation }) {
   const hasActiveFilter =
     filters.province ||
     filters.city ||
-    filters.businessType ||
-    filters.minRating !== '0';
+    filters.businessType;
 
-  // ---------- هندلرها ----------
   const handleSave = postId => {
     setPosts(prev =>
       prev.map(p => (p.id === postId ? { ...p, saved: !p.saved } : p)),
@@ -72,13 +62,9 @@ export default function ExploreScreen({ navigation }) {
 
   const handleClearFilters = () => setFilters(INITIAL_FILTERS);
 
-  // ---------- رندر ----------
-  return (
-    <ScreenWrapper
-      scrollable={true}
-      padding={0}
-      edges={['bottom', 'left', 'right']}
-    >
+  // 🆕 هدر سفارشی که به عنوان ListHeaderComponent به FlatList پاس داده می‌شود
+  const renderHeader = () => (
+    <View>
       {/* هدر صفحه */}
       <View
         style={[
@@ -86,11 +72,19 @@ export default function ExploreScreen({ navigation }) {
           {
             borderColor: colors.border,
             backgroundColor: colors.background,
-            paddingTop: insets.top + 8, // 🎯 insets.top
+            paddingTop: insets.top + 8,
           },
         ]}
       >
+        {/* آیکون ویترین سمت راست */}
+        <View style={[styles.headerIconBox, { backgroundColor: colors.primary + '15' }]}>
+          <Icon name="collections" size={22} color={colors.primary} />
+        </View>
+
+        {/* تایتل وسط */}
         <Text style={[styles.headerTitle, { color: colors.textMain }]}>ویترین</Text>
+
+        {/* دکمه فیلتر سمت چپ */}
         <TouchableOpacity
           onPress={() => setFilterVisible(true)}
           style={[
@@ -110,12 +104,22 @@ export default function ExploreScreen({ navigation }) {
 
       {/* چیپ‌های فیلتر فعال */}
       <ActiveFilterChips filters={filters} onChange={setFilters} />
+    </View>
+  );
 
-      {/* گرید پست‌ها */}
+  return (
+    // ✅ scrollable={false} - چون PostGrid خودش FlatList هست
+    <ScreenWrapper
+      scrollable={false}
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+    >
+      {/* ✅ هدر و چیپ‌ها به عنوان ListHeaderComponent به PostGrid پاس داده می‌شوند */}
       <PostGrid
         posts={filteredPosts}
         onPostPress={setActivePost}
         onClearFilters={hasActiveFilter ? handleClearFilters : null}
+        ListHeaderComponent={renderHeader()}
       />
 
       {/* مدال فیلتر */}
@@ -147,9 +151,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
   },
+  headerIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Vazir-Bold',
+    flex: 1,
+    textAlign: 'center',
   },
   filterBtn: {
     width: 40,
