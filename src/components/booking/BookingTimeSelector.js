@@ -28,11 +28,10 @@ export default function BookingTimeSelector({ slots = [], selectedId, onSelect }
         {slots.map((slot) => {
           const isSelected = selectedId === slot.id;
           const isAvailable = slot.isAvailable;
-
           return (
             <TouchableOpacity
               key={slot.id}
-              onPress={() => isAvailable && onSelect(slot.id)}
+              onPress={() => isAvailable && onSelect(slot)}
               disabled={!isAvailable}
               activeOpacity={0.7}
               style={[
