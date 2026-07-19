@@ -34,7 +34,7 @@ export default function SeeAllButton({ onPress, count }) {
 
 const s = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingVertical: 7,

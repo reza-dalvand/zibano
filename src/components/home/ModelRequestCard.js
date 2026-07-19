@@ -51,10 +51,6 @@ export default function ModelRequestCard({ request, onPress }) {
       </View>
 
       <View style={s.content}>
-        <View style={s.badgeRow}>
-          <Badge label="مدلینگ" variant="primary" size="sm" dot />
-          {request.isUrgent && <Badge label="فوری" variant="error" size="sm" />}
-        </View>
 
         <Text style={[s.title, { color: colors.textMain }]} numberOfLines={2}>
           {request.title}
@@ -88,7 +84,7 @@ export default function ModelRequestCard({ request, onPress }) {
             onPress={() => onPress?.(request)}
           >
             <Icon name="description" size={14} color="#fff" />
-            <Text style={s.detailsBtnText}>توضیحات بیشتر</Text>
+            <Text style={s.detailsBtnText}>توضیحات</Text>
             <Icon name="arrow-back" size={14} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -230,7 +226,7 @@ const s = StyleSheet.create({
     marginTop: 4,
   },
   detailsBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 16,
