@@ -2,7 +2,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
-  Text,
   Image,
   FlatList,
   TouchableOpacity,
@@ -10,16 +9,11 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
-import SeeAllButton from './SeeAllButton';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
 const CARD_SPACING = 10;
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();
@@ -72,18 +66,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
 
   return (
     <View style={s.container}>
-      <View style={s.sectionHeader}>
-        <View style={s.titleRow}>
-          <View style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}>
-            <Icon name="local-fire-department" size={18} color={colors.primary} />
-          </View>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-            پیشنهادات ویژه
-          </Text>
-        </View>
-        <SeeAllButton onPress={() => {}} count={ads.length} />
-      </View>
-
       <FlatList
         ref={flatListRef}
         data={ads}
@@ -103,18 +85,15 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
               ]}
             >
               <Image source={{ uri: item.imageUrl }} style={s.image} />
-              <View style={s.gradientOverlay} />
 
-              {item.badge && (
-                <View style={[s.badgeBox, { backgroundColor: colors.primary }]}>
-                  <Icon name="auto-awesome" size={11} color="#fff" />
-                  <Text style={s.badgeText}>{item.badge}</Text>
-                </View>
-              )}
+              {/* ❌ badgeBox (تگ پرفروش/جدید/پیشنهاد ویژه) حذف شد */}
+              {/* ❌ gradientOverlay حذف شد */}
+              {/* ❌ contentOverlay (عنوان، زیرعنوان، دکمه) حذف شد */}
 
-              {isActive && (
+              {/* Progress bar بالای کارت (اختیاری) */}
+              {isActive && ads.length > 1 && (
                 <View style={s.progressContainer}>
-                  <View style={[s.progressBg, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
+                  <View style={[s.progressBg, { backgroundColor: 'rgba(255,255,255,0.35)' }]}>
                     <Animated.View
                       style={[
                         s.progressFill,
@@ -130,25 +109,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
                   </View>
                 </View>
               )}
-
-              <View style={s.contentOverlay}>
-                <Text style={s.title} numberOfLines={2}>
-                  {item.title}
-                </Text>
-                {item.subtitle && (
-                  <Text style={s.subtitle} numberOfLines={1}>
-                    {item.subtitle}
-                  </Text>
-                )}
-                <View style={s.ctaRow}>
-                  <View style={[s.ctaBtn, { backgroundColor: '#fff' }]}>
-                    <Text style={[s.ctaText, { color: colors.primary }]}>
-                      مشاهده پیشنهاد
-                    </Text>
-                    <Icon name="arrow-back" size={14} color={colors.primary} />
-                  </View>
-                </View>
-              </View>
             </TouchableOpacity>
           );
         }}
@@ -163,26 +123,29 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         contentContainerStyle={s.flatListContent}
       />
 
-      <View style={s.dotsContainer}>
-        {ads.map((_, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={() => goToSlide(i)}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                s.dot,
-                {
-                  backgroundColor:
-                    i === activeIndex ? colors.primary : colors.border,
-                  width: i === activeIndex ? 24 : 8,
-                },
-              ]}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Indicator Dots */}
+      {ads.length > 1 && (
+        <View style={s.dotsContainer}>
+          {ads.map((_, i) => (
+            <TouchableOpacity
+              key={i}
+              onPress={() => goToSlide(i)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  s.dot,
+                  {
+                    backgroundColor:
+                      i === activeIndex ? colors.primary : colors.border,
+                    width: i === activeIndex ? 24 : 8,
+                  },
+                ]}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -191,39 +154,16 @@ const s = StyleSheet.create({
   container: {
     marginBottom: 8,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-    paddingHorizontal: 4,
-    gap: 8,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-  },
   flatListContent: {
     paddingHorizontal: 20,
     paddingVertical: 4,
   },
   slideCard: {
-    height: 220,
+    height: 200,
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: '#eee',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -234,104 +174,31 @@ const s = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  gradientOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '75%',
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  badgeBox: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    zIndex: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
-  },
+  // Progress bar (بالای کارت)
   progressContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 0,
+    paddingTop: 0,
     zIndex: 2,
   },
   progressBg: {
     height: 3,
-    borderRadius: 2,
+    borderRadius: 0,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 2,
-  },
-  contentOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 18,
-    gap: 8,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 18,
-    fontFamily: 'Vazir-Bold',
-    lineHeight: 24,
-    textShadowColor: 'rgba(0,0,0,0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  subtitle: {
-    color: 'rgba(255,255,255,0.92)',
-    fontSize: 13,
-    fontFamily: 'Vazir',
-  },
-  ctaRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 4,
-  },
-  ctaBtn: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  ctaText: {
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
+    borderRadius: 0,
   },
   dotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: 16,
+    marginTop: 14,
   },
   dot: {
     height: 8,
