@@ -1,6 +1,6 @@
 // src/screens/manageBusiness/ModelRequestsScreen.js
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -11,7 +11,10 @@ import ModelRequestCard from '../../components/manageBusiness/modelRequest/Model
 import ModelRequestEmptyState from '../../components/manageBusiness/modelRequest/ModelRequestEmptyState';
 import ModelRequestStats from '../../components/manageBusiness/modelRequest/ModelRequestStats';
 
-// داده‌های موقت
+const toPersianDigit = (str) =>
+  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+// 🎯 داده‌های موقت با ۳ نوع costType
 const MOCK_MODEL_REQUESTS = [
   {
     id: 'mr_1',
@@ -20,7 +23,7 @@ const MOCK_MODEL_REQUESTS = [
     serviceImage: 'https://picsum.photos/200/200?random=50',
     title: 'مدل برای فیشیال VIP عروس',
     description: 'نیاز به مدل برای تست محصولات جدید فیشیال. این خدمت شامل پاکسازی عمیق پوست، استفاده از ماسک طلای ۲۴ عیار و ماساژ صورت با روغن‌های طبیعی است.',
-    requirements: 'سن ۲۰ تا ۳۵ سال، پوست سالم',
+    costType: 'paid',  // 🎯 با هزینه
     status: 'active',
     contactPhone: '09121234567',
     createdAt: '1405/01/22',
@@ -32,8 +35,8 @@ const MOCK_MODEL_REQUESTS = [
     serviceName: 'کاشت ناخن ژله‌ای',
     serviceImage: 'https://picsum.photos/200/200?random=51',
     title: 'مدل برای طراحی ناخن جدید',
-    description: 'طراحی‌های جدید و خاص برای نمونه‌کار با تکنیک‌های روز دنیا.',
-    requirements: 'ناخن‌های طبیعی و سالم',
+    description: 'طراحی‌های جدید و خاص برای نمونه‌کار با تکنیک‌های روز دنیا. مناسب ناخن‌های طبیعی و سالم.',
+    costType: 'material_cost',  // 🎯 با هزینه مواد
     status: 'active',
     contactPhone: '09129876543',
     createdAt: '1405/01/20',
@@ -45,8 +48,8 @@ const MOCK_MODEL_REQUESTS = [
     serviceName: 'رنگ و لایت مو',
     serviceImage: 'https://picsum.photos/200/200?random=52',
     title: 'مدل برای تکنیک جدید بالیاژ',
-    description: 'تست تکنیک جدید بالیاژ فرانسوی با مواد اورجینال ایتالیایی.',
-    requirements: 'موهای بلند و سالم',
+    description: 'تست تکنیک جدید بالیاژ فرانسوی با مواد اورجینال ایتالیایی. مناسب موهای بلند و سالم.',
+    costType: 'free',  // 🎯 رایگان
     status: 'inactive',
     contactPhone: '09121112233',
     createdAt: '1404/12/15',
@@ -93,7 +96,6 @@ export default function ModelRequestsScreen({ navigation }) {
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="درخواست‌های مدل" onBackPress={() => navigation.goBack()} />
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
         {requests.length > 0 ? (
           <>
@@ -108,13 +110,26 @@ export default function ModelRequestsScreen({ navigation }) {
               </Text>
             </View>
 
-            {/* آمار */}
             <ModelRequestStats requests={requests} />
 
-            {/* ❌ دکمه سبز "ایجاد درخواست مدل جدید" حذف شد */}
-            {/* ❌ FAB (دکمه شناور بعلاوه) حذف شد */}
+            {/* دکمه سبز ثبت درخواست */}
+            <TouchableOpacity
+              onPress={handleCreate}
+              activeOpacity={0.85}
+              style={s.createBtn}
+            >
+              <View style={s.createBtnIconBox}>
+                <Icon name="add" size={22} color="#fff" />
+              </View>
+              <View style={s.createBtnTextCol}>
+                <Text style={s.createBtnTitle}>ثبت درخواست مدل جدید</Text>
+                <Text style={s.createBtnSubtitle}>
+                  مدل جدیدی برای خدمات خود جذب کنید
+                </Text>
+              </View>
+              <Icon name="chevron-left" size={24} color="#fff" />
+            </TouchableOpacity>
 
-            {/* لیست درخواست‌ها */}
             <View style={s.listContainer}>
               {requests.map((request) => (
                 <ModelRequestCard
@@ -129,11 +144,18 @@ export default function ModelRequestsScreen({ navigation }) {
         ) : (
           <ModelRequestEmptyState onCreate={handleCreate} />
         )}
-
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* ❌ FAB کاملاً حذف شد */}
+      {requests.length > 0 && (
+        <TouchableOpacity
+          style={[s.fab, { backgroundColor: colors.primary }]}
+          onPress={handleCreate}
+          activeOpacity={0.85}
+        >
+          <Icon name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
 
       <Toast
         visible={toast.visible}
@@ -174,8 +196,60 @@ const s = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
   },
+  createBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: '#43A047',
+    shadowColor: '#43A047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  createBtnIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createBtnTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  createBtnTitle: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
+  createBtnSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 11,
+    fontFamily: 'Vazir',
+  },
   listContainer: {
     paddingHorizontal: 16,
     gap: 12,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
 });

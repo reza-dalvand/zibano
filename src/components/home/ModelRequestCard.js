@@ -8,9 +8,28 @@ import Badge from '../common/Badge';
 const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
+// 🎯 متادیتای ۳ نوع هزینه
+const COST_TYPE_META = {
+  paid: {
+    label: 'با هزینه',
+    icon: 'attach-money',
+    color: '#2196F3',
+  },
+  material_cost: {
+    label: 'با هزینه مواد',
+    icon: 'science',
+    color: '#FF9800',
+  },
+  free: {
+    label: 'رایگان',
+    icon: 'redeem',
+    color: '#4CAF50',
+  },
+};
+
 export default function ModelRequestCard({ request, onPress }) {
   const { colors } = useTheme();
-  const hasDiscount = request.discount > 0;
+  const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
 
   return (
     <TouchableOpacity
@@ -25,23 +44,16 @@ export default function ModelRequestCard({ request, onPress }) {
         <Image source={{ uri: request.serviceImage }} style={s.image} />
         <View style={s.imageGradient} />
 
-        {/* 🏷️ تگ تخفیف (در صورت وجود) */}
-        {hasDiscount && (
-          <View style={s.discountBadge}>
-            <Icon name="local-offer" size={10} color="#fff" />
-            <Text style={s.discountText}>
-              {toPersianDigit(request.discount)}٪ تخفیف
-            </Text>
-          </View>
-        )}
-
-        {/* 💰 تگ "با هزینه مواد" (در صورت نبود تخفیف) */}
-        {!hasDiscount && (
-          <View style={s.materialCostBadge}>
-            <Icon name="science" size={10} color="#fff" />
-            <Text style={s.materialCostText}>با هزینه مواد</Text>
-          </View>
-        )}
+        {/* 🎯 Badge نوع هزینه */}
+        <View
+          style={[
+            s.costBadge,
+            { backgroundColor: costMeta.color },
+          ]}
+        >
+          <Icon name={costMeta.icon} size={10} color="#fff" />
+          <Text style={s.costBadgeText}>{costMeta.label}</Text>
+        </View>
 
         <View style={s.serviceTypeBox}>
           <Text style={s.serviceTypeText} numberOfLines={1}>
@@ -51,11 +63,9 @@ export default function ModelRequestCard({ request, onPress }) {
       </View>
 
       <View style={s.content}>
-
         <Text style={[s.title, { color: colors.textMain }]} numberOfLines={2}>
           {request.title}
         </Text>
-
         <View style={s.businessRow}>
           <Icon name="store" size={12} color={colors.primary} />
           <Text
@@ -65,8 +75,6 @@ export default function ModelRequestCard({ request, onPress }) {
             {request.businessName}
           </Text>
         </View>
-
-        {/* 📍 فقط شهر - بدون expiresIn */}
         <View style={s.metaRow}>
           <Icon name="location-on" size={12} color={colors.textSecondary} />
           <Text
@@ -76,8 +84,6 @@ export default function ModelRequestCard({ request, onPress }) {
             {request.city}
           </Text>
         </View>
-
-        {/* 🎯 دکمه "توضیحات بیشتر" بدون قیمت */}
         <View style={[s.footer, { borderTopColor: colors.border }]}>
           <TouchableOpacity
             style={[s.detailsBtn, { backgroundColor: colors.primary }]}
@@ -122,48 +128,25 @@ const s = StyleSheet.create({
     height: 60,
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
-  discountBadge: {
+  // 🎯 Badge نوع هزینه
+  costBadge: {
     position: 'absolute',
     top: 10,
     left: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#E53935',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
     zIndex: 2,
-    shadowColor: '#E53935',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 3,
   },
-  discountText: {
-    color: '#fff',
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
-  },
-  materialCostBadge: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: '#FF9800',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    zIndex: 2,
-    shadowColor: '#FF9800',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  materialCostText: {
+  costBadgeText: {
     color: '#fff',
     fontSize: 11,
     fontFamily: 'Vazir-Bold',

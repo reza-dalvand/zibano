@@ -22,28 +22,46 @@ const truncateDescription = (text) => {
   return text.slice(0, MAX_DESC_LENGTH).trim() + '...';
 };
 
+// 🎯 متادیتای ۳ نوع هزینه
+const COST_TYPE_META = {
+  paid: {
+    label: 'با هزینه',
+    icon: 'attach-money',
+    color: '#2196F3',
+    bg: '#2196F318',
+    border: '#2196F340',
+  },
+  material_cost: {
+    label: 'با هزینه مواد',
+    icon: 'science',
+    color: '#FF9800',
+    bg: '#FF980018',
+    border: '#FF980040',
+  },
+  free: {
+    label: 'کاملاً رایگان',
+    icon: 'redeem',
+    color: '#4CAF50',
+    bg: '#4CAF5018',
+    border: '#4CAF5040',
+  },
+};
+
 export default function ModelRequestCard({ request, onEdit, onDelete }) {
   const { colors } = useTheme();
-
+  
   const statusConfig = {
-    active: {
-      label: 'فعال',
-      variant: 'success',
-      color: '#4CAF50',
-    },
-    inactive: {
-      label: 'غیرفعال',
-      variant: 'error',
-      color: '#E53935',
-    },
+    active: { label: 'فعال', variant: 'success', color: '#4CAF50' },
+    inactive: { label: 'غیرفعال', variant: 'error', color: '#E53935' },
   };
 
   const currentStatus = statusConfig[request.status] || statusConfig.inactive;
+  const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
 
   const handleDelete = () => {
     Alert.alert(
       'حذف درخواست مدل',
-      `آیا از حذف "${request.title}" مطمئن هستید؟\n\nاین عمل قابل بازگشت نیست.`,
+      `آیا از حذف "${request.title}" مطمئن هستید؟\nاین عمل قابل بازگشت نیست.`,
       [
         { text: 'انصراف', style: 'cancel' },
         {
@@ -97,6 +115,24 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
         />
       </View>
 
+      {/* 🎯 Badge نوع هزینه */}
+      <View style={s.costTypeRow}>
+        <View
+          style={[
+            s.costTypeBadge,
+            {
+              backgroundColor: costMeta.bg,
+              borderColor: costMeta.border,
+            },
+          ]}
+        >
+          <Icon name={costMeta.icon} size={14} color={costMeta.color} />
+          <Text style={[s.costTypeText, { color: costMeta.color }]}>
+            {costMeta.label}
+          </Text>
+        </View>
+      </View>
+
       {/* شماره تماس */}
       {request.contactPhone && (
         <TouchableOpacity
@@ -120,7 +156,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
         </TouchableOpacity>
       )}
 
-      {/* 🆕 توضیحات در کادر سفید */}
+      {/* توضیحات */}
       {truncatedDesc ? (
         <View style={[s.descBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
           <View style={s.descHeader}>
@@ -138,9 +174,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
         </View>
       ) : null}
 
-      {/* ❌ قسمت الزامات حذف شد */}
-
-      {/* تاریخ ایجاد و انقضا */}
+      {/* تاریخ‌ها */}
       <View style={[s.datesBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
         <View style={s.dateRow}>
           <Icon name="event-note" size={14} color={colors.textSecondary} />
@@ -158,7 +192,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
         </View>
       </View>
 
-      {/* پیام آگهی غیرفعال */}
+      {/* پیام غیرفعال */}
       {request.status === 'inactive' && (
         <View style={[s.inactiveBox, { backgroundColor: '#E5393510', borderColor: '#E5393530' }]}>
           <Icon name="block" size={16} color="#E53935" />
@@ -168,7 +202,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
         </View>
       )}
 
-      {/* دکمه‌های اکشن */}
+      {/* دکمه‌ها */}
       <View style={[s.actions, { borderTopColor: colors.border }]}>
         <TouchableOpacity
           style={[s.actionBtn, { backgroundColor: colors.primary + '15' }]}
@@ -177,7 +211,6 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
           <Icon name="edit" size={20} color={colors.primary} />
           <Text style={[s.actionBtnText, { color: colors.primary }]}>ویرایش</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={[s.actionBtn, { backgroundColor: '#E5393515' }]}
           onPress={handleDelete}
@@ -221,7 +254,25 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-  // 🆕 استایل‌های مشترک برای کادرهای اطلاعاتی
+  // 🎯 Badge نوع هزینه
+  costTypeRow: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+  },
+  costTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+  },
+  costTypeText: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
   infoBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,7 +316,6 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
-  // 🆕 استایل کادر توضیحات
   descBox: {
     marginHorizontal: 14,
     marginTop: 10,
@@ -294,7 +344,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     marginTop: 2,
   },
-  // تاریخ‌ها
   datesBox: {
     marginHorizontal: 14,
     marginTop: 10,
@@ -317,22 +366,6 @@ const s = StyleSheet.create({
   dateValue: {
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
-  },
-  durationBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginHorizontal: 14,
-    marginBottom: 14,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  durationText: {
-    flex: 1,
-    fontSize: 12,
-    fontFamily: 'Vazir-Medium',
-    lineHeight: 18,
   },
   inactiveBox: {
     flexDirection: 'row',
