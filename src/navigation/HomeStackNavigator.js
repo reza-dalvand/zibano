@@ -1,13 +1,12 @@
 // src/navigation/HomeStackNavigator.js
-
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/home/HomeScreen';
 import CategoryBusinessesScreen from '../screens/home/CategoryBusinessesScreen';
-// ۱. امپورت کردن صفحه جزئیات کسب و کار که ساختیم
-import BusinessDetailsScreen from '../screens/home/BusinessDetailsScreen'; 
-// import BookingScreen from '../screens/home/BookingScreen';
+import BusinessDetailsScreen from '../screens/home/BusinessDetailsScreen';
+// 🆕 صفحه جدید پیشنهادات ویژه
+import AllAdsScreen from '../screens/home/AllAdsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,28 +15,23 @@ export default function HomeStackNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_left', // انیمیشن ورود صفحات از چپ به راست (مناسب برای RTL)
+        animation: 'slide_from_left',
       }}
     >
-      {/* صفحه اصلی خانه */}
       <Stack.Screen name="HomeMain" component={HomeScreen} />
-      
-      {/* صفحه لیست کسب و کارهای یک دسته بندی */}
       <Stack.Screen
         name="CategoryBusinesses"
         component={CategoryBusinessesScreen}
       />
-
-      {/* ۲. اضافه کردن صفحه جزئیات به استک نویگیشن خانه */}
-      <Stack.Screen 
-        name="BusinessDetails" 
-        component={BusinessDetailsScreen} 
+      <Stack.Screen
+        name="BusinessDetails"
+        component={BusinessDetailsScreen}
       />
-      {/* ۲. اضافه کردن صفحه رزرو نوبت*/}
-      {/* <Stack.Screen 
-        name="Booking" 
-        component={BookingScreen} 
-      /> */}
+      {/* 🆕 صفحه پیشنهادات ویژه */}
+      <Stack.Screen
+        name="AllAds"
+        component={AllAdsScreen}
+      />
     </Stack.Navigator>
   );
 }

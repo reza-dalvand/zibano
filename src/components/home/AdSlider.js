@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
@@ -21,6 +22,8 @@ const toPersianDigit = (str) =>
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();
+  const navigation = useNavigation(); // ✅ اضافه شد: تعریف navigation
+  
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -47,7 +50,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [ads.length]);
+  }, [ads.length, autoPlayInterval]); // ✅ اضافه شدن autoPlayInterval به وابستگی‌ها
 
   useEffect(() => {
     progressAnim.setValue(0);
@@ -56,7 +59,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
       duration: autoPlayInterval,
       useNativeDriver: false,
     }).start();
-  }, [activeIndex]);
+  }, [activeIndex, autoPlayInterval]); // ✅ اضافه شدن autoPlayInterval به وابستگی‌ها
 
   // 🎯 هندلر اسکرول با محاسبه ایندکس معکوس
   const onScroll = (e) => {
@@ -94,7 +97,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
           </Text>
         </View>
         <TouchableOpacity
-          onPress={() => console.log('See all')}
+          onPress={() => navigation.navigate('AllAds')} // ✅ حالا navigation به درستی کار می‌کند
           style={s.seeAllBtn}
           activeOpacity={0.7}
         >
