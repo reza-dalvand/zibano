@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
+import SeeAllButton from './SeeAllButton'; // 🆕 اضافه شد
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
@@ -22,8 +23,7 @@ const toPersianDigit = (str) =>
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();
-  const navigation = useNavigation(); // ✅ اضافه شد: تعریف navigation
-  
+  const navigation = useNavigation();
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -50,7 +50,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [ads.length, autoPlayInterval]); // ✅ اضافه شدن autoPlayInterval به وابستگی‌ها
+  }, [ads.length, autoPlayInterval]);
 
   useEffect(() => {
     progressAnim.setValue(0);
@@ -59,7 +59,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
       duration: autoPlayInterval,
       useNativeDriver: false,
     }).start();
-  }, [activeIndex, autoPlayInterval]); // ✅ اضافه شدن autoPlayInterval به وابستگی‌ها
+  }, [activeIndex, autoPlayInterval]);
 
   // 🎯 هندلر اسکرول با محاسبه ایندکس معکوس
   const onScroll = (e) => {
@@ -96,16 +96,12 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
             پیشنهادات ویژه
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AllAds')} // ✅ حالا navigation به درستی کار می‌کند
-          style={s.seeAllBtn}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.seeAllText, { color: colors.primary }]}>
-            همه
-          </Text>
-          <Icon name="chevron-left" size={18} color={colors.primary} />
-        </TouchableOpacity>
+        
+        {/* 🆕 استفاده از کامپوننت SeeAllButton به جای دکمه متنی ساده */}
+        <SeeAllButton 
+          onPress={() => navigation.navigate('AllAds')} 
+          count={ads.length} 
+        />
       </View>
 
       {/* 🎯 FlatList با آرایه معکوس شده */}
@@ -231,6 +227,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginBottom:'1%',
   },
   iconBox: {
     width: 32,
@@ -243,15 +240,7 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Vazir-Bold',
   },
-  seeAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  seeAllText: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-  },
+  // ❌ استایل‌های seeAllBtn و seeAllText حذف شدند چون دیگر استفاده نمی‌شوند
   flatListContent: {
     paddingHorizontal: 20,
     paddingVertical: 4,
@@ -355,12 +344,11 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 14,
-    // 🎯 سایه کمرنگ‌تر
     shadowColor: '#43A047',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,  // ✅ کاهش از 0.25 به 0.15
-    shadowRadius: 4,      // ✅ کاهش از 8 به 4
-    elevation: 3,         // ✅ کاهش از 5 به 3
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   bookBtnText: {
     fontSize: 13,
