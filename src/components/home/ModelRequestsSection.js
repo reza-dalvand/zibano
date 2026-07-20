@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native'; // 🆕
 import ModelRequestCard from './ModelRequestCard';
 import SeeAllButton from './SeeAllButton';
 
@@ -44,7 +45,7 @@ const MOCK_MODEL_REQUESTS = [
     serviceImage: 'https://picsum.photos/400/300?random=53',
     businessName: 'مرکز لیزر رویال',
     city: 'تهران، شهرک غرب',
-    discount: 0, // 🎯 بدون تخفیف → "با هزینه مواد"
+    discount: 0,
     isUrgent: true,
   },
   {
@@ -59,8 +60,13 @@ const MOCK_MODEL_REQUESTS = [
   },
 ];
 
-export default function ModelRequestsSection({ onSeeAll, onItemPress }) {
+export default function ModelRequestsSection({ onItemPress }) {
   const { colors } = useTheme();
+  const navigation = useNavigation(); // 🆕
+
+  const handleSeeAll = () => {
+    navigation.navigate('AllModelRequests'); // 🆕
+  };
 
   return (
     <View style={s.section}>
@@ -78,7 +84,7 @@ export default function ModelRequestsSection({ onSeeAll, onItemPress }) {
             </Text>
           </View>
         </View>
-        <SeeAllButton onPress={onSeeAll} count={MOCK_MODEL_REQUESTS.length} />
+        <SeeAllButton onPress={handleSeeAll} count={MOCK_MODEL_REQUESTS.length} />
       </View>
 
       <View
