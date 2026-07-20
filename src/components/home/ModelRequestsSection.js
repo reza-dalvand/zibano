@@ -7,65 +7,102 @@ import { useNavigation } from '@react-navigation/native'; // 🆕
 import ModelRequestCard from './ModelRequestCard';
 import SeeAllButton from './SeeAllButton';
 
+// 🎯 داده‌های کامل‌تر با businessId و contactPhone برای navigation
 const MOCK_MODEL_REQUESTS = [
   {
     id: 'mr_1',
+    businessId: 'b1', // 🆕 شناسه کسب‌وکار
     title: 'مدل فیشیال VIP عروس',
     serviceName: 'فیشیال تخصصی پوست',
     serviceImage: 'https://picsum.photos/400/300?random=50',
     businessName: 'کلینیک زیبایی صدف',
     city: 'تهران، سعادت‌آباد',
+    costType: 'paid', // 🆕 نوع هزینه
     discount: 50,
     isUrgent: true,
+    contactPhone: '09121234567', // 🆕 شماره تماس
+    description: 'نیاز به مدل برای تست محصولات جدید فیشیال. این خدمت شامل پاکسازی عمیق پوست، استفاده از ماسک طلای ۲۴ عیار و ماساژ صورت با روغن‌های طبیعی است.',
+    createdAt: '۱۴۰۳/۰۴/۱۰',
+    expiresAt: '۱۴۰۳/۰۴/۲۰',
   },
   {
     id: 'mr_2',
+    businessId: 'b2',
     title: 'مدل طراحی ناخن ژورنالی',
     serviceName: 'کاشت ناخن',
     serviceImage: 'https://picsum.photos/400/300?random=51',
     businessName: 'ناخن گالری پریا',
     city: 'کرج، فردیس',
+    costType: 'material_cost',
     discount: 70,
     isUrgent: false,
+    contactPhone: '09129876543',
+    description: 'طراحی‌های جدید و خاص برای نمونه‌کار با تکنیک‌های روز دنیا.',
+    createdAt: '۱۴۰۳/۰۴/۰۸',
+    expiresAt: '۱۴۰۳/۰۴/۱۸',
   },
   {
     id: 'mr_3',
+    businessId: 'b3',
     title: 'مدل تکنیک بالیاژ فرانسوی',
     serviceName: 'رنگ و لایت مو',
     serviceImage: 'https://picsum.photos/400/300?random=52',
     businessName: 'سالن زیبایی افرا',
     city: 'تهران، نیاوران',
+    costType: 'paid',
     discount: 60,
     isUrgent: false,
+    contactPhone: '09121112233',
+    description: 'تست تکنیک جدید بالیاژ فرانسوی با مواد اورجینال ایتالیایی.',
+    createdAt: '۱۴۰۳/۰۴/۰۵',
+    expiresAt: '۱۴۰۳/۰۴/۱۵',
   },
   {
     id: 'mr_4',
+    businessId: 'b4',
     title: 'مدل لیزر الکس ۲۰۲۴',
     serviceName: 'لیزر موهای زائد',
     serviceImage: 'https://picsum.photos/400/300?random=53',
     businessName: 'مرکز لیزر رویال',
     city: 'تهران، شهرک غرب',
+    costType: 'material_cost',
     discount: 0,
     isUrgent: true,
+    contactPhone: '09124445566',
+    description: 'تست دستگاه جدید لیزر الکساندرایت ۲۰۲۴. بدون درد و با خنک‌کننده قوی.',
+    createdAt: '۱۴۰۳/۰۴/۰۳',
+    expiresAt: '۱۴۰۳/۰۴/۱۳',
   },
   {
     id: 'mr_5',
+    businessId: 'b5',
     title: 'مدل اکستنشن مژه هالیوودی',
     serviceName: 'کاشت مژه',
     serviceImage: 'https://picsum.photos/400/300?random=54',
     businessName: 'سالن زیبایی افرا',
     city: 'تهران، نیاوران',
+    costType: 'free',
     discount: 0,
     isUrgent: false,
+    contactPhone: '09127778899',
+    description: 'اکستنشن مژه هالیوودی با متریال درجه یک.',
+    createdAt: '۱۴۰۳/۰۴/۰۱',
+    expiresAt: '۱۴۰۳/۰۴/۱۱',
   },
 ];
 
-export default function ModelRequestsSection({ onItemPress }) {
+export default function ModelRequestsSection() {
   const { colors } = useTheme();
   const navigation = useNavigation(); // 🆕
 
+  // 🎯 هندلر کلیک روی کارت - هدایت مستقیم به جزئیات آگهی
+  const handleItemPress = (request) => {
+    navigation.navigate('ModelRequestDetail', { request });
+  };
+
+  // 🎯 هندلر کلیک روی "مشاهده همه" - هدایت به لیست کامل
   const handleSeeAll = () => {
-    navigation.navigate('AllModelRequests'); // 🆕
+    navigation.navigate('AllModelRequests');
   };
 
   return (
@@ -86,7 +123,6 @@ export default function ModelRequestsSection({ onItemPress }) {
         </View>
         <SeeAllButton onPress={handleSeeAll} count={MOCK_MODEL_REQUESTS.length} />
       </View>
-
       <View
         style={[
           s.promoBanner,
@@ -105,7 +141,6 @@ export default function ModelRequestsSection({ onItemPress }) {
           بگیرید
         </Text>
       </View>
-
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -115,7 +150,7 @@ export default function ModelRequestsSection({ onItemPress }) {
           <ModelRequestCard
             key={request.id}
             request={request}
-            onPress={onItemPress}
+            onPress={handleItemPress} // 🎯 هدایت مستقیم به جزئیات
           />
         ))}
       </ScrollView>

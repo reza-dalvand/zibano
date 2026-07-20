@@ -213,35 +213,6 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             </TouchableOpacity>
           </Card>
 
-          {/* ═══════ وضعیت هزینه ═══════ */}
-          <Card variant="elevated" padding={16} radius={16}>
-            <View style={s.sectionHeader}>
-              <View style={[s.sectionIconBox, { backgroundColor: costMeta.color + '15' }]}>
-                <Icon name={costMeta.icon} size={18} color={costMeta.color} />
-              </View>
-              <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-                وضعیت هزینه
-              </Text>
-            </View>
-
-            <View
-              style={[
-                s.costTypeBox,
-                {
-                  backgroundColor: costMeta.color + '10',
-                  borderColor: costMeta.color + '40',
-                },
-              ]}
-            >
-              <Text style={[s.costTypeLabel, { color: costMeta.color }]}>
-                {costMeta.label}
-              </Text>
-              <Text style={[s.costTypeDescription, { color: colors.textSecondary }]}>
-                {costMeta.description}
-              </Text>
-            </View>
-          </Card>
-
           {/* ═══════ توضیحات ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
             <View style={s.sectionHeader}>
@@ -504,6 +475,8 @@ const s = StyleSheet.create({
     fontSize: 17,
     fontFamily: 'Vazir-Bold',
     letterSpacing: 1,
+    textAlign: 'center',
+
   },
   phoneIconCircle: {
     width: 44,
