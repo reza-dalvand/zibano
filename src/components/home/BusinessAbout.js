@@ -1,15 +1,43 @@
 // src/components/home/BusinessAbout.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import Card from '../common/Card';
 
+const toPersianDigit = (str) =>
+  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
 export default function BusinessAbout({ business }) {
   const { colors } = useTheme();
-  
+
+  // 🎯 هندلر تماس مستقیم
+  const handleCall = async () => {
+    if (!business.phone) {
+      Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
+      return;
+    }
+    try {
+      const cleanPhone = business.phone
+        .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+        .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+        .replace(/[^0-9+]/g, '');
+
+      const phoneUrl = `tel:${cleanPhone}`;
+      const canCall = await Linking.canOpenURL(phoneUrl);
+      if (canCall) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert('خطا', 'امکان برقراری تماس وجود ندارد');
+      }
+    } catch (error) {
+      Alert.alert('خطا', 'امکان برقراری تماس وجود ندارد');
+    }
+  };
+
   return (
     <View style={s.aboutSection}>
+      {/* درباره کسب‌وکار */}
       <Card variant="elevated" padding={20} radius={20}>
         <View style={s.aboutHeader}>
           <Icon name="info-outline" size={22} color={colors.primary} />
@@ -21,8 +49,9 @@ export default function BusinessAbout({ business }) {
           {business.about}
         </Text>
       </Card>
-      
+
       <View style={s.contactCards}>
+        {/* آدرس */}
         <Card variant="elevated" padding={16} radius={16} style={s.contactCard}>
           <View style={s.contactRow}>
             <View style={[s.contactIconBox, { backgroundColor: '#E5393520' }]}>
@@ -38,9 +67,14 @@ export default function BusinessAbout({ business }) {
             </View>
           </View>
         </Card>
-        
+
+        {/* 🎯 تلفن تماس - ساده و یکسان با بقیه */}
         <Card variant="elevated" padding={16} radius={16} style={s.contactCard}>
-          <TouchableOpacity style={s.contactRow}>
+          <TouchableOpacity
+            style={s.contactRow}
+            onPress={handleCall}
+            activeOpacity={0.7}
+          >
             <View style={[s.contactIconBox, { backgroundColor: '#4CAF5020' }]}>
               <Icon name="phone" size={22} color="#4CAF50" />
             </View>
@@ -49,13 +83,14 @@ export default function BusinessAbout({ business }) {
                 تلفن تماس
               </Text>
               <Text style={[s.contactValue, { color: colors.textMain }]}>
-                {business.phone}
+                {toPersianDigit(business.phone)}
               </Text>
             </View>
-            <Icon name="chevron-left" size={22} color={colors.textSecondary} />
+            <Icon name="call" size={22} color="#4CAF50" />
           </TouchableOpacity>
         </Card>
-        
+
+        {/* ساعات کاری */}
         <Card variant="elevated" padding={16} radius={16} style={s.contactCard}>
           <View style={s.contactRow}>
             <View style={[s.contactIconBox, { backgroundColor: '#2196F320' }]}>
@@ -72,8 +107,6 @@ export default function BusinessAbout({ business }) {
           </View>
         </Card>
       </View>
-      
-      {/* ❌ بخش شبکه‌های اجتماعی کاملاً حذف شد */}
     </View>
   );
 }
@@ -91,6 +124,7 @@ const s = StyleSheet.create({
   aboutTitle: {
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
+    width:'100%'
   },
   aboutText: {
     fontSize: 13,
@@ -106,7 +140,7 @@ const s = StyleSheet.create({
   contactRow: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   contactIconBox: {
     width: 44,

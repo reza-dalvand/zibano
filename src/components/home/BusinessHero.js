@@ -10,9 +10,10 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
 
 const { width } = Dimensions.get('window');
-const GALLERY_HEIGHT = 380;
+const GALLERY_HEIGHT = 330;
 
 export default function BusinessHero({
   gallery = [],
@@ -22,21 +23,17 @@ export default function BusinessHero({
   isFavorite,
   onFavoritePress,
 }) {
-  // 🎯 فقط اولین تصویر را نمایش بده
+  const insets = useSafeAreaInsets(); // 🆕
   const coverImage = gallery[0] || 'https://picsum.photos/800/600?random=45';
 
-  // 🎯 تولید لینک اختصاصی کسب و کار
   const bookingLink = `https://zibano.app/book/${businessId || 'biz_1'}`;
 
-  // 🎯 اشتراک‌گذاری لینک اختصاصی
   const handleShare = async () => {
     try {
       await Share.share({
         message: `🌸 ${businessName || 'سالن زیبایی'}
-
 📱 با این لینک می‌توانید مستقیماً از من نوبت بگیرید:
 ${bookingLink}
-
 ✨ رزرو از اپلیکیشن زیبانو`,
       });
     } catch (error) {
@@ -46,15 +43,17 @@ ${bookingLink}
 
   return (
     <View style={s.heroContainer}>
-      {/* 🎯 فقط یک Image ساده - بدون اسلایدر */}
-      <Image source={{ uri: coverImage }} style={s.heroImage} />
+      {/* 🎯 تصویر با paddingTop برای safe area */}
+      <View style={[s.heroImageWrapper, { paddingTop: insets.top }]}>
+        <Image source={{ uri: coverImage }} style={s.heroImage} />
+      </View>
 
-      {/* Gradient Overlay */}
-      <View style={s.heroGradientTop} />
+      {/* Gradient Overlays */}
+      <View style={[s.heroGradientTop, { paddingTop: insets.top }]} />
       <View style={s.heroGradientBottom} />
 
-      {/* دکمه‌های شناور */}
-      <View style={s.heroTopActions}>
+      {/* دکمه‌های شناور - با فاصله از status bar */}
+      <View style={[s.heroTopActions, { top: insets.top + 12 }]}>
         <TouchableOpacity style={s.heroActionButton} onPress={onBackPress}>
           <Icon name="arrow-forward" size={22} color="#fff" />
         </TouchableOpacity>
@@ -83,6 +82,15 @@ const s = StyleSheet.create({
     height: GALLERY_HEIGHT,
     position: 'relative',
   },
+  // 🎯 wrapper جدید برای مدیریت paddingTop
+  heroImageWrapper: {
+    width: width,
+    height: GALLERY_HEIGHT,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
   heroImage: {
     width: width,
     height: GALLERY_HEIGHT,
@@ -94,19 +102,18 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     height: 120,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.20)',
   },
   heroGradientBottom: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 70,
     backgroundColor: 'rgba(0,0,0,0.25)',
   },
   heroTopActions: {
     position: 'absolute',
-    top: 50,
     left: 20,
     right: 20,
     flexDirection: 'row',

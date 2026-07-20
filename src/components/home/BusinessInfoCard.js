@@ -158,6 +158,7 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     lineHeight: 30,
     marginBottom: 8,
+    marginTop:'4%',
   },
   ownerRow: {
     flexDirection: 'row',
