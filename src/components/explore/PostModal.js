@@ -150,6 +150,30 @@ export default function PostModal({
           ]}
         >
           <TouchableOpacity
+            onPress={onClose}
+            style={[
+              styles.headerActionBtn,
+              { backgroundColor: colors.background, borderColor: colors.border },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Icon name="close" size={22} color={colors.textMain} />
+          </TouchableOpacity>
+
+          <View style={{ flex: 1 }} />
+
+          <TouchableOpacity
+            onPress={handleShare}
+            style={[
+              styles.headerActionBtn,
+              { backgroundColor: colors.background, borderColor: colors.border },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Icon name="share" size={20} color={colors.textMain} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={handleSave}
             style={[
               styles.headerActionBtn,
@@ -165,30 +189,6 @@ export default function PostModal({
               size={22}
               color={isSaved ? colors.primary : colors.textMain}
             />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleShare}
-            style={[
-              styles.headerActionBtn,
-              { backgroundColor: colors.background, borderColor: colors.border },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Icon name="share" size={20} color={colors.textMain} />
-          </TouchableOpacity>
-
-          <View style={{ flex: 1 }} />
-
-          <TouchableOpacity
-            onPress={onClose}
-            style={[
-              styles.headerActionBtn,
-              { backgroundColor: colors.background, borderColor: colors.border },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Icon name="close" size={22} color={colors.textMain} />
           </TouchableOpacity>
         </View>
 
