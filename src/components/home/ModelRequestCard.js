@@ -90,7 +90,7 @@ export default function ModelRequestCard({ request, onPress }) {
             onPress={() => onPress?.(request)}
           >
             <Icon name="description" size={14} color="#fff" />
-            <Text style={s.detailsBtnText}>توضیحات</Text>
+            <Text style={s.detailsBtnText}>توضیحات و تماس</Text>
             <Icon name="arrow-back" size={14} color="#fff" />
           </TouchableOpacity>
         </View>
