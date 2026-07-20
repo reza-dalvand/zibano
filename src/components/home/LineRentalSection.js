@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 import LineRentalCard from './LineRentalCard';
 import SeeAllButton from './SeeAllButton';
 
@@ -57,8 +58,19 @@ const MOCK_LINE_RENTALS = [
   },
 ];
 
-export default function LineRentalSection({ onSeeAll, onItemPress }) {
+export default function LineRentalSection() {
   const { colors } = useTheme();
+  const navigation = useNavigation();
+
+  // 🎯 هندلر کلیک روی "مشاهده همه" - هدایت به لیست کامل
+  const handleSeeAll = () => {
+    navigation.navigate('AllLineRentals');
+  };
+
+  // 🎯 هندلر کلیک روی کارت - هدایت مستقیم به جزئیات آگهی
+  const handleItemPress = (ad) => {
+    navigation.navigate('LineRentalDetail', { ad });
+  };
 
   return (
     <View style={s.section}>
@@ -72,13 +84,12 @@ export default function LineRentalSection({ onSeeAll, onItemPress }) {
               فرصت‌های همکاری
             </Text>
             <Text style={[s.sectionSubtitle, { color: colors.textSecondary }]}>
-             با اجاره لاین و کسب‌وکار خود را گسترش دهید
+              با اجاره لاین و کسب‌وکار خود را گسترش دهید
             </Text>
           </View>
         </View>
-        <SeeAllButton onPress={onSeeAll} count={MOCK_LINE_RENTALS.length} />
+        <SeeAllButton onPress={handleSeeAll} count={MOCK_LINE_RENTALS.length} />
       </View>
-
       <View
         style={[
           s.promoBanner,
@@ -93,14 +104,17 @@ export default function LineRentalSection({ onSeeAll, onItemPress }) {
           برای متخصصان: با حداقل سرمایه، کسب‌وکار خود را راه‌اندازی کنید
         </Text>
       </View>
-
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={s.cardsContainer}
       >
         {MOCK_LINE_RENTALS.map((ad) => (
-          <LineRentalCard key={ad.id} ad={ad} onPress={onItemPress} />
+          <LineRentalCard
+            key={ad.id}
+            ad={ad}
+            onPress={handleItemPress}
+          />
         ))}
       </ScrollView>
     </View>

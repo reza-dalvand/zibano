@@ -1,4 +1,4 @@
-// src/screens/home/ModelRequestDetailScreen.js
+// src/screens/home/LineRentalDetailScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -21,51 +21,47 @@ const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 const toEnglishDigits = (str) =>
-  String(str)
+  String(str || '')
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const COST_TYPE_META = {
-  paid: {
-    label: 'با هزینه',
+const COLLAB_META = {
+  percent: {
+    label: 'همکاری درصدی',
+    icon: 'pie-chart',
+    color: '#9C27B0',
+    description: 'تقسیم درآمد با درصد توافقی بین سالن و همکار',
+  },
+  fixed: {
+    label: 'اجاره ثابت',
     icon: 'attach-money',
     color: '#2196F3',
-    description: 'مدل بخشی از هزینه خدمت را پرداخت می‌کند',
+    description: 'مبلغ ثابت ماهانه + رهن (اختیاری)',
   },
-  material_cost: {
-    label: 'با هزینه مواد',
-    icon: 'science',
+  hourly: {
+    label: 'همکاری ساعتی',
+    icon: 'schedule',
     color: '#FF9800',
-    description: 'فقط هزینه مواد مصرفی دریافت می‌شود',
-  },
-  free: {
-    label: 'کاملاً رایگان',
-    icon: 'redeem',
-    color: '#4CAF50',
-    description: 'هیچ هزینه‌ای از مدل دریافت نمی‌شود',
+    description: 'به ازای هر ساعت استفاده از لاین',
   },
 };
 
-export default function ModelRequestDetailScreen({ navigation, route }) {
+export default function LineRentalDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { request } = route.params;
+  const { ad } = route.params;
   const [isSaved, setIsSaved] = useState(false);
 
-  const costMeta =
-    COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
+  const meta = COLLAB_META[ad.collabType] || COLLAB_META.percent;
 
-  const shareUrl = `https://zibano.app/model-request/${request.id}`;
+  const shareUrl = `https://zibano.app/line-rental/${ad.id}`;
 
   const handleCall = async () => {
-    if (!request.contactPhone) {
+    if (!ad.contactPhone) {
       Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
       return;
     }
-    const cleanPhone = toEnglishDigits(request.contactPhone).replace(
-      /[^0-9+]/g,
-      '',
-    );
+    const cleanPhone = toEnglishDigits(ad.contactPhone).replace(/[^0-9+]/g, '');
     if (!cleanPhone) {
       Alert.alert('خطا', 'شماره تماس معتبر نیست');
       return;
@@ -84,18 +80,18 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
 
   const handleBusinessPress = () => {
     navigation.navigate('BusinessDetails', {
-      businessId: request.businessId || '1',
+      businessId: ad.businessId || '1',
     });
   };
 
   const handleShare = async () => {
-    const shareMessage = `${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}\n🔗 ${shareUrl}`;
+    const shareMessage = `${ad.title}\n${ad.description || ''}\n🏪 ${ad.businessName}\n📍 ${ad.city}\n🔗 ${shareUrl}`;
     try {
       const result = await Share.share(
         {
           message: shareMessage,
           url: shareUrl,
-          title: request.title,
+          title: ad.title,
         },
         {
           dialogTitle: 'اشتراک‌گذاری آگهی',
@@ -138,7 +134,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             },
           ]}
         >
-          <Image source={{ uri: request.serviceImage }} style={s.heroImage} />
+          <Image source={{ uri: ad.lineImage }} style={s.heroImage} />
           <View style={s.heroGradient} />
 
           {/* دکمه‌های بالا - با فاصله از notch */}
@@ -164,18 +160,25 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
 
           {/* Badge‌ها */}
           <View style={s.heroBadges}>
-            <View style={[s.costBadge, { backgroundColor: costMeta.color }]}>
-              <Icon name={costMeta.icon} size={12} color="#fff" />
-              <Text style={s.costBadgeText}>{costMeta.label}</Text>
+            <View style={[s.collabBadge, { backgroundColor: meta.color }]}>
+              <Icon name={meta.icon} size={12} color="#fff" />
+              <Text style={s.collabBadgeText}>{meta.label}</Text>
+            </View>
+            <View
+              style={[
+                s.serviceBadge,
+                { backgroundColor: ad.serviceTypeColor || '#607D8B' },
+              ]}
+            >
+              <Icon name={ad.serviceTypeIcon || 'spa'} size={10} color="#fff" />
+              <Text style={s.serviceBadgeText}>{ad.serviceTypeName}</Text>
             </View>
           </View>
         </View>
 
         {/* ═══════ محتوا ═══════ */}
         <View style={s.content}>
-          <Text style={[s.title, { color: colors.textMain }]}>
-            {request.title}
-          </Text>
+          <Text style={[s.title, { color: colors.textMain }]}>{ad.title}</Text>
 
           {/* ═══════ کارت کسب و کار ═══════ */}
           <TouchableOpacity onPress={handleBusinessPress} activeOpacity={0.85}>
@@ -199,7 +202,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                     style={[s.businessName, { color: colors.textMain }]}
                     numberOfLines={1}
                   >
-                    {request.businessName}
+                    {ad.businessName}
                   </Text>
                   <View style={s.businessMeta}>
                     <Icon
@@ -210,7 +213,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                     <Text
                       style={[s.businessCity, { color: colors.textSecondary }]}
                     >
-                      {request.city}
+                      {ad.city}
                     </Text>
                   </View>
                 </View>
@@ -222,6 +225,36 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
               </View>
             </Card>
           </TouchableOpacity>
+
+          {/* ═══════ کارت قیمت و شرایط همکاری ═══════ */}
+          <Card
+            variant="elevated"
+            padding={16}
+            radius={16}
+            style={[s.priceCard, { borderColor: meta.color + '40' }]}
+          >
+            <View style={s.priceHeader}>
+              <View
+                style={[s.priceIconBox, { backgroundColor: meta.color + '15' }]}
+              >
+                <Icon name={meta.icon} size={20} color={meta.color} />
+              </View>
+              <View style={s.priceInfo}>
+                <Text style={[s.priceLabel, { color: colors.textSecondary }]}>
+                  شرایط همکاری
+                </Text>
+                <Text style={[s.priceType, { color: colors.textMain }]}>
+                  {meta.label}
+                </Text>
+              </View>
+            </View>
+            <Text style={[s.priceValue, { color: meta.color }]}>
+              {ad.priceDisplay}
+            </Text>
+            <Text style={[s.priceDescription, { color: colors.textSecondary }]}>
+              {meta.description}
+            </Text>
+          </Card>
 
           {/* ═══════ توضیحات ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
@@ -236,7 +269,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
               </Text>
             </View>
             <Text style={[s.descriptionText, { color: colors.textMain }]}>
-              {request.description}
+              {ad.description}
             </Text>
           </Card>
 
@@ -249,7 +282,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                 <Icon name="handshake" size={18} color="#4CAF50" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-                ارتباط و رزرو
+                ارتباط و همکاری
               </Text>
             </View>
 
@@ -275,8 +308,8 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                   style={[s.phoneValue, { color: colors.textMain }]}
                   selectable
                 >
-                  {request.contactPhone
-                    ? toPersianDigit(request.contactPhone)
+                  {ad.contactPhone
+                    ? toPersianDigit(ad.contactPhone)
                     : 'ثبت نشده'}
                 </Text>
               </View>
@@ -291,10 +324,10 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                 <Icon name="call" size={20} color="#fff" />
               </View>
               <View style={s.callBtnTextCol}>
-                <Text style={s.callBtnTitle}>رزرو و تماس</Text>
+                <Text style={s.callBtnTitle}>تماس و همکاری</Text>
                 <Text style={s.callBtnSubtitle}>
-                  {request.contactPhone
-                    ? toPersianDigit(request.contactPhone)
+                  {ad.contactPhone
+                    ? toPersianDigit(ad.contactPhone)
                     : 'شماره ثبت نشده'}
                 </Text>
               </View>
@@ -314,7 +347,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             >
               <Icon name="share" size={20} color={colors.primary} />
               <Text style={[s.shareBtnText, { color: colors.textMain }]}>
-                اشتراک‌گذاری این فرصت با دوستان
+                اشتراک‌گذاری این آگهی با دوستان
               </Text>
               <Icon name="arrow-back" size={18} color={colors.textSecondary} />
             </TouchableOpacity>
@@ -338,7 +371,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                 تاریخ ایجاد:
               </Text>
               <Text style={[s.dateValue, { color: colors.textMain }]}>
-                {request.createdAt}
+                {ad.createdAt}
               </Text>
             </View>
             <View style={s.dateRow}>
@@ -347,7 +380,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                 تاریخ انقضا:
               </Text>
               <Text style={[s.dateValue, { color: colors.textMain }]}>
-                {request.expiresAt}
+                {ad.expiresAt}
               </Text>
             </View>
           </Card>
@@ -370,13 +403,19 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
               <View style={s.hintItem}>
                 <Icon name="check-circle" size={14} color="#4CAF50" />
                 <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  برای رزرو نوبت با سالن تماس بگیرید
+                  شرایط همکاری را حضوری و قبل از شروع کار نهایی کنید
                 </Text>
               </View>
               <View style={s.hintItem}>
                 <Icon name="check-circle" size={14} color="#4CAF50" />
                 <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  مدل‌ها اجازه استفاده از تصاویر را به سالن می‌دهند
+                  قرارداد کتبی تنظیم و امضا شود
+                </Text>
+              </View>
+              <View style={s.hintItem}>
+                <Icon name="check-circle" size={14} color="#4CAF50" />
+                <Text style={[s.hintText, { color: colors.textSecondary }]}>
+                  از هویت و مجوزهای کسب‌وکار اطمینان حاصل کنید
                 </Text>
               </View>
             </View>
@@ -440,7 +479,7 @@ const s = StyleSheet.create({
     gap: 8,
     flexWrap: 'wrap',
   },
-  costBadge: {
+  collabBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -453,9 +492,22 @@ const s = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  costBadgeText: {
+  collabBadgeText: {
     color: '#fff',
     fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
+  serviceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  serviceBadgeText: {
+    color: '#fff',
+    fontSize: 10,
     fontFamily: 'Vazir-Bold',
   },
 
@@ -520,11 +572,44 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-  descriptionText: {
-    fontSize: 14,
+
+  // ═══════ کارت قیمت ═══════
+  priceCard: {
+    borderWidth: 1.5,
+    gap: 10,
+  },
+  priceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  priceIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  priceInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  priceLabel: {
+    fontSize: 12,
     fontFamily: 'Vazir',
-    lineHeight: 26,
-    textAlign: 'justify',
+  },
+  priceType: {
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
+  priceValue: {
+    fontSize: 26,
+    fontFamily: 'Vazir-Bold',
+  },
+  priceDescription: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    lineHeight: 20,
   },
 
   // ═══════ دکمه‌های اکشن ═══════
@@ -607,6 +692,14 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Vazir-Bold',
     flex: 1,
+  },
+
+  // ═══════ توضیحات ═══════
+  descriptionText: {
+    fontSize: 14,
+    fontFamily: 'Vazir',
+    lineHeight: 26,
+    textAlign: 'justify',
   },
 
   // ═══════ تاریخ ═══════

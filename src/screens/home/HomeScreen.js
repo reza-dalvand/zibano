@@ -24,7 +24,7 @@ import { useAuth } from '../../context/AuthContext';
 const MOCK_ADS = [
   {
     id: 1,
-    businessId: '1', // 🆕 شناسه کسب‌وکار برای نویگیشن
+    businessId: '1',
     imageUrl: 'https://picsum.photos/800/400?random=1',
     title: 'جشنواره تخفیف‌های بهار کلینیک رُز',
     subtitle: 'تا ۳۰٪ تخفیف خدمات پوست',
@@ -32,7 +32,7 @@ const MOCK_ADS = [
   },
   {
     id: 2,
-    businessId: '2', // 🆕 شناسه کسب‌وکار برای نویگیشن
+    businessId: '2',
     imageUrl: 'https://picsum.photos/800/400?random=2',
     title: 'افتتاحیه سالن زیبایی لاویا',
     subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی',
@@ -40,7 +40,7 @@ const MOCK_ADS = [
   },
   {
     id: 3,
-    businessId: '3', // 🆕 شناسه کسب‌وکار برای نویگیشن
+    businessId: '3',
     imageUrl: 'https://picsum.photos/800/400?random=3',
     title: 'لیزر با جدیدترین دستگاه ۲۰۲۴',
     subtitle: 'مرکز رویال - تخفیف ویژه',
@@ -48,7 +48,6 @@ const MOCK_ADS = [
   },
 ];
 
-// ... (بقیه MOCK_CATEGORIES بدون تغییر)
 const MOCK_CATEGORIES = [
   { id: 1, name: 'میکاپ', icon: 'face', color: '#E91E63' },
   { id: 2, name: 'کاشت ناخن', icon: 'brush', color: '#9C27B0' },
@@ -116,7 +115,7 @@ export default function HomeScreen({ navigation }) {
         <View style={s.section}>
           <AdSlider
             ads={MOCK_ADS}
-            onPress={handleAdPress} // 🎯 تغییر: هندلر نویگیشن به جای console.log
+            onPress={handleAdPress}
           />
         </View>
 
@@ -142,16 +141,11 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* ۳. فرصت‌های مدلینگ */}
-        <ModelRequestsSection
-          onSeeAll={() => console.log('See all model requests')}
-          onItemPress={(item) => console.log('Model request:', item.id)}
-        />
-        {/* ۴. فرصت‌های همکاری / اجاره لاین */}
-        <LineRentalSection
-          onSeeAll={() => console.log('See all line rentals')}
-          onItemPress={(item) => console.log('Line rental:', item.id)}
-        />
+        {/* ۳. فرصت‌های مدلینگ - ✅ بدون props (خودش navigation دارد) */}
+        <ModelRequestsSection />
+
+        {/* ۴. فرصت‌های همکاری / اجاره لاین - ✅ بدون props (خودش navigation دارد) */}
+        <LineRentalSection />
       </View>
       <NotificationModal
         visible={notificationModalVisible}
