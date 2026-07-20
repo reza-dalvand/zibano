@@ -72,7 +72,7 @@ export default function LineRentalSection({ onSeeAll, onItemPress }) {
               فرصت‌های همکاری
             </Text>
             <Text style={[s.sectionSubtitle, { color: colors.textSecondary }]}>
-              لاین اجاره کنید و کسب‌وکار خود را گسترش دهید
+             با اجاره لاین و کسب‌وکار خود را گسترش دهید
             </Text>
           </View>
         </View>
