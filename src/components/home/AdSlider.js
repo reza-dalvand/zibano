@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
+import SeeAllButton from './SeeAllButton';
 import { useNavigation } from '@react-navigation/native';
-import SeeAllButton from './SeeAllButton'; // 🆕 اضافه شد
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
@@ -23,13 +23,12 @@ const toPersianDigit = (str) =>
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // 🆕
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const autoPlayRef = useRef(null);
 
-  // 🎯 معکوس کردن آرایه برای تغییر جهت اسکرول
   const reversedAds = [...ads].reverse();
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
       autoPlayRef.current = setInterval(() => {
         setActiveIndex((prev) => {
           const nextIndex = (prev + 1) % ads.length;
-          // 🎯 اسکرول به اسلاید بعدی با ایندکس معکوس
           const reversedNextIndex = ads.length - 1 - nextIndex;
           flatListRef.current?.scrollToOffset({
             offset: reversedNextIndex * (CARD_WIDTH + CARD_SPACING),
@@ -61,19 +59,16 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     }).start();
   }, [activeIndex, autoPlayInterval]);
 
-  // 🎯 هندلر اسکرول با محاسبه ایندکس معکوس
   const onScroll = (e) => {
     const slideSize = e.nativeEvent.layoutMeasurement?.width || CARD_WIDTH + CARD_SPACING;
     if (slideSize === 0) return;
     const reversedIndex = Math.round(
       e.nativeEvent.contentOffset.x / slideSize
     );
-    // 🎯 تبدیل ایندکس معکوس به ایندکس واقعی
     const actualIndex = reversedAds.length - 1 - reversedIndex;
     setActiveIndex(Math.max(0, Math.min(actualIndex, ads.length - 1)));
   };
 
-  // 🎯 رفتن به اسلاید با ایندکس معکوس
   const goToSlide = (index) => {
     const reversedIndex = ads.length - 1 - index;
     flatListRef.current?.scrollToOffset({
@@ -81,6 +76,15 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
       animated: true,
     });
     setActiveIndex(index);
+  };
+
+  // 🎯 هندلر کلیک روی دکمه رزرو - مستقیم به دیتیل کسب‌وکار
+  const handleBookPress = (item) => {
+    if (item.businessId) {
+      navigation.navigate('BusinessDetails', { businessId: item.businessId });
+    } else {
+      onPress?.(item);
+    }
   };
 
   if (!ads || ads.length === 0) return null;
@@ -96,15 +100,12 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
             پیشنهادات ویژه
           </Text>
         </View>
-        
-        {/* 🆕 استفاده از کامپوننت SeeAllButton به جای دکمه متنی ساده */}
-        <SeeAllButton 
-          onPress={() => navigation.navigate('AllAds')} 
-          count={ads.length} 
+        <SeeAllButton
+          onPress={() => navigation.navigate('AllAds')}
+          count={ads.length}
         />
       </View>
 
-      {/* 🎯 FlatList با آرایه معکوس شده */}
       <FlatList
         ref={flatListRef}
         data={reversedAds}
@@ -114,7 +115,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
           return (
             <TouchableOpacity
               activeOpacity={0.95}
-              onPress={() => onPress?.(item)}
+              onPress={() => handleBookPress(item)} // 🎯 کلیک روی کل کارت هم به دیتیل بره
               style={[
                 s.slideCard,
                 {
@@ -154,9 +155,9 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
                   </Text>
                 )}
                 <View style={s.ctaRow}>
-                  {/* 🎯 دکمه رزرو نوبت با سایه کمرنگ‌تر */}
+                  {/* 🎯 دکمه رزرو - مستقیم به دیتیل کسب‌وکار */}
                   <TouchableOpacity
-                    onPress={() => onPress?.(item)}
+                    onPress={() => handleBookPress(item)}
                     style={s.bookBtn}
                     activeOpacity={0.85}
                   >
@@ -177,7 +178,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        // 🎯 شروع از انتهای لیست معکوس (= ابتدای لیست واقعی)
         initialScrollIndex={reversedAds.length - 1}
         getItemLayout={(data, index) => ({
           length: CARD_WIDTH + CARD_SPACING,
@@ -227,7 +227,6 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom:'1%',
   },
   iconBox: {
     width: 32,
@@ -240,7 +239,6 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Vazir-Bold',
   },
-  // ❌ استایل‌های seeAllBtn و seeAllText حذف شدند چون دیگر استفاده نمی‌شوند
   flatListContent: {
     paddingHorizontal: 20,
     paddingVertical: 4,
@@ -267,28 +265,6 @@ const s = StyleSheet.create({
     right: 0,
     height: '62%',
     backgroundColor: 'rgba(0,0,0,0.30)',
-  },
-  badgeBox: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    zIndex: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontFamily: 'Vazir-Bold',
   },
   progressContainer: {
     position: 'absolute',
@@ -335,7 +311,6 @@ const s = StyleSheet.create({
     justifyContent: 'flex-start',
     marginTop: 4,
   },
-  // 🎯 دکمه رزرو نوبت با سایه کمرنگ‌تر
   bookBtn: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -20,9 +20,11 @@ import LineRentalSection from '../../components/home/LineRentalSection';
 import SeeAllButton from '../../components/home/SeeAllButton';
 import { useAuth } from '../../context/AuthContext';
 
+// 🎯 اضافه شدن businessId به هر آگهی
 const MOCK_ADS = [
   {
     id: 1,
+    businessId: '1', // 🆕 شناسه کسب‌وکار برای نویگیشن
     imageUrl: 'https://picsum.photos/800/400?random=1',
     title: 'جشنواره تخفیف‌های بهار کلینیک رُز',
     subtitle: 'تا ۳۰٪ تخفیف خدمات پوست',
@@ -30,6 +32,7 @@ const MOCK_ADS = [
   },
   {
     id: 2,
+    businessId: '2', // 🆕 شناسه کسب‌وکار برای نویگیشن
     imageUrl: 'https://picsum.photos/800/400?random=2',
     title: 'افتتاحیه سالن زیبایی لاویا',
     subtitle: 'نوبت‌دهی آنلاین با بیعانه اقتصادی',
@@ -37,6 +40,7 @@ const MOCK_ADS = [
   },
   {
     id: 3,
+    businessId: '3', // 🆕 شناسه کسب‌وکار برای نویگیشن
     imageUrl: 'https://picsum.photos/800/400?random=3',
     title: 'لیزر با جدیدترین دستگاه ۲۰۲۴',
     subtitle: 'مرکز رویال - تخفیف ویژه',
@@ -44,6 +48,7 @@ const MOCK_ADS = [
   },
 ];
 
+// ... (بقیه MOCK_CATEGORIES بدون تغییر)
 const MOCK_CATEGORIES = [
   { id: 1, name: 'میکاپ', icon: 'face', color: '#E91E63' },
   { id: 2, name: 'کاشت ناخن', icon: 'brush', color: '#9C27B0' },
@@ -79,11 +84,17 @@ export default function HomeScreen({ navigation }) {
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filters, setFilters] = useState({});
-
   const hasActiveFilter = Object.values(filters).some(
     (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0)
   );
   const notificationCount = 3;
+
+  // 🎯 هندلر کلیک روی آگهی اسلایدر - هدایت به صفحه دیتیل کسب‌وکار
+  const handleAdPress = (ad) => {
+    if (ad.businessId) {
+      navigation.navigate('BusinessDetails', { businessId: ad.businessId });
+    }
+  };
 
   return (
     <ScreenWrapper scrollable padding={0} edges={['bottom', 'left', 'right']}>
@@ -100,13 +111,12 @@ export default function HomeScreen({ navigation }) {
         onFilterPress={() => setFilterModalVisible(true)}
         hasActiveFilter={hasActiveFilter}
       />
-
       <View style={s.bodyContainer}>
         {/* ۱. اسلایدر تبلیغات */}
         <View style={s.section}>
           <AdSlider
             ads={MOCK_ADS}
-            onPress={(ad) => console.log('Ad pressed:', ad.id)}
+            onPress={handleAdPress} // 🎯 تغییر: هندلر نویگیشن به جای console.log
           />
         </View>
 
@@ -137,22 +147,16 @@ export default function HomeScreen({ navigation }) {
           onSeeAll={() => console.log('See all model requests')}
           onItemPress={(item) => console.log('Model request:', item.id)}
         />
-
         {/* ۴. فرصت‌های همکاری / اجاره لاین */}
         <LineRentalSection
           onSeeAll={() => console.log('See all line rentals')}
           onItemPress={(item) => console.log('Line rental:', item.id)}
         />
-
-        {/* ❌ بخش سالن‌ها و کلینیک‌های برتر حذف شد */}
-
       </View>
-
       <NotificationModal
         visible={notificationModalVisible}
         onClose={() => setNotificationModalVisible(false)}
       />
-
       <HomeFilterModal
         visible={filterModalVisible}
         onClose={() => setFilterModalVisible(false)}
