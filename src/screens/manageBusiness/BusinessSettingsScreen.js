@@ -1,4 +1,3 @@
-// src/screens/manageBusiness/BusinessSettingsScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -33,6 +32,7 @@ const CATEGORIES = [
 export default function BusinessSettingsScreen({ navigation }) {
   const { colors } = useTheme();
   const { businessData, updateBusinessInfo } = useBusiness();
+
   const [formData, setFormData] = useState({
     name: '',
     categoryId: null,
@@ -41,11 +41,11 @@ export default function BusinessSettingsScreen({ navigation }) {
     address: '',
     phone: '',
     coverUrl: null,
+    ownerPhoto: null,
     workingHours: '',
     location: null,
   });
 
-  // مقداردهی اولیه از Context
   useEffect(() => {
     setFormData({
       name: businessData.name || '',
@@ -55,6 +55,7 @@ export default function BusinessSettingsScreen({ navigation }) {
       address: businessData.address || '',
       phone: businessData.phone || '',
       coverUrl: businessData.coverUrl || businessData.logo || null,
+      ownerPhoto: businessData.ownerPhoto || null,
       workingHours: businessData.workingHours || '',
       location: businessData.location || null,
     });
@@ -64,13 +65,11 @@ export default function BusinessSettingsScreen({ navigation }) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // 🎯 هندلر تغییر استان - ریست کردن شهر
   const handleProvinceChange = (provinceId) => {
     updateField('provinceId', provinceId);
     updateField('cityId', null);
   };
 
-  // 🎯 هندلر تغییر شهر
   const handleCityChange = (cityId) => {
     updateField('cityId', cityId);
   };
@@ -83,6 +82,32 @@ export default function BusinessSettingsScreen({ navigation }) {
     if (!result.didCancel && result.assets) {
       updateField('coverUrl', result.assets[0].uri);
     }
+  };
+
+  const pickOwnerPhoto = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 0.85,
+      selectionLimit: 1,
+    });
+    if (!result.didCancel && result.assets?.[0]) {
+      updateField('ownerPhoto', result.assets[0].uri);
+    }
+  };
+
+  const removeOwnerPhoto = () => {
+    Alert.alert(
+      'حذف عکس',
+      'آیا از حذف عکس خود مطمئن هستید؟',
+      [
+        { text: 'انصراف', style: 'cancel' },
+        {
+          text: 'حذف',
+          style: 'destructive',
+          onPress: () => updateField('ownerPhoto', null),
+        },
+      ],
+    );
   };
 
   const handleLocationSelect = (location, mapAddress) => {
@@ -110,6 +135,7 @@ export default function BusinessSettingsScreen({ navigation }) {
       Alert.alert('خطا', 'شهر را انتخاب کنید');
       return;
     }
+
     updateBusinessInfo({
       name: formData.name.trim(),
       categoryId: formData.categoryId,
@@ -121,15 +147,16 @@ export default function BusinessSettingsScreen({ navigation }) {
       phone: formData.phone.trim(),
       coverUrl: formData.coverUrl,
       logo: formData.coverUrl,
+      ownerPhoto: formData.ownerPhoto,
       workingHours: formData.workingHours.trim(),
       location: formData.location,
     });
+
     Alert.alert('موفقیت', 'اطلاعات کسب‌وکار با موفقیت بروزرسانی شد', [
       { text: 'باشه', onPress: () => navigation.goBack() },
     ]);
   };
 
-  // 🎯 پیدا کردن label استان و شهر برای نمایش
   const getProvinceLabel = () => {
     const province = PROVINCES.find((p) => p.id === formData.provinceId);
     return province ? province.label : null;
@@ -223,10 +250,137 @@ export default function BusinessSettingsScreen({ navigation }) {
           </Card>
         </View>
 
+        {/* ═══════════════ عکس مدیر کسب‌وکار ═══════════════ */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <View style={[s.sectionIconBox, { backgroundColor: '#FF980018' }]}>
+              <Icon name="person" size={18} color="#FF9800" />
+            </View>
+            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+              عکس مدیر کسب‌وکار
+            </Text>
+          </View>
+          <Card variant="default" padding={16} radius={16}>
+            <View style={s.ownerPhotoWrapper}>
+              <TouchableOpacity
+                onPress={pickOwnerPhoto}
+                activeOpacity={0.9}
+                style={s.ownerPhotoContainer}
+              >
+                <View
+                  style={[
+                    s.ownerAvatarCircle,
+                    {
+                      borderColor: formData.ownerPhoto
+                        ? colors.primary
+                        : colors.border,
+                      backgroundColor: colors.cardBackground,
+                    },
+                  ]}
+                >
+                  {formData.ownerPhoto ? (
+                    <Image
+                      source={{ uri: formData.ownerPhoto }}
+                      style={s.ownerAvatarImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={s.ownerAvatarPlaceholder}>
+                      <Icon
+                        name="person"
+                        size={44}
+                        color={colors.textSecondary}
+                      />
+                    </View>
+                  )}
+                </View>
+                <View
+                  style={[
+                    s.ownerCameraBtn,
+                    {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.background,
+                    },
+                  ]}
+                >
+                  <Icon name="photo-camera" size={14} color="#fff" />
+                </View>
+              </TouchableOpacity>
+
+              {formData.ownerPhoto && (
+                <TouchableOpacity
+                  onPress={removeOwnerPhoto}
+                  style={[
+                    s.ownerRemoveBtn,
+                    {
+                      backgroundColor: '#E53935',
+                      borderColor: colors.background,
+                    },
+                  ]}
+                  activeOpacity={0.85}
+                >
+                  <Icon name="delete" size={12} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <Text
+              style={[s.ownerNameText, { color: colors.textMain }]}
+              numberOfLines={1}
+            >
+              {businessData?.verifiedName || businessData?.ownerName || 'مدیر کسب‌وکار'}
+            </Text>
+
+            <Text style={[s.ownerHint, { color: colors.textSecondary }]}>
+              {formData.ownerPhoto
+                ? 'برای تغییر عکس، روی آن ضربه بزنید'
+                : 'هنوز عکسی آپلود نشده است'}
+            </Text>
+
+            {/* باکس اعتماد‌سازی */}
+            <View
+              style={[
+                s.ownerTrustBox,
+                {
+                  backgroundColor: colors.primary + '08',
+                  borderColor: colors.primary + '25',
+                },
+              ]}
+            >
+              <Icon name="verified-user" size={18} color={colors.primary} />
+              <View style={s.ownerTrustTextCol}>
+                <Text style={[s.ownerTrustTitle, { color: colors.textMain }]}>
+                  عکس خود را آپلود کنید
+                </Text>
+                <Text
+                  style={[s.ownerTrustSubtitle, { color: colors.textSecondary }]}
+                >
+                  قرار دادن عکس واقعی مدیر کسب‌وکار،{' '}
+                  <Text
+                    style={{
+                      fontFamily: 'Vazir-Bold',
+                      color: colors.primary,
+                    }}
+                  >
+                    اعتماد مشتریان را به طور قابل‌توجهی افزایش می‌دهد
+                  </Text>
+                  . طبق آمار زیبانو، کسب‌وکارهایی که عکس مدیر دارند، تا{' '}
+                  <Text style={{ fontFamily: 'Vazir-Bold', color: '#43A047' }}>
+                    ۴۰٪ رزرو بیشتری
+                  </Text>{' '}
+                  دریافت می‌کنند.
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </View>
+
         {/* ═══════════════ اطلاعات پایه ═══════════════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '18' }]}>
+            <View
+              style={[s.sectionIconBox, { backgroundColor: colors.primary + '18' }]}
+            >
               <Icon name="info" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -268,7 +422,7 @@ export default function BusinessSettingsScreen({ navigation }) {
           </Card>
         </View>
 
-        {/* ═══════════════ موقعیت مکانی (جدید!) ═══════════════ */}
+        {/* ═══════════════ موقعیت مکانی ═══════════════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View style={[s.sectionIconBox, { backgroundColor: '#2196F318' }]}>
@@ -299,7 +453,6 @@ export default function BusinessSettingsScreen({ navigation }) {
               }
               onSelect={handleCityChange}
             />
-            {/* نمایش انتخاب‌ها */}
             {(getProvinceLabel() || getCityLabel()) && (
               <View
                 style={[
@@ -311,7 +464,9 @@ export default function BusinessSettingsScreen({ navigation }) {
                 ]}
               >
                 <Icon name="location-on" size={14} color={colors.primary} />
-                <Text style={[s.locationSummaryText, { color: colors.primary }]}>
+                <Text
+                  style={[s.locationSummaryText, { color: colors.primary }]}
+                >
                   {getProvinceLabel()}
                   {getCityLabel() && ` > ${getCityLabel()}`}
                 </Text>
@@ -320,29 +475,17 @@ export default function BusinessSettingsScreen({ navigation }) {
           </Card>
         </View>
 
-        {/* ═══════════════ آدرس و موقعیت ═══════════════ */}
+        {/* ═══════════════ موقعیت روی نقشه ═══════════════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View style={[s.sectionIconBox, { backgroundColor: '#E5393518' }]}>
               <Icon name="location-on" size={18} color="#E53935" />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              آدرس و موقعیت مکانی
+              موقعیت روی نقشه
             </Text>
           </View>
           <Card variant="default" padding={16} radius={16}>
-            <Input
-              label="آدرس دقیق"
-              placeholder="آدرس کسب‌وکار خود را وارد کنید"
-              value={formData.address}
-              onChangeText={(t) => updateField('address', t)}
-              multiline
-              numberOfLines={2}
-              rightIcon={
-                <Icon name="location-on" size={22} color="#E53935" />
-              }
-            />
-            {/* راهنمای نقشه */}
             <View
               style={[
                 s.mapHintBox,
@@ -360,7 +503,6 @@ export default function BusinessSettingsScreen({ navigation }) {
                 خود را مشخص کنید
               </Text>
             </View>
-            {/* MapPicker */}
             <View
               style={[
                 s.mapWrapper,
@@ -373,7 +515,6 @@ export default function BusinessSettingsScreen({ navigation }) {
                 height={260}
               />
             </View>
-            {/* نمایش مختصات */}
             {formData.location && (
               <View
                 style={[
@@ -422,7 +563,6 @@ const s = StyleSheet.create({
     padding: 16,
     paddingTop: 12,
   },
-  // ═══════════════ بخش‌ها ═══════════════
   section: {
     marginBottom: 20,
   },
@@ -511,7 +651,107 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Vazir',
   },
-  // ═══════════════ 🎯 موقعیت مکانی (جدید) ═══════════════
+  // ═══════════════ عکس مدیر ═══════════════
+  ownerPhotoWrapper: {
+    alignItems: 'center',
+    marginBottom: 14,
+    position: 'relative',
+  },
+  ownerPhotoContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ownerAvatarCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ownerAvatarImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  ownerAvatarPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ownerCameraBtn: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  ownerRemoveBtn: {
+    position: 'absolute',
+    bottom: 0,
+    left: '50%',
+    marginLeft: -52,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  ownerNameText: {
+    fontSize: 16,
+    fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  ownerHint: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  ownerTrustBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  ownerTrustTextCol: {
+    flex: 1,
+    gap: 3,
+  },
+  ownerTrustTitle: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+  },
+  ownerTrustSubtitle: {
+    fontSize: 11.5,
+    fontFamily: 'Vazir',
+    lineHeight: 19,
+  },
+  // ═══════════════ موقعیت مکانی ═══════════════
   locationSummaryBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -527,7 +767,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
-  // ═══════════════ نقشه ═══════════════
   mapHintBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -562,7 +801,6 @@ const s = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Vazir-Medium',
   },
-  // ═══════════════ دکمه ذخیره ═══════════════
   saveContainer: {
     marginTop: 8,
     gap: 10,
