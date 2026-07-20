@@ -23,24 +23,34 @@ const toPersianDigit = (str) =>
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();
-  const navigation = useNavigation(); // 🆕
+  const navigation = useNavigation();
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const autoPlayRef = useRef(null);
 
-  const reversedAds = [...ads].reverse();
+  // 🎯 اسکرول به اولین آیتم بعد از mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      flatListRef.current?.scrollToIndex({ index: 0, animated: false });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
+  // 🎯 AutoPlay با scrollToIndex - حل مشکل بازگشت به اول
   useEffect(() => {
     if (ads.length > 1) {
       autoPlayRef.current = setInterval(() => {
         setActiveIndex((prev) => {
           const nextIndex = (prev + 1) % ads.length;
-          const reversedNextIndex = ads.length - 1 - nextIndex;
+          const offset = nextIndex * (CARD_WIDTH + CARD_SPACING);
+
+          // استفاده از scrollToOffset با محاسبه دقیق
           flatListRef.current?.scrollToOffset({
-            offset: reversedNextIndex * (CARD_WIDTH + CARD_SPACING),
+            offset,
             animated: true,
           });
+
           return nextIndex;
         });
       }, autoPlayInterval);
@@ -50,6 +60,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     };
   }, [ads.length, autoPlayInterval]);
 
+  // 🎯 انیمیشن progress bar
   useEffect(() => {
     progressAnim.setValue(0);
     Animated.timing(progressAnim, {
@@ -59,32 +70,42 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     }).start();
   }, [activeIndex, autoPlayInterval]);
 
+  // 🎯 محاسبه index از روی scroll position
   const onScroll = (e) => {
-    const slideSize = e.nativeEvent.layoutMeasurement?.width || CARD_WIDTH + CARD_SPACING;
-    if (slideSize === 0) return;
-    const reversedIndex = Math.round(
-      e.nativeEvent.contentOffset.x / slideSize
-    );
-    const actualIndex = reversedAds.length - 1 - reversedIndex;
-    setActiveIndex(Math.max(0, Math.min(actualIndex, ads.length - 1)));
+    const slideSize = CARD_WIDTH + CARD_SPACING;
+    const contentOffsetX = e.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / slideSize);
+    setActiveIndex(Math.max(0, Math.min(currentIndex, ads.length - 1)));
   };
 
+  // 🎯 کلیک روی dot - رفتن به اسلاید مشخص
   const goToSlide = (index) => {
-    const reversedIndex = ads.length - 1 - index;
+    const offset = index * (CARD_WIDTH + CARD_SPACING);
     flatListRef.current?.scrollToOffset({
-      offset: reversedIndex * (CARD_WIDTH + CARD_SPACING),
+      offset,
       animated: true,
     });
     setActiveIndex(index);
   };
 
-  // 🎯 هندلر کلیک روی دکمه رزرو - مستقیم به دیتیل کسب‌وکار
+  // 🎯 هندلر کلیک روی کارت
   const handleBookPress = (item) => {
     if (item.businessId) {
       navigation.navigate('BusinessDetails', { businessId: item.businessId });
     } else {
       onPress?.(item);
     }
+  };
+
+  // 🎯 هندلر اسکرول به index نامعتبر
+  const onScrollToIndexFailed = (info) => {
+    const wait = new Promise((resolve) => setTimeout(resolve, 300));
+    wait.then(() => {
+      flatListRef.current?.scrollToIndex({
+        index: info.index,
+        animated: true,
+      });
+    });
   };
 
   if (!ads || ads.length === 0) return null;
@@ -108,14 +129,13 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
 
       <FlatList
         ref={flatListRef}
-        data={reversedAds}
-        renderItem={({ item }) => {
-          const actualIndex = ads.findIndex((a) => a.id === item.id);
-          const isActive = actualIndex === activeIndex;
+        data={ads}
+        renderItem={({ item, index }) => {
+          const isActive = index === activeIndex;
           return (
             <TouchableOpacity
               activeOpacity={0.95}
-              onPress={() => handleBookPress(item)} // 🎯 کلیک روی کل کارت هم به دیتیل بره
+              onPress={() => handleBookPress(item)}
               style={[
                 s.slideCard,
                 {
@@ -127,6 +147,8 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
             >
               <Image source={{ uri: item.imageUrl }} style={s.image} />
               <View style={s.gradientOverlay} />
+
+              {/* Progress Bar */}
               {isActive && (
                 <View style={s.progressContainer}>
                   <View style={[s.progressBg, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
@@ -145,6 +167,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
                   </View>
                 </View>
               )}
+
               <View style={s.contentOverlay}>
                 <Text style={s.title} numberOfLines={2}>
                   {item.title}
@@ -155,7 +178,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
                   </Text>
                 )}
                 <View style={s.ctaRow}>
-                  {/* 🎯 دکمه رزرو - مستقیم به دیتیل کسب‌وکار */}
                   <TouchableOpacity
                     onPress={() => handleBookPress(item)}
                     style={s.bookBtn}
@@ -178,7 +200,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        initialScrollIndex={reversedAds.length - 1}
+        onScrollToIndexFailed={onScrollToIndexFailed}
         getItemLayout={(data, index) => ({
           length: CARD_WIDTH + CARD_SPACING,
           offset: (CARD_WIDTH + CARD_SPACING) * index,
@@ -187,6 +209,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         contentContainerStyle={s.flatListContent}
       />
 
+      {/* Dots */}
       <View style={s.dotsContainer}>
         {ads.map((_, i) => (
           <TouchableOpacity

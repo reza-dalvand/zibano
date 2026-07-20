@@ -57,19 +57,9 @@ export default function AppNavigator() {
       })}
     >
       <Tab.Screen
-        name="Profile"
-        component={ProfileStackNavigator}
-        options={{ tabBarLabel: 'پروفایل' }}
-      />
-      <Tab.Screen
-        name="ManageBusiness"
-        component={ManageStackNavigator}
-        options={{ tabBarLabel: 'مدیریت من' }}
-      />
-      <Tab.Screen
-        name="CreateBusiness"
-        component={CreateBusinessScreen}
-        options={{ tabBarLabel: 'ثبت سالن' }}
+        name="Home"
+        component={HomeStackNavigator}
+        options={{ tabBarLabel: 'خانه' }}
       />
       <Tab.Screen
         name="Explore"
@@ -77,9 +67,19 @@ export default function AppNavigator() {
         options={{ tabBarLabel: 'ویترین' }}
       />
       <Tab.Screen
-        name="Home"
-        component={HomeStackNavigator}
-        options={{ tabBarLabel: 'خانه' }}
+        name="CreateBusiness"
+        component={CreateBusinessScreen}
+        options={{ tabBarLabel: 'ثبت سالن' }}
+      />
+      <Tab.Screen
+        name="ManageBusiness"
+        component={ManageStackNavigator}
+        options={{ tabBarLabel: 'مدیریت من' }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStackNavigator}
+        options={{ tabBarLabel: 'پروفایل' }}
       />
     </Tab.Navigator>
   );
