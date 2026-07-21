@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const MAPTILER_KEY = 'L73LG8NW7ZJ9HyUyCEZu';
 const MAP_STYLE = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}&language=fa`;
-
 const DEFAULT_LOCATION = {
   latitude: 35.6997,
   longitude: 51.3380,
@@ -29,10 +28,8 @@ export default function MapPicker({
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  
   const cameraRef = useRef(null);
   const debounceTimerRef = useRef(null);
-  // استفاده از ref برای ذخیره مختصات زنده بدون درگیر کردن رندر ری‌اکت
   const latestLocationRef = useRef(initialLocation || DEFAULT_LOCATION);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,8 +37,6 @@ export default function MapPicker({
   const [confirmedAddress, setConfirmedAddress] = useState('');
   const [tempAddress, setTempAddress] = useState('در حال دریافت آدرس...');
   const [loading, setLoading] = useState(false);
-  
-  // برای اینکه دکمه تایید بدونه چه زمانی فعال بشه
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
   const initialCamera = useMemo(() => {
@@ -50,8 +45,8 @@ export default function MapPicker({
       center: [loc.longitude, loc.latitude],
       zoom: loc.zoom || DEFAULT_LOCATION.zoom,
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modalVisible]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalVisible]);
 
   const getAddressFromCoordinates = async (lat, lng) => {
     try {
@@ -87,23 +82,17 @@ export default function MapPicker({
     setHasValidLocation(true);
     setModalVisible(true);
     setLoading(true);
-    
     getAddressFromCoordinates(startLoc.latitude, startLoc.longitude).then((addr) => {
       setTempAddress(addr);
       setLoading(false);
     });
   };
 
-  // ═══════ useCallback: جلوگیری از ساخته شدن مجدد تابع در هر رندر ═══════
   const handleRegionDidChange = useCallback((event) => {
     const center = event?.nativeEvent?.properties?.center || event?.nativeEvent?.center;
     if (!center) return;
-    
     const [lng, lat] = center;
-    
-    // ذخیره مختصات در حافظه بدون رندر مجدد صفحه!
     latestLocationRef.current = { latitude: lat, longitude: lng };
-
     setTempAddress('در حال جستجوی موقعیت...');
     setLoading(true);
     setHasValidLocation(false);
@@ -113,7 +102,6 @@ export default function MapPicker({
     }
 
     debounceTimerRef.current = setTimeout(async () => {
-      // فقط زمانی که کاربر مکث کرد اینترنت درگیر میشه
       const addr = await getAddressFromCoordinates(lat, lng);
       setTempAddress(addr);
       setHasValidLocation(true);
@@ -132,7 +120,6 @@ export default function MapPicker({
   const handleConfirm = () => {
     const finalLoc = latestLocationRef.current;
     if (!finalLoc || !hasValidLocation) return;
-    
     setConfirmedLocation(finalLoc);
     setConfirmedAddress(tempAddress);
     onLocationSelect?.(finalLoc, tempAddress);
@@ -143,8 +130,6 @@ export default function MapPicker({
     setModalVisible(false);
   };
 
-  // ═══════ ایزوله کردن کامل نقشه با useMemo ═══════
-  // این بخش باعث می‌شود با تغییر متن لودینگ یا آدرس، نقشه اصلا خبردار نشود و لگ نزند!
   const renderedMap = useMemo(() => {
     if (!modalVisible) return null;
     return (
@@ -164,6 +149,7 @@ export default function MapPicker({
 
   return (
     <View style={s.wrapper}>
+      {/* ═══════ Trigger Button ═══════ */}
       <TouchableOpacity
         onPress={openModal}
         activeOpacity={0.8}
@@ -213,6 +199,7 @@ export default function MapPicker({
         )}
       </TouchableOpacity>
 
+      {/* ═══════ Modal ═══════ */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -220,6 +207,7 @@ export default function MapPicker({
         statusBarTranslucent
       >
         <View style={[s.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Header */}
           <View
             style={[
               s.modalHeader,
@@ -248,10 +236,9 @@ export default function MapPicker({
             <View style={{ width: 38 }} />
           </View>
 
+          {/* Map Wrapper */}
           <View style={s.mapWrapper}>
-            {/* رندر نقشه ایزوله شده */}
             {renderedMap}
-
             {modalVisible && (
               <View style={s.pinWrapper} pointerEvents="none">
                 <View style={[s.markerPin, { backgroundColor: colors.primary }]}>
@@ -262,6 +249,7 @@ export default function MapPicker({
             )}
           </View>
 
+          {/* Address Box */}
           <View
             style={[
               s.addressBox,
@@ -290,6 +278,7 @@ export default function MapPicker({
             </View>
           </View>
 
+          {/* ═══════ Footer Buttons (اصلاح‌شده) ═══════ */}
           <View
             style={[
               s.modalFooter,
@@ -301,25 +290,42 @@ export default function MapPicker({
             ]}
           >
             <View style={s.footerButtonsRow}>
+              {/* ═══════ دکمه انصراف ═══════ */}
               <TouchableOpacity
                 onPress={handleClose}
-                style={[s.cancelBtn, { borderColor: colors.border, backgroundColor: colors.background }]}
-                activeOpacity={0.8}
+                style={[
+                  s.cancelBtn,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: colors.background,
+                  },
+                ]}
+                activeOpacity={0.7}
               >
-                <Icon name="close" size={18} color={colors.textMain} />
-                <Text style={[s.cancelBtnText, { color: colors.textMain }]}>انصراف</Text>
+                <Icon name="arrow-forward" size={17} color={colors.textSecondary} />
+                <Text style={[s.cancelBtnText, { color: colors.textSecondary }]}>
+                  انصراف
+                </Text>
               </TouchableOpacity>
 
+              {/* ═══════ دکمه تایید ═══════ */}
               <TouchableOpacity
                 onPress={handleConfirm}
                 disabled={!hasValidLocation || loading}
                 activeOpacity={0.85}
                 style={[
                   s.confirmBtn,
-                  { backgroundColor: hasValidLocation && !loading ? colors.primary : colors.border },
+                  {
+                    backgroundColor:
+                      hasValidLocation && !loading
+                        ? colors.primary
+                        : colors.border,
+                  },
                 ]}
               >
-                <Icon name="check" size={18} color="#fff" />
+                <View style={s.confirmIconCircle}>
+                  <Icon name="done" size={16} color="#fff" />
+                </View>
                 <Text style={s.confirmBtnText}>تایید موقعیت</Text>
               </TouchableOpacity>
             </View>
@@ -332,24 +338,63 @@ export default function MapPicker({
 
 const s = StyleSheet.create({
   wrapper: { width: '100%' },
-  triggerBox: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, borderWidth: 1.5 },
-  triggerIconBox: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+
+  // ═══════ Trigger Button ═══════
+  triggerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+  },
+  triggerIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   triggerTextCol: { flex: 1, gap: 2 },
   triggerLabel: { fontSize: 11, fontFamily: 'Vazir' },
   triggerAddress: { fontSize: 13, fontFamily: 'Vazir-Bold', textAlign: 'left' },
   triggerPlaceholder: { fontSize: 13, fontFamily: 'Vazir', textAlign: 'left' },
-  triggerEditBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
+  triggerEditBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
   triggerEditText: { color: '#fff', fontSize: 11, fontFamily: 'Vazir-Bold' },
+
+  // ═══════ Modal ═══════
   modalContainer: { flex: 1 },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, gap: 10 },
-  closeBtn: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    gap: 10,
+  },
+  closeBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
   headerCenter: { flex: 1, alignItems: 'center', gap: 2 },
   headerTitle: { fontSize: 16, fontFamily: 'Vazir-Bold' },
   headerSubtitle: { fontSize: 11, fontFamily: 'Vazir' },
 
+  // ═══════ Map ═══════
   mapWrapper: { flex: 1, position: 'relative' },
   map: { flex: 1 },
-
   pinWrapper: {
     position: 'absolute',
     top: 0,
@@ -381,16 +426,73 @@ const s = StyleSheet.create({
     borderRadius: 6,
   },
 
-  addressBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1 },
+  // ═══════ Address Box ═══════
+  addressBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+  },
   addressInfo: { flex: 1, gap: 2 },
   loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   addressLabel: { fontSize: 12, fontFamily: 'Vazir-Bold', textAlign: 'left' },
   addressText: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18, textAlign: 'left' },
 
-  modalFooter: { paddingHorizontal: 16, paddingTop: 12, borderTopWidth: 1, gap: 10 },
-  footerButtonsRow: { flexDirection: 'row', gap: 10 },
-  cancelBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5 },
-  cancelBtnText: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  confirmBtn: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, elevation: 4 },
-  confirmBtnText: { color: '#fff', fontSize: 15, fontFamily: 'Vazir-Bold', flex: 1, textAlign: 'center' },
+  // ═══════ Footer ═══════
+  modalFooter: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+  },
+  footerButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+  // ═══════ Cancel Button ═══════
+  cancelBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 16,
+    borderRadius: 14,
+    borderWidth: 1.5,
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  // ═══════ Confirm Button ═══════
+  confirmBtn: {
+    flex: 1.6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: 14,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  confirmIconCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
 });
