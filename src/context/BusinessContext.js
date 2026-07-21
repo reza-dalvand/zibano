@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { MMKV } from 'react-native-mmkv';
 
 let _storage = null;
+
 function getStorage() {
   if (!_storage) {
     try {
@@ -14,6 +15,7 @@ function getStorage() {
   }
   return _storage;
 }
+
 const BUSINESS_KEY = 'business_data';
 
 const BusinessContext = createContext(null);
@@ -25,7 +27,6 @@ const INITIAL_BUSINESS_DATA = {
   category: 'کلینیک پوست و مو',
   address: 'تهران، سعادت‌آباد',
   phone: '۰۲۱-۲۲۳۳۴۴۵۵',
-  
   // خدمات
   services: [
     {
@@ -56,7 +57,6 @@ const INITIAL_BUSINESS_DATA = {
       isActive: true,
     },
   ],
-
   // اعضای تیم
   team: [
     {
@@ -74,7 +74,6 @@ const INITIAL_BUSINESS_DATA = {
       services: ['svc_2'],
     },
   ],
-
   // زمان‌بندی
   schedules: {
     emp_1: {
@@ -100,7 +99,6 @@ const INITIAL_BUSINESS_DATA = {
       },
     },
   },
-
   // نوبت‌ها
   appointments: [
     {
@@ -134,7 +132,6 @@ const INITIAL_BUSINESS_DATA = {
       depositPaid: 0,
     },
   ],
-
   // نمونه‌کارها
   portfolios: [
     {
@@ -334,6 +331,19 @@ export function BusinessProvider({ children }) {
     });
   }, [saveToStorage]);
 
+  // ============ 🆕 Delete Business (فقط کسب و کار، نه پروفایل کاربری) ============
+  // ============ 🆕 Delete Business ============
+  const deleteBusiness = useCallback(() => {
+    try {
+      getStorage().delete(BUSINESS_KEY);
+      console.log('✅ Business data deleted from storage');
+    } catch (e) {
+      console.log('⚠️ Error deleting business data:', e);
+    }
+    setBusinessData(INITIAL_BUSINESS_DATA);
+    return true;
+  }, []);
+
   return (
     <BusinessContext.Provider
       value={{
@@ -357,6 +367,8 @@ export function BusinessProvider({ children }) {
         deletePortfolio,
         // Business Info
         updateBusinessInfo,
+        // 🆕 حذف کسب‌وکار
+        deleteBusiness,
       }}
     >
       {children}

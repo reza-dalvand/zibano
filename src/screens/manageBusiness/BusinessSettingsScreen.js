@@ -1,3 +1,4 @@
+// src/screens/manageBusiness/BusinessSettingsScreen.js
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,6 +8,8 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -19,6 +22,7 @@ import Dropdown from '../../components/common/Dropdown';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import MapPicker from '../../components/common/MapPicker';
+import Toast from '../../components/common/Toast';
 import { PROVINCES, CITIES } from '../../constants/exploreFilters';
 
 const CATEGORIES = [
@@ -31,7 +35,7 @@ const CATEGORIES = [
 
 export default function BusinessSettingsScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, updateBusinessInfo } = useBusiness();
+  const { businessData, updateBusinessInfo, deleteBusiness } = useBusiness();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,6 +49,10 @@ export default function BusinessSettingsScreen({ navigation }) {
     workingHours: '',
     location: null,
   });
+
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
   useEffect(() => {
     setFormData({
@@ -157,6 +165,36 @@ export default function BusinessSettingsScreen({ navigation }) {
     ]);
   };
 
+  // ═══════════════ هندلر حذف کسب‌وکار ═══════════════
+  const handleDeleteBusiness = async () => {
+    setIsDeleting(true);
+
+    // شبیه‌سازی تاخیر برای UX بهتر
+    await new Promise((r) => setTimeout(r, 1200));
+
+    // حذف کسب‌وکار (نه پروفایل کاربری)
+    deleteBusiness();
+
+    setIsDeleting(false);
+    setDeleteModalVisible(false);
+
+    setToast({
+      visible: true,
+      message: '✓ کسب و کار با موفقیت حذف شد',
+      type: 'success',
+    });
+
+    // هدایت به تب ثبت سالن پس از حذف
+    setTimeout(() => {
+      const parent = navigation.getParent();
+      if (parent) {
+        parent.navigate('CreateBusiness');
+      } else {
+        navigation.navigate('CreateBusiness');
+      }
+    }, 1800);
+  };
+
   const getProvinceLabel = () => {
     const province = PROVINCES.find((p) => p.id === formData.provinceId);
     return province ? province.label : null;
@@ -172,6 +210,7 @@ export default function BusinessSettingsScreen({ navigation }) {
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <Header title="تنظیمات کسب‌وکار" onBackPress={() => navigation.goBack()} />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -187,10 +226,12 @@ export default function BusinessSettingsScreen({ navigation }) {
               تصویر کاور
             </Text>
           </View>
+
           <Card variant="default" padding={14} radius={16}>
             <Text style={[s.coverHint, { color: colors.textSecondary }]}>
               تصویر کاور در بالای صفحه پروفایل نمایش داده می‌شود
             </Text>
+
             <TouchableOpacity
               style={[
                 s.coverPicker,
@@ -260,6 +301,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               عکس مدیر کسب‌وکار
             </Text>
           </View>
+
           <Card variant="default" padding={16} radius={16}>
             <View style={s.ownerPhotoWrapper}>
               <TouchableOpacity
@@ -294,6 +336,7 @@ export default function BusinessSettingsScreen({ navigation }) {
                     </View>
                   )}
                 </View>
+
                 <View
                   style={[
                     s.ownerCameraBtn,
@@ -387,6 +430,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               اطلاعات پایه
             </Text>
           </View>
+
           <Card variant="default" padding={16} radius={16}>
             <Input
               label="نام کسب‌وکار *"
@@ -395,6 +439,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               onChangeText={(t) => updateField('name', t)}
               rightIcon={<Icon name="store" size={22} color={colors.textSecondary} />}
             />
+
             <Dropdown
               label="دسته‌بندی اصلی *"
               placeholder="انتخاب نوع خدمات"
@@ -402,6 +447,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               options={CATEGORIES}
               onSelect={(v) => updateField('categoryId', v)}
             />
+
             <Input
               label="شماره تماس"
               placeholder="مثال: ۰۲۱-۲۲۳۳۴۴۵۵"
@@ -410,6 +456,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               keyboardType="phone-pad"
               rightIcon={<Icon name="phone" size={22} color={colors.textSecondary} />}
             />
+
             <Input
               label="ساعات کاری"
               placeholder="مثال: شنبه تا پنج‌شنبه ۱۰ الی ۲۰"
@@ -432,6 +479,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               موقعیت مکانی
             </Text>
           </View>
+
           <Card variant="default" padding={16} radius={16}>
             <Dropdown
               label="استان *"
@@ -440,6 +488,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               options={PROVINCES}
               onSelect={handleProvinceChange}
             />
+
             <Dropdown
               label="شهر *"
               placeholder={
@@ -453,6 +502,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               }
               onSelect={handleCityChange}
             />
+
             {(getProvinceLabel() || getCityLabel()) && (
               <View
                 style={[
@@ -485,6 +535,7 @@ export default function BusinessSettingsScreen({ navigation }) {
               موقعیت روی نقشه
             </Text>
           </View>
+
           <Card variant="default" padding={16} radius={16}>
             <View
               style={[
@@ -503,6 +554,7 @@ export default function BusinessSettingsScreen({ navigation }) {
                 خود را مشخص کنید
               </Text>
             </View>
+
             <View
               style={[
                 s.mapWrapper,
@@ -515,6 +567,7 @@ export default function BusinessSettingsScreen({ navigation }) {
                 height={260}
               />
             </View>
+
             {formData.location && (
               <View
                 style={[
@@ -552,8 +605,131 @@ export default function BusinessSettingsScreen({ navigation }) {
             تغییرات پس از ذخیره در پروفایل عمومی کسب‌وکار نمایش داده می‌شود
           </Text>
         </View>
+
+        {/* ═══════════════ 🆕 دکمه حذف کسب‌وکار ═══════════════ */}
+        <View style={s.deleteSection}>
+          <TouchableOpacity
+            onPress={() => setDeleteModalVisible(true)}
+            style={[
+              s.deleteBtn,
+              { borderColor: '#E5393540', backgroundColor: '#E5393508' },
+            ]}
+            activeOpacity={0.75}
+          >
+            <Icon name="delete-forever" size={20} color="#E53935" />
+            <Text style={[s.deleteBtnText, { color: '#E53935' }]}>
+              حذف کسب و کار
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* ═══════════════ 🆕 مدال تایید حذف ═══════════════ */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => !isDeleting && setDeleteModalVisible(false)}
+        statusBarTranslucent
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={s.modalBackdrop}
+          onPress={() => !isDeleting && setDeleteModalVisible(false)}
+        >
+          <View style={s.modalContainer}>
+            <TouchableOpacity activeOpacity={1} style={s.modalContent}>
+              {/* آیکون هشدار */}
+              <View style={s.modalHeader}>
+                <View style={[s.modalIconCircle, { backgroundColor: '#E5393515' }]}>
+                  <Icon name="warning" size={48} color="#E53935" />
+                </View>
+              </View>
+
+              {/* عنوان */}
+              <Text style={[s.modalTitle, { color: colors.textMain }]}>
+                حذف کسب و کار
+              </Text>
+
+              {/* متن هشدار */}
+              <Text style={[s.modalText, { color: colors.textSecondary }]}>
+                آیا مطمئن هستید که می‌خواهید کسب و کار خود را حذف کنید؟
+              </Text>
+
+              {/* لیست اتفاقات */}
+              <View
+                style={[
+                  s.warningList,
+                  { backgroundColor: '#E5393508', borderColor: '#E5393530' },
+                ]}
+              >
+                <View style={s.warningItem}>
+                  <Icon name="info" size={14} color="#E53935" />
+                  <Text style={[s.warningText, { color: colors.textSecondary }]}>
+                    تمامی خدمات، و نمونه‌کارها حذف می‌شوند
+                  </Text>
+                </View>
+                <View style={s.warningItem}>
+                  <Icon name="info" size={14} color="#E53935" />
+                  <Text style={[s.warningText, { color: colors.textSecondary }]}>
+                    مشتریان دیگر نمی‌توانند از شما نوبت بگیرند
+                  </Text>
+                </View>
+                <View style={s.warningItem}>
+                  <Icon name="info" size={14} color="#E53935" />
+                  <Text style={[s.warningText, { color: colors.textSecondary }]}>
+                    این عمل غیرقابل بازگشت است
+                  </Text>
+                </View>
+              </View>
+
+              {/* دکمه‌ها */}
+              <View style={s.modalButtons}>
+                <TouchableOpacity
+                  onPress={() => setDeleteModalVisible(false)}
+                  style={[s.modalCancelBtn, { borderColor: colors.border }]}
+                  activeOpacity={0.75}
+                  disabled={isDeleting}
+                >
+                  <Text style={[s.modalCancelText, { color: colors.textMain }]}>
+                    انصراف
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleDeleteBusiness}
+                  style={[
+                    s.modalDeleteBtn,
+                    { backgroundColor: isDeleting ? '#E5393560' : '#E53935' },
+                  ]}
+                  activeOpacity={0.85}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <View style={s.modalLoadingRow}>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={s.modalDeleteText}>در حال حذف...</Text>
+                    </View>
+                  ) : (
+                    <Text style={s.modalDeleteText}>تایید و حذف</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Toast */}
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        position="top"
+        onHide={() => setToast({ ...toast, visible: false })}
+      />
     </ScreenWrapper>
   );
 }
@@ -563,9 +739,11 @@ const s = StyleSheet.create({
     padding: 16,
     paddingTop: 12,
   },
+
   section: {
     marginBottom: 20,
   },
+
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -573,6 +751,7 @@ const s = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 2,
   },
+
   sectionIconBox: {
     width: 32,
     height: 32,
@@ -580,11 +759,13 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   sectionTitle: {
     width: '100%',
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
+
   // ═══════════════ کاور ═══════════════
   coverHint: {
     fontSize: 12,
@@ -592,6 +773,7 @@ const s = StyleSheet.create({
     marginBottom: 10,
     lineHeight: 18,
   },
+
   coverPicker: {
     width: '100%',
     aspectRatio: 2,
@@ -600,16 +782,19 @@ const s = StyleSheet.create({
     borderWidth: 2,
     overflow: 'hidden',
   },
+
   coverImageWrap: {
     width: '100%',
     height: '100%',
     position: 'relative',
   },
+
   coverImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
+
   coverEditBadge: {
     position: 'absolute',
     bottom: 10,
@@ -621,11 +806,13 @@ const s = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
   },
+
   coverEditText: {
     color: '#fff',
     fontSize: 11,
     fontFamily: 'Vazir-Bold',
   },
+
   coverPlaceholder: {
     flex: 1,
     alignItems: 'center',
@@ -633,6 +820,7 @@ const s = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 20,
   },
+
   coverPlaceholderIcon: {
     width: 60,
     height: 60,
@@ -641,27 +829,32 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
+
   coverPlaceholderTitle: {
     fontSize: 14,
     fontFamily: 'Vazir-Bold',
     textAlign: 'center',
     width: '100%',
   },
+
   coverPlaceholderHint: {
     fontSize: 10,
     fontFamily: 'Vazir',
   },
+
   // ═══════════════ عکس مدیر ═══════════════
   ownerPhotoWrapper: {
     alignItems: 'center',
     marginBottom: 14,
     position: 'relative',
   },
+
   ownerPhotoContainer: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   ownerAvatarCircle: {
     width: 120,
     height: 120,
@@ -671,6 +864,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   ownerAvatarImage: {
     width: '100%',
     height: '100%',
@@ -678,10 +872,12 @@ const s = StyleSheet.create({
     top: 0,
     left: 0,
   },
+
   ownerAvatarPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   ownerCameraBtn: {
     position: 'absolute',
     bottom: 0,
@@ -699,6 +895,7 @@ const s = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
+
   ownerRemoveBtn: {
     position: 'absolute',
     bottom: 0,
@@ -717,12 +914,14 @@ const s = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
+
   ownerNameText: {
     fontSize: 16,
     fontFamily: 'Vazir-Bold',
     textAlign: 'center',
     marginTop: 4,
   },
+
   ownerHint: {
     fontSize: 12,
     fontFamily: 'Vazir',
@@ -730,6 +929,7 @@ const s = StyleSheet.create({
     marginTop: 4,
     marginBottom: 12,
   },
+
   ownerTrustBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -738,19 +938,23 @@ const s = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
   },
+
   ownerTrustTextCol: {
     flex: 1,
     gap: 3,
   },
+
   ownerTrustTitle: {
     fontSize: 13,
     fontFamily: 'Vazir-Bold',
   },
+
   ownerTrustSubtitle: {
     fontSize: 11.5,
     fontFamily: 'Vazir',
     lineHeight: 19,
   },
+
   // ═══════════════ موقعیت مکانی ═══════════════
   locationSummaryBox: {
     flexDirection: 'row',
@@ -762,11 +966,13 @@ const s = StyleSheet.create({
     borderWidth: 1,
     marginTop: 8,
   },
+
   locationSummaryText: {
     fontSize: 13,
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
+
   mapHintBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -776,17 +982,20 @@ const s = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
   },
+
   mapHintText: {
     fontSize: 11,
     fontFamily: 'Vazir',
     flex: 1,
     lineHeight: 17,
   },
+
   mapWrapper: {
     borderRadius: 14,
     borderWidth: 1,
     overflow: 'hidden',
   },
+
   coordsBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -797,18 +1006,158 @@ const s = StyleSheet.create({
     borderWidth: 1,
     marginTop: 10,
   },
+
   coordsText: {
     fontSize: 11,
     fontFamily: 'Vazir-Medium',
   },
+
   saveContainer: {
     marginTop: 8,
     gap: 10,
     alignItems: 'center',
   },
+
   saveHint: {
     fontSize: 11,
     fontFamily: 'Vazir',
     textAlign: 'center',
+  },
+
+  // ═══════════════ 🆕 دکمه حذف ═══════════════
+  deleteSection: {
+    marginTop: 24,
+    paddingHorizontal: 4,
+  },
+
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+  },
+
+  deleteBtnText: {
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+    width:'35%',
+    alignItems:'center'
+  },
+
+  // ═══════════════ 🆕 مدال حذف ═══════════════
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+
+  modalContainer: {
+    width: '100%',
+  },
+
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 20,
+  },
+
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  modalIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
+  },
+
+  modalText: {
+    fontSize: 14,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  warningList: {
+    width: '100%',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 10,
+  },
+
+  warningItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+
+  warningText: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+    lineHeight: 18,
+  },
+
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+    marginTop: 8,
+  },
+
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  modalCancelText: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  modalDeleteBtn: {
+    flex: 1,
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  modalDeleteText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  modalLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });
