@@ -12,6 +12,8 @@ import PortfolioModal from '../../components/home/PortfolioModal';
 import BusinessAbout from '../../components/home/BusinessAbout';
 import StickyBookingBar from '../../components/home/StickyBookingBar';
 import BookingModal from './BookingScreen';
+// 🆕 دکمه آدرس روی نقشه
+import BusinessMapButton from '../../components/home/BusinessMapButton';
 
 // ============ دیتای موقت ============
 const MOCK_BUSINESS = {
@@ -25,6 +27,11 @@ const MOCK_BUSINESS = {
   address: 'سعادت‌آباد، خیابان سرو غربی، ساختمان پزشکان نگین، طبقه ۳',
   phone: '۰۲۱-۲۲۳۳۴۴۵۵',
   workingHours: 'شنبه تا پنج‌شنبه: ۱۰:۰۰ الی ۲۰:۰۰',
+  // 🆕 مختصات مکان برای نقشه
+  location: {
+    latitude: 35.7898,
+    longitude: 51.3768,
+  },
   rating: 4.9,
   reviewsCount: 142,
   servicesCount: 24,
@@ -138,17 +145,15 @@ const MOCK_BUSINESS = {
 export default function BusinessDetailsScreen({ navigation }) {
   const { colors } = useTheme();
   const biz = MOCK_BUSINESS;
-
   const [activeTab, setActiveTab] = useState('services');
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
-
   const [portfolioModalVisible, setPortfolioModalVisible] = useState(false);
   const [activePortfolio, setActivePortfolio] = useState(null);
   const [portfolioInitialIndex, setPortfolioInitialIndex] = useState(0);
 
-  const openBooking = service => {
+  const openBooking = (service) => {
     setSelectedService(service);
     setBookingModalVisible(true);
   };
@@ -159,7 +164,7 @@ export default function BusinessDetailsScreen({ navigation }) {
     setPortfolioModalVisible(true);
   };
 
-  const minServicePrice = Math.min(...biz.services.map(s => s.price));
+  const minServicePrice = Math.min(...biz.services.map((s) => s.price));
 
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
@@ -167,7 +172,7 @@ export default function BusinessDetailsScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        {/* ۱. گالری تصاویر - 🎯 با businessId و businessName */}
+        {/* ۱. گالری تصاویر */}
         <BusinessHero
           gallery={biz.gallery}
           businessId={biz.id}
@@ -180,6 +185,14 @@ export default function BusinessDetailsScreen({ navigation }) {
         {/* ۲. اطلاعات کسب‌وکار */}
         <BusinessInfoCard business={biz} />
 
+        {/* 🆕 ۲.۵ دکمه آدرس روی نقشه - بالای تب‌ها */}
+        <View style={{ paddingHorizontal: 20, marginTop: 12 }}>
+          <BusinessMapButton
+            business={biz}
+            onPress={() => navigation.navigate('BusinessMap', { business: biz })}
+          />
+        </View>
+
         {/* ۳. تب‌بار */}
         <BusinessTabs
           activeTab={activeTab}
@@ -191,7 +204,7 @@ export default function BusinessDetailsScreen({ navigation }) {
         <View style={s.tabContentWrapper}>
           {activeTab === 'services' && (
             <View style={s.servicesList}>
-              {biz.services.map(service => (
+              {biz.services.map((service) => (
                 <ServiceBookingCard
                   key={service.id}
                   service={service}

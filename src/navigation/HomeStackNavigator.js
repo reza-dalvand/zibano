@@ -15,9 +15,12 @@ import AllAdsScreen from '../screens/home/AllAdsScreen';
 import AllModelRequestsScreen from '../screens/home/AllModelRequestsScreen';
 import ModelRequestDetailScreen from '../screens/home/ModelRequestDetailScreen';
 
-// 🆕 صفحات فرصت‌های همکاری / اجاره لاین
+// صفحات فرصت‌های همکاری / اجاره لاین
 import AllLineRentalsScreen from '../screens/home/AllLineRentalsScreen';
 import LineRentalDetailScreen from '../screens/home/LineRentalDetailScreen';
+
+// 🆕 صفحه نقشه کسب‌وکار
+import BusinessMapScreen from '../screens/home/BusinessMapScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -57,7 +60,7 @@ export default function HomeStackNavigator() {
         component={ModelRequestDetailScreen}
       />
 
-      {/* 🆕 صفحات فرصت‌های همکاری / اجاره لاین */}
+      {/* صفحات فرصت‌های همکاری / اجاره لاین */}
       <Stack.Screen
         name="AllLineRentals"
         component={AllLineRentalsScreen}
@@ -65,6 +68,13 @@ export default function HomeStackNavigator() {
       <Stack.Screen
         name="LineRentalDetail"
         component={LineRentalDetailScreen}
+      />
+
+      {/* 🆕 صفحه نقشه کسب‌وکار */}
+      <Stack.Screen
+        name="BusinessMap"
+        component={BusinessMapScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
