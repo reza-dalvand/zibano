@@ -211,13 +211,13 @@ export default function TermsAndConditionsStep({ onAccept, onDecline, navbarHeig
               style={s.halfButton}
             />
             <Button
-              title="ادامه و شروع ثبت"
+              title="ثبت کسب و کار"
               onPress={onAccept}
               variant="primary"
               size="lg"
               disabled={!canProceed}
               icon={<Icon name="arrow-back" size={18} color="#fff" />}
-              iconPosition="left"
+              iconPosition="right"
               style={[s.halfButton, { opacity: canProceed ? 1 : 0.5 }]}
             />
           </View>
