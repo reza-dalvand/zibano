@@ -1,5 +1,5 @@
 // src/components/home/CategoryFilterModal.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
@@ -8,10 +8,11 @@ import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';
 import Chip from '../common/Chip';
 import Divider from '../common/Divider';
-import { PROVINCES, CITIES } from '../../constants/exploreFilters';
+import { getSubServicesForCategory } from '../../constants/categorySubServices';
 
-// ✅ فقط گزینه‌های مرتب‌سازی (حذف MIN_RATINGS)
+// ✅ گزینه‌های مرتب‌سازی با اضافه شدن «همه»
 const SORT_OPTIONS = [
+  { id: 'all', label: 'همه', icon: 'apps' },
   { id: 'top_rated', label: 'بیشترین امتیاز', icon: 'star' },
   { id: 'most_booked', label: 'بیشترین رزرو', icon: 'trending-up' },
   { id: 'highest_discount', label: 'بیشترین تخفیف', icon: 'local-offer' },
@@ -22,44 +23,48 @@ export default function CategoryFilterModal({
   onClose,
   onApply,
   currentFilters,
+  categoryId,
 }) {
   const { colors } = useTheme();
-  const [province, setProvince] = useState(null);
-  const [city, setCity] = useState(null);
-  const [sortBy, setSortBy] = useState('top_rated');
+  const [serviceType, setServiceType] = useState(null);
+  const [sortBy, setSortBy] = useState('all'); // ✅ پیش‌فرض تغییر کرد
+
+  // 🎯 دریافت زیرخدمات مربوط به این دسته‌بندی
+  const subServices = useMemo(() => {
+    if (!categoryId) return [];
+    const subs = getSubServicesForCategory(categoryId);
+    return [{ id: 'all', label: 'همه خدمات' }, ...subs];
+  }, [categoryId]);
 
   useEffect(() => {
     if (visible && currentFilters) {
-      setProvince(currentFilters.province);
-      setCity(currentFilters.city);
-      setSortBy(currentFilters.sortBy || 'top_rated');
+      setServiceType(currentFilters.serviceType || null);
+      setSortBy(currentFilters.sortBy || 'all');
     }
   }, [visible, currentFilters]);
 
   const handleApply = () => {
-    onApply({ province, city, minRating: '0', sortBy });
+    onApply({ serviceType, sortBy });
     onClose();
   };
 
   const handleClear = () => {
-    setProvince(null);
-    setCity(null);
-    setSortBy('top_rated');
-    onApply({ province: null, city: null, minRating: '0', sortBy: 'top_rated' });
+    setServiceType(null);
+    setSortBy('all');
+    onApply({ serviceType: null, sortBy: 'all' });
     onClose();
   };
 
   const activeFiltersCount =
-    (province ? 1 : 0) +
-    (city ? 1 : 0) +
-    (sortBy !== 'top_rated' ? 1 : 0);
+    (serviceType && serviceType !== 'all' ? 1 : 0) +
+    (sortBy !== 'all' ? 1 : 0);
 
   return (
     <BottomSheet
       visible={visible}
       onClose={onClose}
       title="فیلتر و مرتب‌سازی"
-      snapPoint={0.85}
+      snapPoint={0.75}
       footer={
         <View style={s.footerRow}>
           <Button
@@ -69,10 +74,10 @@ export default function CategoryFilterModal({
             size="lg"
             style={s.halfButton}
             icon={<Icon name="delete-outline" size={20} color={colors.primary} />}
-            iconPosition="right"
+            iconPosition="left"
           />
           <Button
-            title={`اعمال فیلتر (${activeFiltersCount})`}
+            title={`اعمال فیلتر`}
             onPress={handleApply}
             variant="primary"
             size="lg"
@@ -87,39 +92,36 @@ export default function CategoryFilterModal({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        {/* بخش ۱: موقعیت مکانی */}
+        {/* ═══════ بخش ۱: نوع خدمت (Dropdown) ═══════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <Icon name="location-on" size={20} color={colors.primary} />
+            <View style={[s.sectionIconBox, { backgroundColor: '#FF980018' }]}>
+              <Icon name="category" size={18} color="#FF9800" />
+            </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              موقعیت مکانی
+              نوع خدمت
             </Text>
           </View>
+          <Text style={[s.sectionHint, { color: colors.textSecondary }]}>
+            خدمت موردنظر خود را از این دسته‌بندی انتخاب کنید
+          </Text>
           <Dropdown
-            label="استان"
-            placeholder="انتخاب استان"
-            value={province}
-            options={PROVINCES}
-            onSelect={(val) => {
-              setProvince(val);
-              setCity(null);
-            }}
-          />
-          <Dropdown
-            label="شهر"
-            placeholder={province ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
-            value={city}
-            options={CITIES[province] || []}
-            onSelect={setCity}
+            label="نوع خدمت"
+            placeholder="انتخاب نوع خدمت"
+            value={serviceType}
+            options={subServices}
+            onSelect={setServiceType}
           />
         </View>
 
         <Divider spacing={16} />
 
-        {/* بخش ۲: مرتب‌سازی */}
+        {/* ═══════ بخش ۲: مرتب‌سازی ═══════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <Icon name="sort" size={20} color={colors.primary} />
+            <View style={[s.sectionIconBox, { backgroundColor: '#2196F318' }]}>
+              <Icon name="sort" size={18} color="#2196F3" />
+            </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
               مرتب‌سازی بر اساس
             </Text>
@@ -146,7 +148,7 @@ export default function CategoryFilterModal({
           </View>
         </View>
 
-        {/* ❌ بخش حداقل امتیاز حذف شد */}
+        <View style={{ height: 20 }} />
       </ScrollView>
     </BottomSheet>
   );
@@ -165,9 +167,21 @@ const s = StyleSheet.create({
     gap: 8,
     marginBottom: 4,
   },
+  sectionIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sectionTitle: {
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
+  },
+  sectionHint: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    lineHeight: 18,
   },
   sortGrid: {
     flexDirection: 'row',

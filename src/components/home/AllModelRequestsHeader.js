@@ -4,17 +4,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
-
 const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function AllModelRequestsHeader({
   requestsCount = 0,
   onBackPress,
+  onFilterPress,
+  hasActiveFilter = false,
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-
   return (
     <View
       style={[
@@ -34,7 +34,6 @@ export default function AllModelRequestsHeader({
           >
             <Icon name="arrow-forward" size={22} color="#fff" />
           </TouchableOpacity>
-
           <View style={s.titleContainer}>
             <View style={s.titleIconBox}>
               <Icon name="face-retouching-natural" size={22} color="#E91E63" />
@@ -42,21 +41,37 @@ export default function AllModelRequestsHeader({
             <View style={s.titleTextCol}>
               <Text style={s.headerLabel}>فرصت‌های مدلینگ</Text>
               <Text style={s.headerTitle} numberOfLines={1}>
-                مدل شوید و نمونه‌کار بسازید
+                لیست درخواست مدل
               </Text>
             </View>
           </View>
 
-          <View style={s.countBox}>
-            <Text style={s.countNumber}>{toPersianDigit(requestsCount)}</Text>
-            <Text style={s.countLabel}>فرصت</Text>
+          {/* 🎯 دکمه فیلتر + تعداد فرصت‌ها */}
+          <View style={s.rightActions}>
+            {/* Badge تعداد فرصت‌ها (هم‌اندازه دکمه فیلتر) */}
+            <View style={s.countBox}>
+              <Icon name="assignment" size={14} color="#fff" />
+              <Text style={s.countNumber}>{toPersianDigit(requestsCount)}</Text>
+            </View>
+
+            {/* دکمه فیلتر */}
+            <TouchableOpacity
+              onPress={onFilterPress}
+              style={[
+                s.filterBtn,
+                hasActiveFilter && { backgroundColor: 'rgba(255,255,255,0.32)' },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Icon name="tune" size={20} color="#fff" />
+              {hasActiveFilter && <View style={s.filterIndicator} />}
+            </TouchableOpacity>
           </View>
         </View>
       </View>
     </View>
   );
 }
-
 const s = StyleSheet.create({
   headerContainer: {
     paddingBottom: 24,
@@ -113,25 +128,51 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
-  countBox: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
+  // 🎯 اکشن‌های سمت چپ
+  rightActions: {
+    flexDirection: 'row',
     alignItems: 'center',
-    minWidth: 64,
+    gap: 8,
+  },
+  // 🎯 Badge تعداد فرصت‌ها (هم‌اندازه دکمه فیلتر: 40x40)
+  countBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 3,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
   },
   countNumber: {
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
-  countLabel: {
-    fontSize: 10,
-    fontFamily: 'Vazir',
-    color: 'rgba(255,255,255,0.85)',
-    marginTop: 1,
+  // 🎯 دکمه فیلتر
+  filterBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  filterIndicator: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: '#FFD700',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.15)',
   },
 });

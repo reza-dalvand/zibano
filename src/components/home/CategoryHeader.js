@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import SearchBar from '../common/SearchBar';
 
@@ -14,9 +14,11 @@ export default function CategoryHeader({
   searchQuery,
   onSearchChange,
   onBackPress,
+  onFilterPress,
+  hasActiveFilter = false,
 }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets();
 
   const getGradientColors = (icon) => {
     const gradients = {
@@ -35,12 +37,18 @@ export default function CategoryHeader({
   const [gradientStart, gradientEnd] = getGradientColors(categoryIcon);
 
   return (
-    <View style={[s.headerContainer, {
-      backgroundColor: gradientStart,
-      paddingTop: insets.top + 8, // 🎯 insets.top
-    }]}>
+    <View
+      style={[
+        s.headerContainer,
+        {
+          backgroundColor: gradientStart,
+          paddingTop: insets.top + 8,
+        },
+      ]}
+    >
       <View style={s.headerContent}>
         <View style={s.topRow}>
+          {/* دکمه بازگشت */}
           <TouchableOpacity
             style={s.backButton}
             onPress={onBackPress}
@@ -48,6 +56,8 @@ export default function CategoryHeader({
           >
             <Icon name="arrow-forward" size={22} color="#fff" />
           </TouchableOpacity>
+
+          {/* اطلاعات دسته‌بندی */}
           <View style={s.categoryInfo}>
             <View style={s.categoryIconBox}>
               <Icon name={categoryIcon} size={28} color={gradientStart} />
@@ -59,11 +69,35 @@ export default function CategoryHeader({
               </Text>
             </View>
           </View>
-          <View style={s.resultCounter}>
-            <Text style={s.resultNumber}>{resultCount}</Text>
-            <Text style={s.resultLabel}>کسب‌وکار</Text>
+
+          {/* شمارنده نتایج + دکمه فیلتر */}
+          <View style={s.rightActions}>
+            {/* 🆕 دکمه فیلتر */}
+            {onFilterPress && (
+              <TouchableOpacity
+                onPress={onFilterPress}
+                style={[
+                  s.filterBtn,
+                  hasActiveFilter && {
+                    backgroundColor: 'rgba(255,255,255,0.32)',
+                  },
+                ]}
+                activeOpacity={0.7}
+              >
+                <Icon name="tune" size={20} color="#fff" />
+                {/* 🆕 نقطه نشانگر فیلتر فعال */}
+                {hasActiveFilter && <View style={s.filterIndicator} />}
+              </TouchableOpacity>
+            )}
+
+            {/* شمارنده نتایج */}
+            <View style={s.resultCounter}>
+              <Text style={s.resultNumber}>{resultCount}</Text>
+            </View>
           </View>
         </View>
+
+        {/* نوار جستجو */}
         <View style={s.searchWrapper}>
           <SearchBar
             value={searchQuery}
@@ -78,12 +112,10 @@ export default function CategoryHeader({
 
 const s = StyleSheet.create({
   headerContainer: {
-    // paddingTop حذف شد
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  // بقیه بدون تغییر...
   headerContent: {
     paddingHorizontal: 20,
     gap: 20,
@@ -134,13 +166,44 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
+  // 🆕 کانتینر سمت راست (شامل فیلتر + شمارنده)
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  // 🆕 دکمه فیلتر
+  filterBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  // 🆕 نقطه نشانگر فیلتر فعال (زرد طلایی)
+  filterIndicator: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: '#FFD700',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.15)',
+  },
   resultCounter: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 14,
     alignItems: 'center',
-    minWidth: 70,
+    width: 45,
+    height: 45,
   },
   resultNumber: {
     fontSize: 18,

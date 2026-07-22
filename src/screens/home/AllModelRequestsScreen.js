@@ -1,11 +1,12 @@
 // src/screens/home/AllModelRequestsScreen.js
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import AllModelRequestsHeader from '../../components/home/AllModelRequestsHeader';
 import AllModelRequestsCard from '../../components/home/AllModelRequestsCard';
 import AllModelRequestsEmptyState from '../../components/home/AllModelRequestsEmptyState';
+import ModelRequestFilterModal from '../../components/home/ModelRequestFilterModal';
 
 const MOCK_MODEL_REQUESTS = [
   {
@@ -16,6 +17,9 @@ const MOCK_MODEL_REQUESTS = [
     businessName: 'کلینیک زیبایی صدف',
     businessId: 'b1',
     city: 'تهران، سعادت‌آباد',
+    provinceId: 'tehran',
+    cityId: 'tehran-city',
+    serviceTypeId: 'facial',
     discount: 50,
     isUrgent: true,
     costType: 'paid',
@@ -23,6 +27,7 @@ const MOCK_MODEL_REQUESTS = [
     contactPhone: '09121234567',
     createdAt: '۱۴۰۳/۰۴/۱۰',
     expiresAt: '۱۴۰۳/۰۴/۲۰',
+    createdAtTimestamp: Date.now() - 10 * 24 * 60 * 60 * 1000,
   },
   {
     id: 'mr_2',
@@ -32,6 +37,9 @@ const MOCK_MODEL_REQUESTS = [
     businessName: 'ناخن گالری پریا',
     businessId: 'b2',
     city: 'کرج، فردیس',
+    provinceId: 'alborz',
+    cityId: 'fardis',
+    serviceTypeId: 'nail',
     discount: 70,
     isUrgent: false,
     costType: 'material_cost',
@@ -39,6 +47,7 @@ const MOCK_MODEL_REQUESTS = [
     contactPhone: '09129876543',
     createdAt: '۱۴۰۳/۰۴/۰۸',
     expiresAt: '۱۴۰۳/۰۴/۱۸',
+    createdAtTimestamp: Date.now() - 12 * 24 * 60 * 60 * 1000,
   },
   {
     id: 'mr_3',
@@ -48,6 +57,9 @@ const MOCK_MODEL_REQUESTS = [
     businessName: 'سالن زیبایی افرا',
     businessId: 'b3',
     city: 'تهران، نیاوران',
+    provinceId: 'tehran',
+    cityId: 'shemiran',
+    serviceTypeId: 'hair',
     discount: 60,
     isUrgent: false,
     costType: 'paid',
@@ -55,6 +67,7 @@ const MOCK_MODEL_REQUESTS = [
     contactPhone: '09121112233',
     createdAt: '۱۴۰۳/۰۴/۰۵',
     expiresAt: '۱۴۰۳/۰۴/۱۵',
+    createdAtTimestamp: Date.now() - 15 * 24 * 60 * 60 * 1000,
   },
   {
     id: 'mr_4',
@@ -64,6 +77,9 @@ const MOCK_MODEL_REQUESTS = [
     businessName: 'مرکز لیزر رویال',
     businessId: 'b4',
     city: 'تهران، شهرک غرب',
+    provinceId: 'tehran',
+    cityId: 'tehran-city',
+    serviceTypeId: 'laser',
     discount: 0,
     isUrgent: true,
     costType: 'material_cost',
@@ -71,6 +87,7 @@ const MOCK_MODEL_REQUESTS = [
     contactPhone: '09124445566',
     createdAt: '۱۴۰۳/۰۴/۰۳',
     expiresAt: '۱۴۰۳/۰۴/۱۳',
+    createdAtTimestamp: Date.now() - 17 * 24 * 60 * 60 * 1000,
   },
   {
     id: 'mr_5',
@@ -80,6 +97,9 @@ const MOCK_MODEL_REQUESTS = [
     businessName: 'سالن زیبایی افرا',
     businessId: 'b3',
     city: 'تهران، نیاوران',
+    provinceId: 'tehran',
+    cityId: 'shemiran',
+    serviceTypeId: 'eyelash',
     discount: 0,
     isUrgent: false,
     costType: 'free',
@@ -87,19 +107,44 @@ const MOCK_MODEL_REQUESTS = [
     contactPhone: '09127778899',
     createdAt: '۱۴۰۳/۰۴/۰۱',
     expiresAt: '۱۴۰۳/۰۴/۱۱',
+    createdAtTimestamp: Date.now() - 19 * 24 * 60 * 60 * 1000,
   },
 ];
 
 export default function AllModelRequestsScreen({ navigation }) {
   const { colors } = useTheme();
-  const [requests, setRequests] = useState(MOCK_MODEL_REQUESTS);
+  const [requests] = useState(MOCK_MODEL_REQUESTS);
   const [refreshing, setRefreshing] = useState(false);
+
+  // 🎯 state فیلتر ساده‌شده
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    costType: 'all',
+    serviceType: 'all',
+  });
+
+  // 🎯 تشخیص فیلتر فعال
+  const hasActiveFilter =
+    filters.costType !== 'all' || filters.serviceType !== 'all';
+
+  // 🎯 فیلتر ساده‌شده
+  const filteredRequests = useMemo(() => {
+    let data = [...requests];
+
+    if (filters.costType !== 'all') {
+      data = data.filter(r => r.costType === filters.costType);
+    }
+    if (filters.serviceType !== 'all') {
+      data = data.filter(r => r.serviceTypeId === filters.serviceType);
+    }
+
+    return data;
+  }, [requests, filters]);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1000);
   };
-
   const handleRequestPress = (request) => {
     navigation.navigate('ModelRequestDetail', { request });
   };
@@ -107,10 +152,11 @@ export default function AllModelRequestsScreen({ navigation }) {
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <AllModelRequestsHeader
-        requestsCount={requests.length}
+        requestsCount={filteredRequests.length}
         onBackPress={() => navigation.goBack()}
+        onFilterPress={() => setFilterVisible(true)}
+        hasActiveFilter={hasActiveFilter}
       />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -123,8 +169,8 @@ export default function AllModelRequestsScreen({ navigation }) {
         }
       >
         <View style={s.listContainer}>
-          {requests.length > 0 ? (
-            requests.map((request) => (
+          {filteredRequests.length > 0 ? (
+            filteredRequests.map((request) => (
               <AllModelRequestsCard
                 key={request.id}
                 request={request}
@@ -136,10 +182,17 @@ export default function AllModelRequestsScreen({ navigation }) {
           )}
         </View>
       </ScrollView>
+
+      {/* 🎯 مدال فیلتر ساده‌شده */}
+      <ModelRequestFilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
+        onApply={setFilters}
+        currentFilters={filters}
+      />
     </ScreenWrapper>
   );
 }
-
 const s = StyleSheet.create({
   scrollContent: {
     paddingBottom: 120,
