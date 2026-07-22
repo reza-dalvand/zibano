@@ -1,6 +1,11 @@
 // src/screens/home/BusinessDetailsScreen.js
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import BusinessHero from '../../components/home/BusinessHero';
@@ -12,10 +17,13 @@ import PortfolioModal from '../../components/home/PortfolioModal';
 import BusinessAbout from '../../components/home/BusinessAbout';
 import StickyBookingBar from '../../components/home/StickyBookingBar';
 import BookingModal from './BookingScreen';
-// 🆕 دکمه آدرس روی نقشه
 import BusinessMapButton from '../../components/home/BusinessMapButton';
 
-// ============ دیتای موقت ============
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// ═══════════════════════════════════════════════════════
+//                    MOCK DATA
+// ═══════════════════════════════════════════════════════
 const MOCK_BUSINESS = {
   id: '1',
   name: 'مجموعه زیبایی و سلامت نیلارام',
@@ -27,7 +35,6 @@ const MOCK_BUSINESS = {
   address: 'سعادت‌آباد، خیابان سرو غربی، ساختمان پزشکان نگین، طبقه ۳',
   phone: '۰۲۱-۲۲۳۳۴۴۵۵',
   workingHours: 'شنبه تا پنج‌شنبه: ۱۰:۰۰ الی ۲۰:۰۰',
-  // 🆕 مختصات مکان برای نقشه
   location: {
     latitude: 35.7898,
     longitude: 51.3768,
@@ -142,9 +149,14 @@ const MOCK_BUSINESS = {
   ],
 };
 
+// ═══════════════════════════════════════════════════════
+//               BUSINESS DETAILS SCREEN
+// ═══════════════════════════════════════════════════════
 export default function BusinessDetailsScreen({ navigation }) {
   const { colors } = useTheme();
   const biz = MOCK_BUSINESS;
+
+  // ─── State Management ───
   const [activeTab, setActiveTab] = useState('services');
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -153,94 +165,132 @@ export default function BusinessDetailsScreen({ navigation }) {
   const [activePortfolio, setActivePortfolio] = useState(null);
   const [portfolioInitialIndex, setPortfolioInitialIndex] = useState(0);
 
-  const openBooking = (service) => {
+  // ─── Derived Values ───
+  const minServicePrice = useMemo(
+    () => Math.min(...biz.services.map((s) => s.price)),
+    [biz.services],
+  );
+
+  // ─── Handlers ───
+  const openBooking = useCallback((service) => {
     setSelectedService(service);
     setBookingModalVisible(true);
-  };
+  }, []);
 
-  const openPortfolio = (portfolio, index = 0) => {
+  const closeBooking = useCallback(() => {
+    setBookingModalVisible(false);
+    setSelectedService(null);
+  }, []);
+
+  const openPortfolio = useCallback((portfolio, index = 0) => {
     setActivePortfolio(portfolio);
     setPortfolioInitialIndex(index);
     setPortfolioModalVisible(true);
-  };
+  }, []);
 
-  const minServicePrice = Math.min(...biz.services.map((s) => s.price));
+  const closePortfolio = useCallback(() => {
+    setPortfolioModalVisible(false);
+    setActivePortfolio(null);
+  }, []);
+
+  const toggleFavorite = useCallback(() => {
+    setIsFavorite((prev) => !prev);
+  }, []);
+
+  const goBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const openMap = useCallback(() => {
+    navigation.navigate('BusinessMap', { business: biz });
+  }, [navigation, biz]);
+
+  // ─── Tab Content Renderer ───
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'services':
+        return (
+          <View style={s.servicesList}>
+            {biz.services.map((service) => (
+              <ServiceBookingCard
+                key={service.id}
+                service={service}
+                onBook={openBooking}
+              />
+            ))}
+          </View>
+        );
+
+      case 'portfolio':
+        return (
+          <PortfolioGrid
+            portfolios={biz.portfolios}
+            onPortfolioPress={openPortfolio}
+          />
+        );
+
+      case 'about':
+        return <BusinessAbout business={biz} />;
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
+      {/* ═══ Main Scrollable Content ═══ */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
+        bounces={false}
       >
-        {/* ۱. گالری تصاویر */}
+        {/* ─── 1. Hero Gallery ─── */}
         <BusinessHero
           gallery={biz.gallery}
           businessId={biz.id}
           businessName={biz.name}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={goBack}
           isFavorite={isFavorite}
-          onFavoritePress={() => setIsFavorite(!isFavorite)}
+          onFavoritePress={toggleFavorite}
         />
 
-        {/* ۲. اطلاعات کسب‌وکار */}
+        {/* ─── 2. Business Info Card ─── */}
         <BusinessInfoCard business={biz} />
 
-        {/* 🆕 ۲.۵ دکمه آدرس روی نقشه - بالای تب‌ها */}
-        <View style={{ paddingHorizontal: 20, marginTop: 12 }}>
-          <BusinessMapButton
-            business={biz}
-            onPress={() => navigation.navigate('BusinessMap', { business: biz })}
-          />
+        {/* ─── 3. Map Button ─── */}
+        <View style={s.mapButtonWrapper}>
+          <BusinessMapButton business={biz} onPress={openMap} />
         </View>
 
-        {/* ۳. تب‌بار */}
+        {/* ─── 4. Tabs ─── */}
         <BusinessTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           colors={colors}
         />
 
-        {/* ۴. محتوای تب‌ها */}
-        <View style={s.tabContentWrapper}>
-          {activeTab === 'services' && (
-            <View style={s.servicesList}>
-              {biz.services.map((service) => (
-                <ServiceBookingCard
-                  key={service.id}
-                  service={service}
-                  onBook={openBooking}
-                />
-              ))}
-            </View>
-          )}
+        {/* ─── 5. Tab Content ─── */}
+        <View style={s.tabContentWrapper}>{renderTabContent()}</View>
 
-          {activeTab === 'portfolio' && (
-            <PortfolioGrid
-              portfolios={biz.portfolios}
-              onPortfolioPress={openPortfolio}
-            />
-          )}
-
-          {activeTab === 'about' && <BusinessAbout business={biz} />}
-        </View>
-
-        <View style={{ height: 240 }} />
+        {/* ─── Bottom Spacer for Sticky Bar ─── */}
+        <View style={s.bottomSpacer} />
       </ScrollView>
 
-      {/* ۶. مدال رزرو نوبت */}
+      {/* ═══ Sticky Booking Bar ═══ */}
+      <StickyBookingBar minPrice={minServicePrice} onBookPress={openBooking} />
+
+      {/* ═══ Booking Modal ═══ */}
       <BookingModal
         visible={bookingModalVisible}
-        onClose={() => setBookingModalVisible(false)}
+        onClose={closeBooking}
         service={selectedService}
       />
 
-      {/* ۷. مدال گالری نمونه‌کار */}
+      {/* ═══ Portfolio Modal ═══ */}
       <PortfolioModal
         visible={portfolioModalVisible}
-        onClose={() => {
-          setPortfolioModalVisible(false);
-          setActivePortfolio(null);
-        }}
+        onClose={closePortfolio}
         portfolio={activePortfolio}
         initialIndex={portfolioInitialIndex}
       />
@@ -248,14 +298,26 @@ export default function BusinessDetailsScreen({ navigation }) {
   );
 }
 
+// ═══════════════════════════════════════════════════════
+//                     STYLES
+// ═══════════════════════════════════════════════════════
 const s = StyleSheet.create({
   scrollContent: {
     paddingBottom: 0,
   },
+  mapButtonWrapper: {
+    paddingHorizontal: 20,
+    marginTop: 12,
+  },
   tabContentWrapper: {
     paddingHorizontal: 20,
+    paddingTop: 4,
   },
   servicesList: {
     gap: 12,
+    paddingBottom: 8,
+  },
+  bottomSpacer: {
+    height: 220,
   },
 });
