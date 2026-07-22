@@ -15,7 +15,6 @@ const SORT_OPTIONS = [
   { id: 'top_rated', label: 'بیشترین امتیاز', icon: 'star' },
   { id: 'most_booked', label: 'بیشترین رزرو', icon: 'trending-up' },
   { id: 'highest_discount', label: 'بیشترین تخفیف', icon: 'local-offer' },
-  { id: 'nearest', label: 'نزدیک‌ترین', icon: 'near-me' },
 ];
 
 export default function CategoryFilterModal({

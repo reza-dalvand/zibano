@@ -1,6 +1,6 @@
 // src/components/home/HomeFilterModal.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import BottomSheet from '../common/BottomSheet';
@@ -23,8 +23,6 @@ const SORT_OPTIONS = [
   { id: 'top_rated', label: 'بیشترین امتیاز', icon: 'thumb-up' },
   { id: 'most_discount', label: 'بیشترین تخفیف', icon: 'local-offer' },
 ];
-
-// ❌ FEATURES حذف شد
 
 export default function HomeFilterModal({ visible, onClose, onApply, currentFilters }) {
   const { colors } = useTheme();
@@ -69,30 +67,44 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
       title="فیلتر و مرتب‌سازی"
       snapPoint={0.88}
       footer={
-        <View style={s.footerRow}>
-          <Button
-            title="حذف همه"
-            onPress={handleClear}
-            variant="outline"
-            size="lg"
-            style={s.halfBtn}
-            icon={<Icon name="delete-outline" size={18} color={colors.primary} />}
-            iconPosition="right"
-          />
-          <Button
-            title={`اعمال فیلتر (${activeCount})`}
+        <View style={s.footerContainer}>
+          {/* دکمه حذف همه - بالا سمت راست */}
+          <View style={s.topActionsRow}>
+            <Button
+              title="حذف همه"
+              onPress={handleClear}
+              variant="outline"
+              size="lg"
+              style={s.clearBtn}
+              icon={<Icon name="delete-outline" size={18} color={colors.primary} />}
+              iconPosition="right"
+            />
+          </View>
+
+          {/* 🎯 دکمه سبز تایید بزرگ و تمام‌عرض */}
+          <TouchableOpacity
             onPress={handleApply}
-            variant="primary"
-            size="lg"
-            style={s.halfBtn}
-            icon={<Icon name="check" size={18} color="#fff" />}
-            iconPosition="right"
-          />
+            activeOpacity={0.9}
+            style={s.confirmBtn}
+          >
+            <View style={s.confirmBtnIconCircle}>
+              <Icon name="check" size={20} color="#fff" />
+            </View>
+            <View style={s.confirmBtnTextCol}>
+              <Text style={s.confirmBtnTitle}>اعمال فیلتر</Text>
+              <Text style={s.confirmBtnSubtitle}>
+                {activeCount > 0
+                  ? `${activeCount} فیلتر فعال`
+                  : 'نمایش همه نتایج'}
+              </Text>
+            </View>
+            <Icon name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
         </View>
       }
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
-        {/* موقعیت مکانی */}
+        {/* ═══════ موقعیت مکانی ═══════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View style={[s.sectionIconBox, { backgroundColor: '#2196F318' }]}>
@@ -123,7 +135,7 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
 
         <Divider spacing={16} />
 
-        {/* بازه قیمت */}
+        {/* ═══════ بازه قیمت ═══════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5018' }]}>
@@ -147,9 +159,7 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
 
         <Divider spacing={16} />
 
-        {/* ❌ بخش ویژگی‌ها حذف شد */}
-
-        {/* مرتب‌سازی */}
+        {/* ═══════ مرتب‌سازی ═══════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View style={[s.sectionIconBox, { backgroundColor: '#FF980018' }]}>
@@ -165,7 +175,13 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
                 key={opt.id}
                 label={opt.label}
                 selected={sortBy === opt.id}
-                icon={<Icon name={opt.icon} size={14} color={sortBy === opt.id ? colors.primary : colors.textSecondary} />}
+                icon={
+                  <Icon
+                    name={opt.icon}
+                    size={14}
+                    color={sortBy === opt.id ? colors.primary : colors.textSecondary}
+                  />
+                }
                 onPress={() => setSortBy(opt.id)}
               />
             ))}
@@ -208,11 +224,55 @@ const s = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  footerRow: {
-    flexDirection: 'row',
+  // ═══════ فوتر ═══════
+  footerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 6,
     gap: 10,
   },
-  halfBtn: {
+  topActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  },
+  clearBtn: {
+    minWidth: 130,
+  },
+  // 🎯 دکمه سبز تایید
+  confirmBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: '#43A047',
+    shadowColor: '#43A047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  confirmBtnIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmBtnTextCol: {
     flex: 1,
+    gap: 2,
+  },
+  confirmBtnTitle: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
+  confirmBtnSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 11,
+    fontFamily: 'Vazir',
   },
 });
