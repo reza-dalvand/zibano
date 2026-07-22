@@ -443,7 +443,7 @@ const s = StyleSheet.create({
   phoneLabel: {
     fontSize: 13,
     fontFamily: 'Vazir-Medium',
-    textAlign: 'right',
+    textAlign: 'left',
     marginBottom: 6,
   },
   phoneBox: {
@@ -486,7 +486,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 12,
+    paddingVertical: 14,
+    paddingHorizontal:16,
     borderRadius: 12,
     borderWidth: 1.5,
     marginBottom: 8,

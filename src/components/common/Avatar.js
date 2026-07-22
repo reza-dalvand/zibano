@@ -1,11 +1,12 @@
 // src/components/common/Avatar.js
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
- * ✅ اصلاح: تصویر حالا کاملاً دایره را پر می‌کند
+ * defaultIcon: آیکون پیش‌فرض وقتی عکس نیست
  */
 export default function Avatar({
   uri,
@@ -13,8 +14,10 @@ export default function Avatar({
   size = 'md',
   showBorder = false,
   style,
+  defaultIcon = 'spa',
 }) {
   const { colors } = useTheme();
+
   const sizes = {
     xs: 28,
     sm: 36,
@@ -22,6 +25,15 @@ export default function Avatar({
     lg: 64,
     xl: 88,
   };
+
+  const iconSizes = {
+    xs: 14,
+    sm: 18,
+    md: 24,
+    lg: 32,
+    xl: 44,
+  };
+
   const fontSizes = {
     xs: 11,
     sm: 13,
@@ -29,10 +41,13 @@ export default function Avatar({
     lg: 22,
     xl: 30,
   };
+
   const dim = sizes[size] ?? sizes.md;
+  const iconSize = iconSizes[size] ?? iconSizes.md;
   const fontSize = fontSizes[size] ?? fontSizes.md;
 
-  const initials = name ? name.trim().charAt(0).toUpperCase() : '?';
+  // گرفتن حرف اول نام
+  const initial = name ? name.trim().charAt(0) : '';
 
   return (
     <View
@@ -42,23 +57,34 @@ export default function Avatar({
           width: dim,
           height: dim,
           borderRadius: dim / 2,
-          backgroundColor: colors.cardBackground,
           borderColor: showBorder ? colors.primary : colors.border,
           borderWidth: showBorder ? 2 : 1,
+          backgroundColor: colors.primary + '18',
         },
         style,
       ]}
     >
       {uri ? (
-        <Image
-          source={{ uri }}
-          style={s.image}
-          resizeMode="cover"
-        />
+        <Image source={{ uri }} style={s.image} resizeMode="cover" />
       ) : (
-        <Text style={[s.initials, { color: colors.primary, fontSize }]}>
-          {initials}
-        </Text>
+        <View style={s.placeholderContainer}>
+          {/* آیکون پیش‌فرض */}
+          <Icon name={defaultIcon} size={iconSize} color={colors.primary} />
+          {/* حرف اول نام (اگر موجود باشد) */}
+          {initial ? (
+            <Text
+              style={[
+                s.initial,
+                {
+                  color: colors.primary,
+                  fontSize: fontSize * 0.55,
+                },
+              ]}
+            >
+              {initial}
+            </Text>
+          ) : null}
+        </View>
       )}
     </View>
   );
@@ -68,20 +94,26 @@ const s = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden', // ✅ کلید حل مشکل: تصویر را clip می‌کند
+    overflow: 'hidden',
   },
   image: {
-    // ✅ اصلاح اصلی: استفاده از position absolute با top/left/right/bottom = 0
-    // این باعث می‌شود تصویر کاملاً wrapper را پر کند
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    // borderRadius روی wrapper اعمال می‌شود و overflow:hidden خودش clip می‌کند
+    width: '100%',
+    height: '100%',
   },
-  initials: {
+  placeholderContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  initial: {
+    position: 'absolute',
+    bottom: '8%',
+    right: '12%',
     fontFamily: 'Vazir-Bold',
-    textAlign: 'center',
   },
 });
