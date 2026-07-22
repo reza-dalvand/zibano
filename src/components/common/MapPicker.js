@@ -239,12 +239,14 @@ export default function MapPicker({
           {/* Map Wrapper */}
           <View style={s.mapWrapper}>
             {renderedMap}
+            
+            {/* 🎯 مارکر ثابت قرمز در مرکز نقشه */}
             {modalVisible && (
               <View style={s.pinWrapper} pointerEvents="none">
-                <View style={[s.markerPin, { backgroundColor: colors.primary }]}>
-                  <Icon name="location-on" size={28} color="#fff" />
+                <View style={s.markerContainer}>
+                  <Icon name="location-on" size={48} color="#E53935" style={s.markerIcon} />
+                  <View style={s.markerShadow} />
                 </View>
-                <View style={s.markerShadow} />
               </View>
             )}
           </View>
@@ -278,7 +280,7 @@ export default function MapPicker({
             </View>
           </View>
 
-          {/* ═══════ Footer Buttons (اصلاح‌شده) ═══════ */}
+          {/* ═══════ Footer Buttons ═══════ */}
           <View
             style={[
               s.modalFooter,
@@ -290,7 +292,7 @@ export default function MapPicker({
             ]}
           >
             <View style={s.footerButtonsRow}>
-              {/* ═══════ دکمه انصراف ═══════ */}
+              {/* دکمه انصراف */}
               <TouchableOpacity
                 onPress={handleClose}
                 style={[
@@ -308,7 +310,7 @@ export default function MapPicker({
                 </Text>
               </TouchableOpacity>
 
-              {/* ═══════ دکمه تایید ═══════ */}
+              {/* دکمه تایید */}
               <TouchableOpacity
                 onPress={handleConfirm}
                 disabled={!hasValidLocation || loading}
@@ -404,26 +406,25 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markerPin: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  // 🎯 مارکر قرمز مشابه فایل قبلی + شیفت به بالا (translateY) برای مرکز شدن دقیق
+  markerContainer: { 
+    width: 52,
+    height: 58,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    marginBottom: 8,
+    justifyContent: 'flex-start',
+    paddingTop: 2,
+    // به اندازه نصف ارتفاع کانتینر (29 پیکسل) شیفت می‌دهیم تا نوک پین در مرکز قرار گیرد
+    transform: [{ translateY: -29 }], 
+  },
+  markerIcon: {
+    includeFontPadding: false,
   },
   markerShadow: {
-    width: 12,
+    width: 14,
     height: 4,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 6,
+    backgroundColor: 'rgba(0,0,0,0.22)',
+    borderRadius: 7,
+    marginTop: -4,
   },
 
   // ═══════ Address Box ═══════
