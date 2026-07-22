@@ -4,9 +4,8 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  ScrollView,
 } from 'react-native';
+import { getSubServicesForCategory } from '../../constants/categorySubServices';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -49,14 +48,62 @@ const MOCK_ADS = [
 ];
 
 const MOCK_CATEGORIES = [
-  { id: 1, name: 'میکاپ', icon: 'face', color: '#E91E63' },
-  { id: 2, name: 'کاشت ناخن', icon: 'brush', color: '#9C27B0' },
-  { id: 3, name: 'لیزر مو', icon: 'flash-on', color: '#2196F3' },
-  { id: 4, name: 'پاکسازی', icon: 'spa', color: '#4CAF50' },
-  { id: 5, name: 'رنگ مو', icon: 'palette', color: '#FF9800' },
-  { id: 6, name: 'کراتین', icon: 'auto-awesome', color: '#00BCD4' },
-  { id: 7, name: 'مژه', icon: 'visibility', color: '#795548' },
-  { id: 8, name: 'ماساژ', icon: 'self-improvement', color: '#607D8B' },
+  {
+    id: 1,
+    name: 'میکاپ',
+    icon: 'face',
+    color: '#E91E63',
+    count: getSubServicesForCategory(1).length, // 🎯 ۶ خدمت
+  },
+  {
+    id: 2,
+    name: 'کاشت ناخن',
+    icon: 'brush',
+    color: '#9C27B0',
+    count: getSubServicesForCategory(2).length, // 🎯 ۶ خدمت
+  },
+  {
+    id: 3,
+    name: 'لیزر مو',
+    icon: 'flash-on',
+    color: '#2196F3',
+    count: getSubServicesForCategory(3).length, // 🎯 ۵ خدمت
+  },
+  {
+    id: 4,
+    name: 'پاکسازی',
+    icon: 'spa',
+    color: '#4CAF50',
+    count: getSubServicesForCategory(4).length, // 🎯 ۶ خدمت
+  },
+  {
+    id: 5,
+    name: 'رنگ مو',
+    icon: 'palette',
+    color: '#FF9800',
+    count: getSubServicesForCategory(5).length, // 🎯 ۶ خدمت
+  },
+  {
+    id: 6,
+    name: 'کراتین',
+    icon: 'auto-awesome',
+    color: '#00BCD4',
+    count: getSubServicesForCategory(6).length, // 🎯 ۵ خدمت
+  },
+  {
+    id: 7,
+    name: 'مژه',
+    icon: 'visibility',
+    color: '#795548',
+    count: getSubServicesForCategory(7).length, // 🎯 ۶ خدمت
+  },
+  {
+    id: 8,
+    name: 'ماساژ',
+    icon: 'self-improvement',
+    color: '#607D8B',
+    count: getSubServicesForCategory(8).length, // 🎯 ۴ خدمت
+  },
 ];
 
 function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
