@@ -1,5 +1,5 @@
 // src/screens/home/BusinessMapScreen.js
-import React, { useRef, useMemo, useState } from 'react';
+import React, { useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   Linking,
   Alert,
   Platform,
-  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Map, Camera, Marker } from '@maplibre/maplibre-react-native';
@@ -23,56 +22,6 @@ const DEFAULT_LOCATION = {
   longitude: 51.3380,
 };
 
-// 🎯 اپلیکیشن‌های مسیریاب 
-const NAVIGATION_APPS = [
-  {
-    id: 'google',
-    name: 'گوگل مپ',
-    icon: 'map',
-    color: '#4285F4',
-    description: 'مسیریاب پیش‌فرض',
-    buildUrl: (lat, lng) =>
-      Platform.OS === 'ios'
-        ? `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`
-        : `google.navigation:q=${lat},${lng}`,
-    fallbackUrl: (lat, lng) =>
-      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
-  },
-  {
-    id: 'neshan',
-    name: 'نشان',
-    icon: 'navigation',
-    color: '#00BCD4',
-    description: 'مسیریاب فارسی با ترافیک زنده',
-    buildUrl: (lat, lng, name) =>
-      `neshan://direction?to=${lat},${lng}&to_name=${encodeURIComponent(name)}`,
-    fallbackUrl: (lat, lng) =>
-      `https://neshan.org/maps/@${lat},${lng},17z`,
-  },
-  {
-    id: 'balad',
-    name: 'بلد',
-    icon: 'place',
-    color: '#4CAF50',
-    description: 'مسیریاب ایرانی با نقشه دقیق',
-    buildUrl: (lat, lng, name) =>
-      `balad://direction?to=${lat},${lng}&to_name=${encodeURIComponent(name)}`,
-    fallbackUrl: (lat, lng) =>
-      `https://balad.ir/maps/@${lat},${lng},17z`,
-  },
-  {
-    id: 'apple',
-    name: 'اپل مپ',
-    icon: 'explore',
-    color: '#000000',
-    description: 'فقط برای iOS',
-    buildUrl: (lat, lng) =>
-      `http://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`,
-    fallbackUrl: (lat, lng) =>
-      `http://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`,
-  },
-];
-
 export default function BusinessMapScreen({ navigation, route }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -80,7 +29,9 @@ export default function BusinessMapScreen({ navigation, route }) {
   
   const { business } = route.params || {};
 
-  const [showAppSelector, setShowAppSelector] = useState(false);
+  // 🎯 محاسبه فاصله از پایین برای قرار گرفتن دقیقاً بالای تب‌بار شناور
+  const TAB_BAR_HEIGHT = 90; 
+  const safeBottom = Math.max(insets.bottom, 12) + TAB_BAR_HEIGHT;
 
   const location = useMemo(() => {
     if (business?.location?.latitude && business?.location?.longitude) {
@@ -100,48 +51,35 @@ export default function BusinessMapScreen({ navigation, route }) {
     [location]
   );
 
-  const availableApps = useMemo(() => {
-    return NAVIGATION_APPS.filter((app) => {
-      if (app.id === 'apple' && Platform.OS !== 'ios') return false;
-      return true;
+  // 🎯 تابع جدید برای سپردن انتخاب به سیستم‌عامل
+  const handleNavigation = async () => {
+    const lat = location.latitude;
+    const lng = location.longitude;
+    const label = encodeURIComponent(business?.name || 'مقصد');
+
+    // تولید لینک بر اساس سیستم‌عامل
+    const url = Platform.select({
+      // باز کردن دیالوگ پیش‌فرض اندروید برای انتخاب از بین تمام مسیریاب‌های نصب شده
+      android: `geo:${lat},${lng}?q=${lat},${lng}(${label})`,
+      // باز کردن نقشه در iOS (هدایت به سمت مقصد)
+      ios: `maps://?daddr=${lat},${lng}&dirflg=d` 
     });
-  }, []);
 
-  const handleNavigation = async (app) => {
-    const url = app.buildUrl(
-      location.latitude,
-      location.longitude,
-      business?.name || 'مقصد'
-    );
-    const fallbackUrl = app.fallbackUrl(
-      location.latitude,
-      location.longitude,
-      business?.name || 'مقصد'
-    );
-
-    setShowAppSelector(false);
+    // لینک جایگزین در صورتی که هیچ اپلیکیشن نقشه‌ای نصب نباشد
+    const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
     try {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
         await Linking.openURL(url);
       } else {
-        Alert.alert(
-          `اپلیکیشن ${app.name}`,
-          `اپلیکیشن ${app.name} روی دستگاه شما نصب نیست.\nآیا می‌خواهید در مرورگر باز شود؟`,
-          [
-            { text: 'انصراف', style: 'cancel' },
-            {
-              text: 'باز کردن',
-              onPress: () => Linking.openURL(fallbackUrl),
-            },
-          ]
-        );
+        // باز کردن نسخه وب گوگل مپ
+        await Linking.openURL(fallbackUrl);
       }
     } catch (error) {
       console.log('Navigation error:', error);
       Linking.openURL(fallbackUrl).catch(() => {
-        Alert.alert('خطا', 'امکان باز کردن لینک وجود ندارد');
+        Alert.alert('خطا', 'امکان باز کردن مسیریاب وجود ندارد.');
       });
     }
   };
@@ -158,7 +96,6 @@ export default function BusinessMapScreen({ navigation, route }) {
       >
         <Camera ref={cameraRef} initialViewState={initialCamera} />
         
-        {/* 🎯 مارکر قرمز رنگ خالص بدون برش‌خوردگی */}
         <Marker
           id="business-marker"
           lngLat={[location.longitude, location.latitude]}
@@ -176,7 +113,7 @@ export default function BusinessMapScreen({ navigation, route }) {
         style={[
           s.bottomActionContainer,
           {
-            paddingBottom: Math.max(insets.bottom, 20),
+            bottom: safeBottom,
             backgroundColor: colors.cardBackground,
           },
         ]}
@@ -203,70 +140,13 @@ export default function BusinessMapScreen({ navigation, route }) {
           <TouchableOpacity
             style={[s.routeButton, { backgroundColor: colors.primary }]}
             activeOpacity={0.8}
-            onPress={() => setShowAppSelector(true)}
+            onPress={handleNavigation} // 🎯 فراخوانی مستقیم بدون نیاز به مدال
           >
             <Icon name="directions" size={20} color="#fff" />
             <Text style={s.routeButtonText}>مسیریابی</Text>
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* ═══════ مُدال انتخاب اپلیکیشن ═══════ */}
-      <Modal
-        visible={showAppSelector}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowAppSelector(false)}
-      >
-        <View style={s.modalOverlay}>
-          <TouchableOpacity 
-            style={StyleSheet.absoluteFillObject} 
-            activeOpacity={1} 
-            onPress={() => setShowAppSelector(false)} 
-          />
-          <View
-            style={[
-              s.bottomSheet,
-              {
-                backgroundColor: colors.cardBackground,
-                paddingBottom: Math.max(insets.bottom, 20),
-              },
-            ]}
-          >
-            <View style={s.sheetHandle} />
-            <Text style={[s.sheetTitle, { color: colors.textMain }]}>
-              انتخاب مسیر‌یاب
-            </Text>
-            <Text style={[s.sheetSubtitle, { color: colors.textSecondary }]}>
-              کدام اپلیکیشن را برای مسیریابی باز کنیم؟
-            </Text>
-
-            <View style={s.appsList}>
-              {availableApps.map((app) => (
-                <TouchableOpacity
-                  key={app.id}
-                  onPress={() => handleNavigation(app)}
-                  activeOpacity={0.8}
-                  style={[s.appItem, { borderBottomColor: colors.border }]}
-                >
-                  <View style={[s.appIconBox, { backgroundColor: app.color + '18' }]}>
-                    <Icon name={app.icon} size={24} color={app.color} />
-                  </View>
-                  <View style={s.appTextCol}>
-                    <Text style={[s.appName, { color: colors.textMain }]}>
-                      {app.name}
-                    </Text>
-                    <Text style={[s.appDesc, { color: colors.textSecondary }]}>
-                      {app.description}
-                    </Text>
-                  </View>
-                  <Icon name="chevron-left" size={24} color={colors.textSecondary} />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -275,7 +155,6 @@ const s = StyleSheet.create({
   container: { flex: 1, position: 'relative' },
   map: { flex: 1 },
   
-  // 🎯 تنظیم ابعاد کانتینر جهت جلوگیری از برش خوردن نوک پین
   markerContainer: { 
     width: 52,
     height: 58,
@@ -296,13 +175,10 @@ const s = StyleSheet.create({
 
   bottomActionContainer: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    left: '2%',
+    right: '2%',
+    padding: 16,
+    borderRadius: 24,
     elevation: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -3 },
@@ -317,16 +193,4 @@ const s = StyleSheet.create({
   cancelButtonText: { fontSize: 15, fontFamily: 'Vazir-Bold' },
   routeButton: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 54, borderRadius: 16, elevation: 4 },
   routeButtonText: { color: '#fff', fontSize: 16, fontFamily: 'Vazir-Bold' },
-
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  bottomSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 12, maxHeight: '80%' },
-  sheetHandle: { width: 40, height: 4, backgroundColor: '#ccc', borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
-  sheetTitle: { fontSize: 18, fontFamily: 'Vazir-Bold', textAlign: 'right' },
-  sheetSubtitle: { fontSize: 13, fontFamily: 'Vazir', marginTop: 4, marginBottom: 20, textAlign: 'right' },
-  appsList: { paddingBottom: 20 },
-  appItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 0.5, gap: 14 },
-  appIconBox: { width: 46, height: 46, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  appTextCol: { flex: 1, gap: 2, alignItems: 'flex-start' },
-  appName: { fontSize: 15, fontFamily: 'Vazir-Bold' },
-  appDesc: { fontSize: 12, fontFamily: 'Vazir' },
 });
