@@ -74,7 +74,7 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
 
 const maskPhone = (phone) => {
   if (!phone || phone.length < 11) return phone || '';
-  return phone.slice(0, 4) + '***' + phone.slice(-4);
+  return '\u202A' + phone.slice(0, 4) + '***' + phone.slice(-4) + '\u202C';
 };
 
 export default function NationalIdVerificationStep({

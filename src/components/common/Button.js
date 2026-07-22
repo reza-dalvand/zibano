@@ -1,5 +1,4 @@
 // src/components/common/Button.js
-
 import React from 'react';
 import {
   TouchableOpacity,
@@ -85,14 +84,11 @@ export default function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variantTextColors[variant]}
-        />
+        <ActivityIndicator size="small" color={variantTextColors[variant]} />
       ) : (
         <View style={s.row}>
           {icon && iconPosition === 'left' && (
-            <View style={s.iconLeft}>{icon}</View>
+            <View style={s.iconWrapLeft}>{icon}</View>
           )}
           <Text
             style={[
@@ -100,6 +96,8 @@ export default function Button({
               {
                 color: variantTextColors[variant],
                 fontSize: textSizes[size],
+                // lineHeight برابر fontSize تا با آیکون در یک راستا باشه
+                lineHeight: textSizes[size] + 2,
               },
               textStyle,
             ]}
@@ -107,7 +105,7 @@ export default function Button({
             {title}
           </Text>
           {icon && iconPosition === 'right' && (
-            <View style={s.iconRight}>{icon}</View>
+            <View style={s.iconWrapRight}>{icon}</View>
           )}
         </View>
       )}
@@ -130,15 +128,22 @@ const s = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    // از gap به جای margin استفاده می‌کنیم — جهت‌ناپذیره و توی RTL مشکل نداره
+    gap: 6,
   },
   text: {
     fontFamily: 'Vazir-Medium',
     textAlign: 'center',
+    includeFontPadding: false,  // اندروید: padding اضافه فونت رو حذف می‌کنه
+    textAlignVertical: 'center',
   },
-  iconLeft: {
-    marginLeft: 8,
+  // margin حذف شد، gap روی row کافیه
+  iconWrapLeft: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  iconRight: {
-    marginRight: 8,
+  iconWrapRight: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

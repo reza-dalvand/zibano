@@ -1,6 +1,6 @@
 // src/components/common/SuccessModal.js
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Animated, Easing } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -8,137 +8,17 @@ export default function SuccessModal({
   visible,
   onClose,
   title = 'ثبت‌نام موفق',
-  message = 'اطلاعات کسب‌وکار شما با موفقیت ثبت شد. پس از بررسی توسط کارشناسان، نتیجه از طریق پیامک اعلام خواهد شد.',
+  message = 'اطلاعات کسب‌وکار شما با موفقیت ثبت شد.',
   confirmText = 'متوجه شدم',
   emoji = '🎉',
 }) {
   const { colors } = useTheme();
 
-  // انیمیشن‌ها
-  const scaleAnim = useRef(new Animated.Value(0.6)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const checkScale = useRef(new Animated.Value(0)).current;
-  const checkRotate = useRef(new Animated.Value(0)).current;
-  const ringScale = useRef(new Animated.Value(0.3)).current;
-  const ringOpacity = useRef(new Animated.Value(1)).current;
-  const sparkles = useRef(
-    Array.from({ length: 8 }).map(() => ({
-      translate: new Animated.ValueXY({ x: 0, y: 0 }),
-      opacity: new Animated.Value(0),
-      scale: new Animated.Value(0.3),
-    }))
-  ).current;
-
-  useEffect(() => {
-    if (visible) {
-      // شروع انیمیشن‌ها
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          bounciness: 10,
-          speed: 14,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // انیمیشن حلقه پالس
-      Animated.loop(
-        Animated.sequence([
-          Animated.parallel([
-            Animated.timing(ringScale, {
-              toValue: 1.8,
-              duration: 1500,
-              useNativeDriver: true,
-            }),
-            Animated.timing(ringOpacity, {
-              toValue: 0,
-              duration: 1500,
-              useNativeDriver: true,
-            }),
-          ]),
-          Animated.parallel([
-            Animated.timing(ringScale, { toValue: 0.3, duration: 0 }),
-            Animated.timing(ringOpacity, { toValue: 1, duration: 0 }),
-          ]),
-        ])
-      ).start();
-
-      // انیمیشن چک‌مارک (با تاخیر)
-      setTimeout(() => {
-        Animated.spring(checkScale, {
-          toValue: 1,
-          useNativeDriver: true,
-          bounciness: 14,
-          speed: 12,
-        }).start();
-      }, 400);
-
-      // انیمیشن sparkles
-      sparkles.forEach((spark, i) => {
-        const angle = (i * 360) / sparkles.length;
-        const distance = 70;
-        const tx = Math.cos((angle * Math.PI) / 180) * distance;
-        const ty = Math.sin((angle * Math.PI) / 180) * distance;
-
-        setTimeout(() => {
-          Animated.parallel([
-            Animated.timing(spark.translate.x, {
-              toValue: tx,
-              duration: 700,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.timing(spark.translate.y, {
-              toValue: ty,
-              duration: 700,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.timing(spark.opacity, {
-              toValue: 1,
-              duration: 300,
-              useNativeDriver: true,
-            }),
-            Animated.spring(spark.scale, {
-              toValue: 1,
-              useNativeDriver: true,
-            }),
-          ]).start(() => {
-            Animated.timing(spark.opacity, {
-              toValue: 0,
-              duration: 400,
-              useNativeDriver: true,
-            }).start();
-          });
-        }, 300 + i * 80);
-      });
-    } else {
-      // ریست انیمیشن‌ها هنگام بسته شدن
-      scaleAnim.setValue(0.6);
-      opacityAnim.setValue(0);
-      checkScale.setValue(0);
-      checkRotate.setValue(0);
-      ringScale.setValue(0.3);
-      ringOpacity.setValue(1);
-      sparkles.forEach((spark) => {
-        spark.translate.x.setValue(0);
-        spark.translate.y.setValue(0);
-        spark.opacity.setValue(0);
-        spark.scale.setValue(0.3);
-      });
-    }
-  }, [visible]);
-
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="none"
+      animationType="fade"
       onRequestClose={onClose}
       statusBarTranslucent
     >
@@ -147,127 +27,146 @@ export default function SuccessModal({
         onPress={onClose}
         style={s.backdrop}
       >
-        <Animated.View
-          style={[
-            s.modalContainer,
-            {
-              opacity: opacityAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
-          <TouchableOpacity activeOpacity={1}>
-            <View style={s.modalContent}>
-              {/* Sparkles دور دایره */}
-              <View style={s.sparklesContainer}>
-                {sparkles.map((spark, i) => (
-                  <Animated.View
-                    key={i}
-                    style={[
-                      s.sparkle,
-                      {
-                        opacity: spark.opacity,
-                        transform: [
-                          { translateX: spark.translate.x },
-                          { translateY: spark.translate.y },
-                          { scale: spark.scale },
-                        ],
-                      },
-                    ]}
-                  >
-                    <Icon
-                      name="auto-awesome"
-                      size={16}
-                      color={colors.primary}
-                    />
-                  </Animated.View>
-                ))}
+        <TouchableOpacity activeOpacity={1} style={s.container}>
+          <View style={[s.modalContent, { backgroundColor: colors.cardBackground }]}>
+            {/* ═══════ بخش بالایی: آیکون موفقیت ═══════ */}
+            <View style={s.iconSection}>
+              {/* حلقه‌های تزئینی پشت آیکون */}
+              <View style={[s.decorRing1, { borderColor: '#4CAF5020' }]} />
+              <View style={[s.decorRing2, { borderColor: '#4CAF5010' }]} />
+              
+              {/* دایره اصلی سبز با چک‌مارک */}
+              <View style={s.successCircle}>
+                <View style={s.innerGlow} />
+                <Icon name="check" size={56} color="#fff" />
               </View>
+              
+              {/* ایموجی */}
+              <View style={s.emojiBadge}>
+                <Text style={s.emojiText}>{emoji}</Text>
+              </View>
+            </View>
 
-              {/* حلقه پالس */}
-              <Animated.View
-                style={[
-                  s.pulseRing,
-                  {
-                    opacity: ringOpacity,
-                    transform: [{ scale: ringScale }],
-                  },
-                ]}
-              />
+            {/* ═══════ عنوان ═══════ */}
+            <Text style={[s.title, { color: colors.textMain }]}>
+              {title}
+            </Text>
 
-              {/* دایره موفقیت با چک‌مارک */}
-              <Animated.View
-                style={[
-                  s.successIconBox,
-                  {
-                    transform: [{ scale: checkScale }],
-                  },
-                ]}
-              >
-                <View style={s.iconCircle}>
-                  <Icon name="check" size={48} color="#fff" />
-                </View>
-                <View style={s.iconInnerGlow} />
-              </Animated.View>
-
-              {/* ایموجی بالای دایره */}
-              <Text style={s.emoji}>{emoji}</Text>
-
-              {/* عنوان */}
-              <Text style={[s.title, { color: colors.textMain }]}>
-                {title}
-              </Text>
-
-              {/* کارت پیام */}
-              <View
-                style={[
-                  s.messageCard,
-                  {
-                    backgroundColor: colors.primary + '08',
-                    borderColor: colors.primary + '25',
-                  },
-                ]}
-              >
+            {/* ═══════ کارت پیام ═══════ */}
+            <View
+              style={[
+                s.messageCard,
+                {
+                  backgroundColor: colors.primary + '08',
+                  borderColor: colors.primary + '25',
+                },
+              ]}
+            >
+              <View style={[s.messageIconBox, { backgroundColor: colors.primary + '20' }]}>
                 <Icon name="sms" size={18} color={colors.primary} />
-                <Text style={[s.messageText, { color: colors.textSecondary }]}>
-                  {message}
+              </View>
+              <Text style={[s.messageText, { color: colors.textSecondary }]}>
+                {message}
+              </Text>
+            </View>
+
+            {/* ═══════ نکات مهم ═══════ */}
+            <View style={s.tipsSection}>
+              <View style={s.tipsHeader}>
+                <Icon name="info-outline" size={16} color={colors.primary} />
+                <Text style={[s.tipsTitle, { color: colors.textMain }]}>
+                  مراحل بعدی
                 </Text>
               </View>
 
-              {/* نکات */}
               <View style={s.tipsList}>
                 <View style={s.tipItem}>
-                  <Icon name="schedule" size={14} color={colors.primary} />
-                  <Text style={[s.tipText, { color: colors.textSecondary }]}>
-                    بررسی توسط کارشناسان ۲۴ تا ۴۸ ساعت
-                  </Text>
+                  <View style={[s.tipIconBox, { backgroundColor: '#FF980020' }]}>
+                    <Icon name="schedule" size={14} color="#FF9800" />
+                  </View>
+                  <View style={s.tipTextCol}>
+                    <Text style={[s.tipTitle, { color: colors.textMain }]}>
+                      بررسی توسط کارشناسان
+                    </Text>
+                    <Text style={[s.tipDescription, { color: colors.textSecondary }]}>
+                      فرآیند بررسی ۲۴ تا ۴۸ ساعت زمان می‌برد
+                    </Text>
+                  </View>
                 </View>
+
+                <View style={s.tipDivider}>
+                  <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+                </View>
+
                 <View style={s.tipItem}>
-                  <Icon name="notifications-active" size={14} color={colors.primary} />
-                  <Text style={[s.tipText, { color: colors.textSecondary }]}>
-                    اطلاع‌رسانی از طریق پیامک و نوتیفیکیشن
-                  </Text>
+                  <View style={[s.tipIconBox, { backgroundColor: '#2196F320' }]}>
+                    <Icon name="notifications-active" size={14} color="#2196F3" />
+                  </View>
+                  <View style={s.tipTextCol}>
+                    <Text style={[s.tipTitle, { color: colors.textMain }]}>
+                      اطلاع‌رسانی نتیجه
+                    </Text>
+                    <Text style={[s.tipDescription, { color: colors.textSecondary }]}>
+                      نتیجه از طریق پیامک و نوتیفیکیشن ارسال می‌شود
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={s.tipDivider}>
+                  <View style={[s.dividerLine, { backgroundColor: colors.border }]} />
+                </View>
+
+                <View style={s.tipItem}>
+                  <View style={[s.tipIconBox, { backgroundColor: '#4CAF5020' }]}>
+                    <Icon name="rocket-launch" size={14} color="#4CAF50" />
+                  </View>
+                  <View style={s.tipTextCol}>
+                    <Text style={[s.tipTitle, { color: colors.textMain }]}>
+                      شروع فعالیت
+                    </Text>
+                    <Text style={[s.tipDescription, { color: colors.textSecondary }]}>
+                      پس از تایید، کسب‌وکار شما فعال می‌شود
+                    </Text>
+                  </View>
                 </View>
               </View>
-
-              {/* دکمه */}
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={onClose}
-                style={[s.confirmBtn, { backgroundColor: colors.primary }]}
-              >
-                <Text style={s.confirmBtnText}>{confirmText}</Text>
-                <Icon name="check-circle" size={18} color="#fff" />
-              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        </Animated.View>
+
+            {/* ═══════ کارت اطمینان ═══════ */}
+            <View
+              style={[
+                s.trustCard,
+                {
+                  backgroundColor: '#4CAF5008',
+                  borderColor: '#4CAF5025',
+                },
+              ]}
+            >
+              <Icon name="shield" size={16} color="#4CAF50" />
+              <Text style={[s.trustText, { color: '#4CAF50' }]}>
+                اطلاعات شما محرمانه و امن نگهداری می‌شود
+              </Text>
+            </View>
+
+            {/* ═══════ دکمه تایید ═══════ */}
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={onClose}
+              style={[s.confirmBtn, { backgroundColor: colors.primary }]}
+            >
+              <Icon name="check-circle" size={20} color="#fff" />
+              <Text style={s.confirmBtnText}>{confirmText}</Text>
+              <Icon name="arrow-back" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
   );
 }
 
 const s = StyleSheet.create({
+  // ═══════ Backdrop ═══════
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
@@ -275,126 +174,214 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
   },
-  modalContainer: {
+  container: {
     width: '100%',
   },
+
+  // ═══════ Modal Content ═══════
   modalContent: {
-    backgroundColor: '#fff',
     borderRadius: 28,
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingTop: 32,
+    paddingBottom: 24,
     alignItems: 'center',
     position: 'relative',
-    overflow: 'visible',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 12,
   },
-  // Sparkles
-  sparklesContainer: {
-    position: 'absolute',
-    top: 48,
-    width: '100%',
-    height: 100,
+
+  // ═══════ بخش آیکون ═══════
+  iconSection: {
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1,
+    width: 130,
+    height: 130,
+    marginBottom: 20,
   },
-  sparkle: {
+  decorRing1: {
     position: 'absolute',
-  },
-  // Pulse Ring
-  pulseRing: {
-    position: 'absolute',
-    top: 28,
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 2,
-    borderColor: '#4CAF50',
-    alignSelf: 'center',
+    zIndex: 1,
   },
-  // Success Icon
-  successIconBox: {
-    position: 'relative',
-    marginBottom: 12,
-    zIndex: 2,
+  decorRing2: {
+    position: 'absolute',
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 1,
+    zIndex: 0,
   },
-  iconCircle: {
+  successCircle: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: '#4CAF50',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
+    position: 'relative',
     shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
   },
-  iconInnerGlow: {
+  innerGlow: {
     position: 'absolute',
-    top: 8,
-    left: 16,
-    width: 30,
-    height: 20,
+    top: 10,
+    left: 18,
+    width: 32,
+    height: 22,
     borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
   },
-  emoji: {
-    fontSize: 32,
-    marginBottom: 4,
+  emojiBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#4CAF50',
+    zIndex: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
+  emojiText: {
+    fontSize: 18,
+  },
+
+  // ═══════ عنوان ═══════
   title: {
     fontSize: 22,
     fontFamily: 'Vazir-Bold',
     textAlign: 'center',
     marginBottom: 16,
   },
+
+  // ═══════ کارت پیام ═══════
   messageCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 10,
+    gap: 12,
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 20,
     width: '100%',
+  },
+  messageIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   messageText: {
     flex: 1,
     fontSize: 13,
     fontFamily: 'Vazir',
     lineHeight: 22,
-    textAlign: 'right',
+    textAlign: 'left',
   },
-  // Tips
+
+  // ═══════ بخش نکات ═══════
+  tipsSection: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  tipsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 14,
+  },
+  tipsTitle: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
   tipsList: {
     width: '100%',
-    gap: 10,
-    marginBottom: 20,
   },
   tipItem: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  tipIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tipTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  tipTitle: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+  },
+  tipDescription: {
+    fontSize: 11.5,
+    fontFamily: 'Vazir',
+    lineHeight: 18,
+  },
+  tipDivider: {
+    paddingLeft: 15,
+    paddingVertical: 2,
+  },
+  dividerLine: {
+    width: 2,
+    height: 14,
+    borderRadius: 1,
+    marginLeft: 0,
+  },
+
+  // ═══════ کارت اطمینان ═══════
+  trustCard: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+    width: '100%',
   },
-  tipText: {
+  trustText: {
     flex: 1,
-    fontSize: 12,
-    fontFamily: 'Vazir',
+    fontSize: 11.5,
+    fontFamily: 'Vazir-Medium',
+    textAlign: 'center',
   },
-  // Confirm Button
+
+  // ═══════ دکمه تایید ═══════
   confirmBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     width: '100%',
     paddingVertical: 15,
+    paddingHorizontal: 17,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -406,5 +393,8 @@ const s = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
+    flex: 1,
+    textAlign: 'center',
+
   },
 });

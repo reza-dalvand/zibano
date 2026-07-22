@@ -21,7 +21,6 @@ import NationalIdVerificationStep from '../../components/createbusiness/National
 import TermsAndConditionsStep from '../../components/createbusiness/TermsAndConditionsStep';
 import SuccessModal from '../../components/common/SuccessModal';
 
-// 🎯 ارتفاع تقریبی نوبار شناور (Tab Bar)
 const NAVBAR_HEIGHT = 90;
 
 export default function CreateBusinessScreen({ navigation }) {
@@ -32,6 +31,7 @@ export default function CreateBusinessScreen({ navigation }) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
+
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isStepValid, setIsStepValid] = useState(false);
 
@@ -51,7 +51,7 @@ export default function CreateBusinessScreen({ navigation }) {
   const registeredPhone = user?.phone || '09123456789';
 
   const updateForm = (key, value) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   const renderCurrentStep = () => {
@@ -61,7 +61,7 @@ export default function CreateBusinessScreen({ navigation }) {
           <BasicInfoStep
             formData={formData}
             onUpdate={updateForm}
-            onValidationChange={valid => setIsStepValid(valid)}
+            onValidationChange={(valid) => setIsStepValid(valid)}
           />
         );
       case 2:
@@ -147,7 +147,6 @@ export default function CreateBusinessScreen({ navigation }) {
     }
   };
 
-  // 🎯 صفحه قوانین
   if (!termsAccepted) {
     return (
       <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
@@ -167,10 +166,9 @@ export default function CreateBusinessScreen({ navigation }) {
     );
   }
 
-  // 🎯 Wizard
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
-      {/* 🎯 هدر لاکچری - جمع‌وجور و کوچک */}
+      {/* هدر */}
       <View
         style={[
           s.luxuryHeader,
@@ -181,7 +179,6 @@ export default function CreateBusinessScreen({ navigation }) {
         ]}
       >
         <View style={s.headerTop}>
-          {/* 🎯 دکمه بازگشت واضح و مشخص */}
           <TouchableOpacity
             onPress={handleBackFromWizard}
             style={s.headerBackBtn}
@@ -194,7 +191,6 @@ export default function CreateBusinessScreen({ navigation }) {
         </View>
       </View>
 
-      {/* 🎯 اسکرول‌ویو اصلی با key={currentStep} برای scroll to top خودکار */}
       <ScrollView
         key={currentStep}
         showsVerticalScrollIndicator={false}
@@ -203,37 +199,28 @@ export default function CreateBusinessScreen({ navigation }) {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Step Progress */}
         <StepProgress currentStep={currentStep} totalSteps={totalSteps} />
-
-        {/* محتوای مرحله */}
         {renderCurrentStep()}
-
-        {/* 🎯 فاصله بین محتوا و دکمه‌ها */}
         <View style={{ height: 32 }} />
 
-        {/* 🎯 فوتر با دکمه‌های ناوبری - در انتهای جریان طبیعی اسکرول */}
-        <View style={s.footerControls}>
+        {/* ═══════ فوتر دکمه‌ها ═══════ */}
+        <View
+          style={[
+            s.footerControls,
+            {
+              backgroundColor: colors.cardBackground,
+              borderTopColor: colors.border,
+            },
+          ]}
+        >
           <View style={s.footerRow}>
-            {!isFirstStep && (
-              <Button
-                title="مرحله قبل"
-                onPress={handleBackFromWizard}
-                variant="outline"
-                size="lg"
-                style={s.halfButton}
-                icon={
-                  <Icon name="arrow-forward" size={18} color={colors.primary} />
-                }
-                iconPosition="right"
-              />
-            )}
+            {/* دکمه اصلی — در RTL force شده سمت راست قرار می‌گیره */}
             <Button
               title={isLastStep ? 'ثبت نهایی' : 'مرحله بعد'}
               onPress={handleNextStep}
               variant="primary"
               size="lg"
-              style={isFirstStep ? s.fullButton : s.halfButton}
+              style={isFirstStep ? s.fullButton : s.nextButton}
               disabled={!canGoNext()}
               icon={
                 isLastStep ? (
@@ -242,12 +229,35 @@ export default function CreateBusinessScreen({ navigation }) {
                   <Icon name="arrow-back" size={18} color="#fff" />
                 )
               }
-              iconPosition={isLastStep ? 'right' : 'left'}
+              iconPosition="right"
             />
+
+            {/* دکمه مرحله قبل — سمت چپ */}
+            {!isFirstStep && (
+              <Button
+                title="مرحله قبل"
+                onPress={handleBackFromWizard}
+                variant="outline"
+                size="lg"
+                style={s.backButton}
+                icon={
+                  <Icon name="arrow-forward" size={18} color={colors.primary} />
+                }
+                iconPosition="left"
+              />
+            )}
           </View>
 
           {!canGoNext() && (
-            <View style={s.warningBox}>
+            <View
+              style={[
+                s.warningBox,
+                {
+                  backgroundColor: '#FFA00010',
+                  borderColor: '#FFA00030',
+                },
+              ]}
+            >
               <Icon name="info-outline" size={14} color="#FFA000" />
               <Text style={[s.warningText, { color: colors.textSecondary }]}>
                 {currentStep === 1 &&
@@ -259,7 +269,6 @@ export default function CreateBusinessScreen({ navigation }) {
           )}
         </View>
 
-        {/* 🎯 فضای خالی در انتها برای جلوگیری از چسبیدن به Navbar شناور */}
         <View style={{ height: NAVBAR_HEIGHT + insets.bottom + 20 }} />
       </ScrollView>
 
@@ -276,7 +285,6 @@ export default function CreateBusinessScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  // 🎯 هدر لوکس - کوچک و جمع‌وجور
   luxuryHeader: {
     paddingBottom: 10,
     paddingHorizontal: 16,
@@ -307,39 +315,54 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
-  // 🎯 فوتر دکمه‌ها - دیگر position: absolute نیست!
+
+  // ═══════ فوتر دکمه‌ها ═══════
   footerControls: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 20,
+    paddingBottom: 24,
     gap: 12,
+    borderTopWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
   },
   footerRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',  // در RTL force شده، row از راست شروع می‌کنه
     gap: 10,
+    alignItems: 'stretch',
   },
-  halfButton: {
+  nextButton: {
+    flex: 1.6,   // دکمه اصلی پهن‌تر
+    height: 54,
+    borderRadius: 16,
+  },
+  backButton: {
     flex: 1,
+    height: 54,
+    borderRadius: 16,
   },
   fullButton: {
     flex: 1,
+    height: 54,
+    borderRadius: 16,
   },
   warningBox: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#FFA00010',
     borderWidth: 1,
-    borderColor: '#FFA00030',
   },
   warningText: {
     fontSize: 12,
     fontFamily: 'Vazir',
-    textAlign: 'center',
+    textAlign: 'left',
     flex: 1,
+    lineHeight: 18,
   },
 });
