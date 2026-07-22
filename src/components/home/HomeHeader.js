@@ -112,7 +112,7 @@ const s = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     position: 'relative',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   decorCircle1: {
     position: 'absolute',
@@ -151,7 +151,8 @@ const s = StyleSheet.create({
   },
   avatar: {
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.59)',
   },
   welcomeTextContainer: {
     flex: 1,

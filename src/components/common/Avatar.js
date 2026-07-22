@@ -6,7 +6,6 @@ import { useTheme } from '../../theme/ThemeContext';
 
 /**
  * size: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
- * defaultIcon: آیکون پیش‌فرض وقتی عکس نیست
  */
 export default function Avatar({
   uri,
@@ -14,7 +13,6 @@ export default function Avatar({
   size = 'md',
   showBorder = false,
   style,
-  defaultIcon = 'spa',
 }) {
   const { colors } = useTheme();
 
@@ -27,11 +25,11 @@ export default function Avatar({
   };
 
   const iconSizes = {
-    xs: 14,
-    sm: 18,
-    md: 24,
-    lg: 32,
-    xl: 44,
+    xs: 16,
+    sm: 20,
+    md: 28,
+    lg: 36,
+    xl: 50,
   };
 
   const fontSizes = {
@@ -46,8 +44,7 @@ export default function Avatar({
   const iconSize = iconSizes[size] ?? iconSizes.md;
   const fontSize = fontSizes[size] ?? fontSizes.md;
 
-  // گرفتن حرف اول نام
-  const initial = name ? name.trim().charAt(0) : '';
+  const initials = name ? name.trim().charAt(0).toUpperCase() : null;
 
   return (
     <View
@@ -57,34 +54,33 @@ export default function Avatar({
           width: dim,
           height: dim,
           borderRadius: dim / 2,
+          backgroundColor: colors.primary + '20',
           borderColor: showBorder ? colors.primary : colors.border,
           borderWidth: showBorder ? 2 : 1,
-          backgroundColor: colors.primary + '18',
         },
         style,
       ]}
     >
       {uri ? (
-        <Image source={{ uri }} style={s.image} resizeMode="cover" />
-      ) : (
-        <View style={s.placeholderContainer}>
-          {/* آیکون پیش‌فرض */}
-          <Icon name={defaultIcon} size={iconSize} color={colors.primary} />
-          {/* حرف اول نام (اگر موجود باشد) */}
-          {initial ? (
-            <Text
-              style={[
-                s.initial,
-                {
-                  color: colors.primary,
-                  fontSize: fontSize * 0.55,
-                },
-              ]}
-            >
-              {initial}
-            </Text>
-          ) : null}
+        // overflow hidden فقط روی image wrapper گذاشته میشه نه کل View
+        <View style={[s.imageWrapper, { borderRadius: dim / 2 }]}>
+          <Image
+            source={{ uri }}
+            style={s.image}
+            resizeMode="cover"
+          />
         </View>
+      ) : initials ? (
+        <Text
+          style={[
+            s.initialsText,
+            { color: colors.primary, fontSize },
+          ]}
+        >
+          {initials}
+        </Text>
+      ) : (
+        <Icon name="person" size={iconSize} color={colors.primary} />
       )}
     </View>
   );
@@ -94,26 +90,23 @@ const s = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    // overflow: 'hidden' اینجا نیست — آیکون clip نمیشه
   },
-  image: {
+  imageWrapper: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    overflow: 'hidden', // فقط برای image
+  },
+  image: {
     width: '100%',
     height: '100%',
   },
-  placeholderContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  initial: {
-    position: 'absolute',
-    bottom: '8%',
-    right: '12%',
+  initialsText: {
     fontFamily: 'Vazir-Bold',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
 });
