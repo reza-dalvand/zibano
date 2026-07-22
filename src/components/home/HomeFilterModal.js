@@ -4,104 +4,43 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import BottomSheet from '../common/BottomSheet';
-import Button from '../common/Button';
-import Chip from '../common/Chip';
 import Dropdown from '../common/Dropdown';
-import Divider from '../common/Divider';
 import { PROVINCES, CITIES } from '../../constants/exploreFilters';
-
-const PRICE_RANGES = [
-  { id: 'all', label: 'همه قیمت‌ها' },
-  { id: 'low', label: 'اقتصادی (تا ۵۰۰ هزار)' },
-  { id: 'medium', label: 'متوسط (۵۰۰ تا ۱ میلیون)' },
-  { id: 'high', label: 'لوکس (بالای ۱ میلیون)' },
-];
-
-const SORT_OPTIONS = [
-  { id: 'recommended', label: 'پیشنهادی', icon: 'star' },
-  { id: 'nearest', label: 'نزدیک‌ترین', icon: 'near-me' },
-  { id: 'top_rated', label: 'بیشترین امتیاز', icon: 'thumb-up' },
-  { id: 'most_discount', label: 'بیشترین تخفیف', icon: 'local-offer' },
-];
+import { toPersianDigit } from '../../constants/exploreFilters';
 
 export default function HomeFilterModal({ visible, onClose, onApply, currentFilters }) {
   const { colors } = useTheme();
   const [province, setProvince] = useState(null);
   const [city, setCity] = useState(null);
-  const [priceRange, setPriceRange] = useState('all');
-  const [sortBy, setSortBy] = useState('recommended');
 
   useEffect(() => {
     if (visible && currentFilters) {
       setProvince(currentFilters.province || null);
       setCity(currentFilters.city || null);
-      setPriceRange(currentFilters.priceRange || 'all');
-      setSortBy(currentFilters.sortBy || 'recommended');
     }
   }, [visible, currentFilters]);
 
   const handleApply = () => {
-    onApply({ province, city, priceRange, sortBy });
+    onApply({ province, city });
     onClose();
   };
 
   const handleClear = () => {
     setProvince(null);
     setCity(null);
-    setPriceRange('all');
-    setSortBy('recommended');
     onApply({});
     onClose();
   };
 
-  const activeCount =
-    (province ? 1 : 0) +
-    (city ? 1 : 0) +
-    (priceRange !== 'all' ? 1 : 0) +
-    (sortBy !== 'recommended' ? 1 : 0);
+  const activeCount = (province ? 1 : 0) + (city ? 1 : 0);
+  const hasActiveFilter = activeCount > 0;
 
   return (
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      title="فیلتر و مرتب‌سازی"
-      snapPoint={0.88}
-      footer={
-        <View style={s.footerContainer}>
-          {/* دکمه حذف همه - بالا سمت راست */}
-          <View style={s.topActionsRow}>
-            <Button
-              title="حذف همه"
-              onPress={handleClear}
-              variant="outline"
-              size="lg"
-              style={s.clearBtn}
-              icon={<Icon name="delete-outline" size={18} color={colors.primary} />}
-              iconPosition="right"
-            />
-          </View>
-
-          {/* 🎯 دکمه سبز تایید بزرگ و تمام‌عرض */}
-          <TouchableOpacity
-            onPress={handleApply}
-            activeOpacity={0.9}
-            style={s.confirmBtn}
-          >
-            <View style={s.confirmBtnIconCircle}>
-              <Icon name="check" size={20} color="#fff" />
-            </View>
-            <View style={s.confirmBtnTextCol}>
-              <Text style={s.confirmBtnTitle}>اعمال فیلتر</Text>
-              <Text style={s.confirmBtnSubtitle}>
-                {activeCount > 0
-                  ? `${activeCount} فیلتر فعال`
-                  : 'نمایش همه نتایج'}
-              </Text>
-            </View>
-            <Icon name="arrow-back" size={22} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      }
+      title="فیلتر موقعیت مکانی"
+      snapPoint={0.7}
     >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
         {/* ═══════ موقعیت مکانی ═══════ */}
@@ -114,6 +53,23 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
               موقعیت مکانی
             </Text>
           </View>
+
+          {/* کارت راهنما */}
+          <View
+            style={[
+              s.hintCard,
+              {
+                backgroundColor: '#2196F30A',
+                borderColor: '#2196F325',
+              },
+            ]}
+          >
+            <Icon name="info-outline" size={16} color="#2196F3" />
+            <Text style={[s.hintText, { color: colors.textSecondary }]}>
+              استان و شهر موردنظر خود را انتخاب کنید تا فقط کسب‌وکارهای آن منطقه نمایش داده شود
+            </Text>
+          </View>
+
           <Dropdown
             label="استان"
             placeholder="انتخاب استان"
@@ -133,60 +89,86 @@ export default function HomeFilterModal({ visible, onClose, onApply, currentFilt
           />
         </View>
 
-        <Divider spacing={16} />
+        {/* 🎯 دکمه‌های اکشن - دقیقا زیر Dropdown شهر */}
+        <View style={s.actionsSection}>
+          {/* دکمه حذف فیلترها */}
+          {hasActiveFilter && (
+            <TouchableOpacity
+              onPress={handleClear}
+              activeOpacity={0.75}
+              style={s.clearBtn}
+            >
+              <Icon name="delete-outline" size={16} color="#E53935" />
+              <Text style={[s.clearBtnText, { color: '#E53935' }]}>
+                حذف فیلترها
+              </Text>
+            </TouchableOpacity>
+          )}
 
-        {/* ═══════ بازه قیمت ═══════ */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5018' }]}>
-              <Icon name="attach-money" size={18} color="#4CAF50" />
+          {/* 🎯 دکمه سبز تایید */}
+          <TouchableOpacity
+            onPress={handleApply}
+            activeOpacity={0.9}
+            style={[s.confirmBtn, { backgroundColor: '#43A047' }]}
+          >
+            <View style={s.confirmBtnIconCircle}>
+              <Icon name="check" size={20} color="#fff" />
             </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              بازه قیمت
-            </Text>
-          </View>
-          <View style={s.chipsGrid}>
-            {PRICE_RANGES.map(pr => (
-              <Chip
-                key={pr.id}
-                label={pr.label}
-                selected={priceRange === pr.id}
-                onPress={() => setPriceRange(pr.id)}
-              />
-            ))}
-          </View>
+            <View style={s.confirmBtnTextCol}>
+              <Text style={s.confirmBtnTitle}>تایید و اعمال فیلتر</Text>
+              <Text style={s.confirmBtnSubtitle}>
+                {hasActiveFilter
+                  ? `${toPersianDigit(activeCount)} فیلتر فعال`
+                  : 'نمایش همه نتایج'}
+              </Text>
+            </View>
+            <Icon name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
         </View>
 
-        <Divider spacing={16} />
-
-        {/* ═══════ مرتب‌سازی ═══════ */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: '#FF980018' }]}>
-              <Icon name="sort" size={18} color="#FF9800" />
+        {/* خلاصه انتخاب‌ها */}
+        {hasActiveFilter && (
+          <View
+            style={[
+              s.summaryCard,
+              {
+                backgroundColor: colors.primary + '0A',
+                borderColor: colors.primary + '30',
+              },
+            ]}
+          >
+            <View style={s.summaryHeader}>
+              <Icon name="filter-list" size={18} color={colors.primary} />
+              <Text style={[s.summaryTitle, { color: colors.textMain }]}>
+                خلاصه فیلترهای شما
+              </Text>
             </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              مرتب‌سازی بر اساس
-            </Text>
+
+            {province && (
+              <View style={s.summaryRow}>
+                <Icon name="place" size={14} color={colors.textSecondary} />
+                <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>
+                  استان:
+                </Text>
+                <Text style={[s.summaryValue, { color: colors.textMain }]}>
+                  {PROVINCES.find((p) => p.id === province)?.label}
+                </Text>
+              </View>
+            )}
+
+            {city && (
+              <View style={s.summaryRow}>
+                <Icon name="location-city" size={14} color={colors.textSecondary} />
+                <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>
+                  شهر:
+                </Text>
+                <Text style={[s.summaryValue, { color: colors.textMain }]}>
+                  {CITIES[province]?.find((c) => c.id === city)?.label}
+                </Text>
+              </View>
+            )}
           </View>
-          <View style={s.chipsGrid}>
-            {SORT_OPTIONS.map(opt => (
-              <Chip
-                key={opt.id}
-                label={opt.label}
-                selected={sortBy === opt.id}
-                icon={
-                  <Icon
-                    name={opt.icon}
-                    size={14}
-                    color={sortBy === opt.id ? colors.primary : colors.textSecondary}
-                  />
-                }
-                onPress={() => setSortBy(opt.id)}
-              />
-            ))}
-          </View>
-        </View>
+        )}
 
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -219,26 +201,40 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-  chipsGrid: {
+  hintCard: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'flex-start',
     gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
   },
-  // ═══════ فوتر ═══════
-  footerContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 6,
+  hintText: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    flex: 1,
+    lineHeight: 19,
+  },
+  actionsSection: {
+    marginTop: 8,
     gap: 10,
   },
-  topActionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
   clearBtn: {
-    minWidth: 130,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#E5393510',
+    borderWidth: 1,
+    borderColor: '#E5393530',
   },
-  // 🎯 دکمه سبز تایید
+  clearBtnText: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+  },
   confirmBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -246,7 +242,6 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: '#43A047',
     shadowColor: '#43A047',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -274,5 +269,38 @@ const s = StyleSheet.create({
     color: 'rgba(255,255,255,0.9)',
     fontSize: 11,
     fontFamily: 'Vazir',
+  },
+  summaryCard: {
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 10,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  summaryTitle: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  summaryLabel: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    minWidth: 50,
+  },
+  summaryValue: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+    flex: 1,
   },
 });
