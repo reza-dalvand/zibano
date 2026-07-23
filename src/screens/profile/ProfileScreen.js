@@ -12,7 +12,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Button from '../../components/common/Button';
-import Card from '../../components/common/Card';
 import { useAuth } from '../../context/AuthContext';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileStatsCard from '../../components/profile/ProfileStatsCard';
@@ -139,26 +138,6 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      '⚠️ حذف حساب کاربری',
-      'آیا از حذف دائمی حساب کاربری خود مطمئن هستید؟\nاین عمل قابل بازگشت نیست.',
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف دائمی حساب',
-          style: 'destructive',
-          onPress: () => {
-            setToast({
-              visible: true,
-              message: 'این قابلیت در فاز بعدی فعال می‌شود',
-              type: 'info',
-            });
-          },
-        },
-      ],
-    );
-  };
 
   // ═══════════ Render ═══════════
   return (
@@ -189,54 +168,12 @@ export default function ProfileScreen({ navigation }) {
           <View style={{ marginBottom: 10 }}>
             <ThemeToggleItem isDark={isDark} onToggle={toggleTheme} />
           </View>
+
           <ProfileMenuList
             title=""
             items={settingsMenuItems}
             onItemPress={handleMenuPress}
           />
-        </View>
-
-        {/* ═══════════════ ناحیه خطرناک ═══════════════ */}
-        <View style={s.section}>
-          <Card
-            variant="default"
-            padding={0}
-            radius={16}
-            style={[
-              s.dangerCard,
-              { borderColor: '#E5393540', backgroundColor: '#E5393508' },
-            ]}
-          >
-            <View style={s.dangerRow}>
-              <View style={s.dangerInfo}>
-                <View
-                  style={[s.dangerIconBox, { backgroundColor: '#E5393520' }]}
-                >
-                  <Icon name="delete-forever" size={22} color="#E53935" />
-                </View>
-                <View style={s.dangerText}>
-                  <Text style={[s.dangerTitle, { color: '#E53935' }]}>
-                    حذف حساب کاربری
-                  </Text>
-                  <Text
-                    style={[s.dangerSubtitle, { color: colors.textSecondary }]}
-                  >
-                    حذف دائمی حساب و تمامی اطلاعات شما
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <TouchableOpacity
-              onPress={handleDeleteAccount}
-              style={[s.dangerBtn, { borderColor: '#E53935' }]}
-              activeOpacity={0.75}
-            >
-              <Icon name="delete-forever" size={18} color="#E53935" />
-              <Text style={[s.dangerBtnText, { color: '#E53935' }]}>
-                حذف حساب کاربری
-              </Text>
-            </TouchableOpacity>
-          </Card>
         </View>
 
         {/* ═══════════════ خروج و نسخه ═══════════════ */}
@@ -248,7 +185,7 @@ export default function ProfileScreen({ navigation }) {
             size="lg"
             fullWidth
             icon={<Icon name="logout" size={20} color="#E53935" />}
-            iconPosition="right"
+            iconPosition="left"
             style={s.logoutButton}
             textStyle={{ color: '#E53935' }}
           />
@@ -281,57 +218,6 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Vazir-Bold',
     marginBottom: 12,
-  },
-  dangerCard: {
-    borderWidth: 1.5,
-    overflow: 'hidden',
-    padding: 14,
-    gap: 12,
-  },
-  dangerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  dangerInfo: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    flex: 1,
-  },
-  dangerIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dangerText: {
-    flex: 1,
-    gap: 3,
-  },
-  dangerTitle: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-  },
-  dangerSubtitle: {
-    fontSize: 11,
-    fontFamily: 'Vazir',
-    lineHeight: 17,
-  },
-  dangerBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    backgroundColor: '#E5393510',
-  },
-  dangerBtnText: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
   },
   logoutContainer: {
     marginTop: 16,

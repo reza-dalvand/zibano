@@ -6,12 +6,14 @@ import ProfileMenuCard from './ProfileMenuCard';
 
 export default function ProfileMenuList({ title, items, onItemPress }) {
   const { colors } = useTheme();
-
   return (
     <View style={s.section}>
-      <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-        {title}
-      </Text>
+      {/* ✅ شرطی کردن: فقط وقتی title مقدار دارد رندر شود */}
+      {title ? (
+        <Text style={[s.sectionTitle, { color: colors.textMain }]}>
+          {title}
+        </Text>
+      ) : null}
       <View style={s.menuContainer}>
         {items.map((item) => (
           <ProfileMenuCard

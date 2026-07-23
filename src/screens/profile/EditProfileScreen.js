@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -18,24 +19,24 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const maskPhone = phone => {
+// ✅ تابع maskPhone با LTR marks (همان راه‌حل OtpVerifyScreen)
+const maskPhone = (phone) => {
   if (!phone || phone.length < 11) return phone || '';
-  return phone.slice(0, 4) + '***' + phone.slice(-4);
+  // 🎯 کلید حل مشکل: LTR marks برای جلوگیری از برعکس شدن شماره در RTL
+  return '\u202A' + phone.slice(0, 4) + '\u200C***\u200C' + phone.slice(-4) + '\u202C';
 };
+
+const toPersianDigit = (str) =>
+  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function EditProfileScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth(); // ✅ logout اضافه شد
 
-  // ✅ فقط اطلاعات ضروری: نام + آواتار + شماره
   const [formData, setFormData] = useState({
     name: user?.name || 'مریم حسینی',
     avatarUrl: user?.avatar || 'https://i.pravatar.cc/150?img=5',
   });
-
   const [nameError, setNameError] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({
@@ -45,7 +46,7 @@ export default function EditProfileScreen({ navigation }) {
   });
 
   const updateField = (key, value) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
     if (key === 'name' && nameError) setNameError('');
   };
 
@@ -66,25 +67,28 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const removeAvatar = () => {
-    Alert.alert('حذف عکس پروفایل', 'آیا از حذف عکس پروفایل خود مطمئن هستید؟', [
-      { text: 'انصراف', style: 'cancel' },
-      {
-        text: 'حذف',
-        style: 'destructive',
-        onPress: () => {
-          updateField('avatarUrl', null);
-          setToast({
-            visible: true,
-            message: 'عکس پروفایل حذف شد',
-            type: 'info',
-          });
+    Alert.alert(
+      'حذف عکس پروفایل',
+      'آیا از حذف عکس پروفایل خود مطمئن هستید؟',
+      [
+        { text: 'انصراف', style: 'cancel' },
+        {
+          text: 'حذف',
+          style: 'destructive',
+          onPress: () => {
+            updateField('avatarUrl', null);
+            setToast({
+              visible: true,
+              message: 'عکس پروفایل حذف شد',
+              type: 'info',
+            });
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleSave = () => {
-    // اعتبارسنجی نام
     if (!formData.name.trim()) {
       setNameError('نام و نام خانوادگی الزامی است');
       return;
@@ -93,10 +97,7 @@ export default function EditProfileScreen({ navigation }) {
       setNameError('نام باید حداقل ۳ کاراکتر باشد');
       return;
     }
-
     setLoading(true);
-
-    // شبیه‌سازی ذخیره در سرور
     setTimeout(() => {
       setLoading(false);
       setToast({
@@ -108,12 +109,40 @@ export default function EditProfileScreen({ navigation }) {
     }, 1000);
   };
 
+  // 🎯 هندلر حذف حساب کاربری - با logout واقعی
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      '⚠️ حذف حساب کاربری',
+      'آیا از حذف دائمی حساب کاربری خود مطمئن هستید؟\n\nاین عمل قابل بازگشت نیست و تمامی اطلاعات شما شامل:\n• نوبت‌های رزرو شده\n• علاقه‌مندی‌ها\n• سوابق پرداخت\n• اطلاعات پروفایل\n\nبرای همیشه حذف خواهد شد.',
+      [
+        { text: 'انصراف', style: 'cancel' },
+        {
+          text: 'حذف دائمی حساب',
+          style: 'destructive',
+          onPress: () => {
+            // 🎯 شبیه‌سازی حذف از سرور
+            setTimeout(() => {
+              // 🎯 Toast نمایش بده
+              setToast({
+                visible: true,
+                message: 'حساب کاربری با موفقیت حذف شد',
+                type: 'success',
+              });
+              
+              // 🎯 بعد از ۱.۵ ثانیه، logout کن → خودکار به صفحه لاگین می‌ره
+              setTimeout(() => {
+                logout(); // ✅ این کار isAuthenticated رو false می‌کنه
+                          // RootNavigator در App.js تشخیص میده و AuthNavigator رو نشون میده
+              }, 1500);
+            }, 800);
+          },
+        },
+      ],
+    );
+  };
+
   return (
-    <ScreenWrapper
-      padding={0}
-      edges={['bottom', 'left', 'right']}
-      keyboardAware
-    >
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
@@ -123,7 +152,6 @@ export default function EditProfileScreen({ navigation }) {
         <View style={s.avatarSection}>
           <View style={s.avatarWrapper}>
             <TouchableOpacity onPress={pickAvatar} activeOpacity={0.9}>
-              {/* ✅ استفاده مستقیم از Image برای کنترل کامل */}
               <View
                 style={[
                   s.avatarCircle,
@@ -141,16 +169,10 @@ export default function EditProfileScreen({ navigation }) {
                   />
                 ) : (
                   <View style={s.avatarPlaceholder}>
-                    <Icon
-                      name="person"
-                      size={40}
-                      color={colors.textSecondary}
-                    />
+                    <Icon name="person" size={40} color={colors.textSecondary} />
                   </View>
                 )}
               </View>
-
-              {/* دکمه دوربین */}
               <View
                 style={[
                   s.cameraBtn,
@@ -163,8 +185,6 @@ export default function EditProfileScreen({ navigation }) {
                 <Icon name="photo-camera" size={16} color="#fff" />
               </View>
             </TouchableOpacity>
-
-            {/* دکمه حذف (فقط وقتی عکس وجود دارد) */}
             {formData.avatarUrl && (
               <TouchableOpacity
                 onPress={removeAvatar}
@@ -181,14 +201,9 @@ export default function EditProfileScreen({ navigation }) {
               </TouchableOpacity>
             )}
           </View>
-
-          <Text
-            style={[s.avatarName, { color: colors.textMain }]}
-            numberOfLines={1}
-          >
+          <Text style={[s.avatarName, { color: colors.textMain }]} numberOfLines={1}>
             {formData.name || 'کاربر زیبانو'}
           </Text>
-
           <View style={s.avatarHintRow}>
             <Icon name="info-outline" size={12} color={colors.textSecondary} />
             <Text style={[s.avatarHint, { color: colors.textSecondary }]}>
@@ -202,35 +217,23 @@ export default function EditProfileScreen({ navigation }) {
         {/* ═══════════════ کارت اطلاعات شخصی ═══════════════ */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <View
-              style={[
-                s.sectionIcon,
-                { backgroundColor: colors.primary + '15' },
-              ]}
-            >
+            <View style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}>
               <Icon name="person" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
               اطلاعات شخصی
             </Text>
           </View>
-
           <Card variant="elevated" padding={16} radius={18}>
-            {/* فیلد نام */}
             <Input
               label="نام و نام خانوادگی *"
               placeholder="مثال: مریم حسینی"
               value={formData.name}
-              onChangeText={t => updateField('name', t)}
+              onChangeText={(t) => updateField('name', t)}
               error={nameError}
-              rightIcon={
-                <Icon name="badge" size={20} color={colors.textSecondary} />
-              }
+              rightIcon={<Icon name="badge" size={20} color={colors.textSecondary} />}
             />
 
-            {/* ✅ سایر فیلدها حذف شدند: nickname, bio, email, birthDate */}
-
-            {/* نمایش شماره موبایل */}
             <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>
               شماره موبایل
             </Text>
@@ -244,25 +247,19 @@ export default function EditProfileScreen({ navigation }) {
               ]}
             >
               <View style={s.phoneInfo}>
-                <View
-                  style={[s.phoneIconCircle, { backgroundColor: '#2196F320' }]}
-                >
+                <View style={[s.phoneIconCircle, { backgroundColor: '#2196F320' }]}>
                   <Icon name="smartphone" size={16} color="#2196F3" />
                 </View>
+                {/* 🎯 شماره با LTR marks - مشکل برعکس شدن حل شد */}
                 <Text style={[s.phoneValue, { color: colors.textMain }]}>
                   {toPersianDigit(maskPhone(user?.phone))}
                 </Text>
-                <View
-                  style={[s.verifiedBadge, { backgroundColor: '#43A04720' }]}
-                >
+                <View style={[s.verifiedBadge, { backgroundColor: '#43A04720' }]}>
                   <Icon name="verified" size={10} color="#43A047" />
-                  <Text style={[s.verifiedText, { color: '#43A047' }]}>
-                    تایید شده
-                  </Text>
+                  <Text style={[s.verifiedText, { color: '#43A047' }]}>تایید شده</Text>
                 </View>
               </View>
             </View>
-
             <TouchableOpacity
               style={[
                 s.changePhoneBtn,
@@ -280,21 +277,14 @@ export default function EditProfileScreen({ navigation }) {
               </Text>
               <Icon name="arrow-back" size={16} color={colors.primary} />
             </TouchableOpacity>
-
             <View style={s.phoneHintRow}>
-              <Icon
-                name="info-outline"
-                size={14}
-                color={colors.textSecondary}
-              />
+              <Icon name="info-outline" size={14} color={colors.textSecondary} />
               <Text style={[s.phoneHintText, { color: colors.textSecondary }]}>
                 برای تغییر شماره، کد تایید (OTP) به شماره جدید ارسال خواهد شد
               </Text>
             </View>
           </Card>
         </View>
-
-        {/* ✅ بخش حریم خصوصی کاملاً حذف شد */}
 
         {/* ═══════════════ دکمه ذخیره ═══════════════ */}
         <Button
@@ -310,7 +300,44 @@ export default function EditProfileScreen({ navigation }) {
           style={s.saveBtn}
         />
 
-        {/* ✅ دکمه حذف حساب کاربری از اینجا حذف شد */}
+        {/* ═══════════════ 🆕 ناحیه خطرناک (حذف حساب) ═══════════════ */}
+        <View style={s.dangerSection}>
+          <Card
+            variant="default"
+            padding={0}
+            radius={16}
+            style={[
+              s.dangerCard,
+              { borderColor: '#E5393540', backgroundColor: '#E5393508' },
+            ]}
+          >
+            <View style={s.dangerRow}>
+              <View style={s.dangerInfo}>
+                <View style={[s.dangerIconBox, { backgroundColor: '#E5393520' }]}>
+                  <Icon name="delete-forever" size={22} color="#E53935" />
+                </View>
+                <View style={s.dangerText}>
+                  <Text style={[s.dangerTitle, { color: '#E53935' }]}>
+                    حذف حساب کاربری
+                  </Text>
+                  <Text style={[s.dangerSubtitle, { color: colors.textSecondary }]}>
+                    حذف دائمی حساب و تمامی اطلاعات شما
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={handleDeleteAccount}
+              style={[s.dangerBtn, { borderColor: '#E53935' }]}
+              activeOpacity={0.75}
+            >
+              <Icon name="delete-forever" size={18} color="#E53935" />
+              <Text style={[s.dangerBtnText, { color: '#E53935' }]}>
+                حذف حساب کاربری
+              </Text>
+            </TouchableOpacity>
+          </Card>
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -326,16 +353,12 @@ export default function EditProfileScreen({ navigation }) {
   );
 }
 
-// ✅ نیاز به import Image از react-native
-const { Image } = require('react-native');
-
 const s = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 100,
   },
-
   // ═══════════════ بخش آواتار ═══════════════
   avatarSection: {
     alignItems: 'center',
@@ -352,7 +375,7 @@ const s = StyleSheet.create({
     height: 110,
     borderRadius: 55,
     borderWidth: 3,
-    overflow: 'hidden', // ✅ کلید حل مشکل: clip می‌کند
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -415,7 +438,6 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-
   // ═══════════════ سکشن‌ها ═══════════════
   section: {
     marginBottom: 20,
@@ -438,7 +460,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-
   // ═══════════════ شماره موبایل ═══════════════
   phoneLabel: {
     fontSize: 13,
@@ -487,13 +508,13 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 14,
-    paddingHorizontal:16,
+    paddingHorizontal: 18,
     borderRadius: 12,
     borderWidth: 1.5,
     marginBottom: 8,
   },
   changePhoneText: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: 'Vazir-Bold',
     flex: 1,
     textAlign: 'center',
@@ -510,7 +531,6 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
-
   // ═══════════════ دکمه ذخیره ═══════════════
   saveBtn: {
     marginTop: 8,
@@ -519,5 +539,60 @@ const s = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 6,
+  },
+  // ═══════════════ 🆕 ناحیه خطرناک ═══════════════
+  dangerSection: {
+    marginTop: 24,
+  },
+  dangerCard: {
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    padding: 14,
+    gap: 12,
+  },
+  dangerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  dangerInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    flex: 1,
+  },
+  dangerIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dangerText: {
+    flex: 1,
+    gap: 3,
+  },
+  dangerTitle: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
+  },
+  dangerSubtitle: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    lineHeight: 17,
+  },
+  dangerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    backgroundColor: '#E5393510',
+  },
+  dangerBtnText: {
+    fontSize: 14,
+    fontFamily: 'Vazir-Bold',
   },
 });

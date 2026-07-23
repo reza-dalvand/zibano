@@ -47,7 +47,7 @@ const s = StyleSheet.create({
   statItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
   },
   statIconBox: {
     width: 48,
