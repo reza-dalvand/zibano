@@ -24,7 +24,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { login } = useAuth();
   const { phone } = route.params;
-
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const [currentBox, setCurrentBox] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -56,7 +55,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
 
   const handleChange = (text, index) => {
     const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
-
     if (cleaned.length > 1) {
       const digits = cleaned.slice(0, OTP_LENGTH).split('');
       const newOtp = [...otp];
@@ -69,13 +67,11 @@ export default function OtpVerifyScreen({ navigation, route }) {
       inputRefs.current[nextIndex]?.focus();
       return;
     }
-
     const digit = cleaned[0] || '';
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
     if (error) setError('');
-
     if (digit && index < OTP_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
       setCurrentBox(index + 1);
@@ -89,7 +85,10 @@ export default function OtpVerifyScreen({ navigation, route }) {
     }
   };
 
-  const maskedPhone = phone ? phone.slice(0, 4) + '***' + phone.slice(-4) : '';
+  // ✅ اصلاح شده با LTR marks
+  const maskedPhone = phone 
+    ? '\u202A' + phone.slice(0, 4) + '\u200C***\u200C' + phone.slice(-4) + '\u202C' 
+    : '';
 
   const handleVerify = async () => {
     const code = otp.join('');
@@ -97,25 +96,14 @@ export default function OtpVerifyScreen({ navigation, route }) {
       setError(`لطفاً کد ${OTP_LENGTH} رقمی را کامل وارد کنید`);
       return;
     }
-
     setLoading(true);
     setError('');
     Keyboard.dismiss();
-
     await new Promise(resolve => setTimeout(resolve, 1200));
-
     if (code === MOCK_OTP) {
-      console.log('✅ OTP correct — calling login()');
-
-      // ✅ ترتیب مهمه:
-      // 1. loading رو false کن (state محلی)
-      // 2. login رو صدا بزن (state global در AuthContext)
-      // React این دو رو batch میکنه و در یک render انجام میده
-      // بعد RootNavigator چون isAuthenticated=true شد، AppNavigator رو نشون میده
       setLoading(false);
       login(phone);
     } else {
-      console.log('❌ OTP wrong');
       setError('کد وارد شده صحیح نیست');
       setLoading(false);
     }
@@ -143,7 +131,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
       <Header title="کد تایید" onBackPress={() => navigation.goBack()} />
-
       <View style={[styles.content, { paddingHorizontal: 24 }]}>
         <View
           style={[
@@ -153,7 +140,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
         >
           <Icon name="sms" size={48} color={colors.primary} />
         </View>
-
         <Text style={[styles.title, { color: colors.textMain }]}>
           کد تایید را وارد کنید
         </Text>
@@ -164,7 +150,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
           </Text>{' '}
           را وارد کنید
         </Text>
-
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
             <TextInput
@@ -195,9 +180,7 @@ export default function OtpVerifyScreen({ navigation, route }) {
             />
           ))}
         </View>
-
         {error ? <Text style={styles.error}>{error}</Text> : null}
-
         <View style={styles.resendSection}>
           {canResend ? (
             <TouchableOpacity onPress={handleResend}>
@@ -210,7 +193,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
               ارسال مجدد تا {formatTime(timer)}
             </Text>
           )}
-
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.editPhone}
@@ -221,7 +203,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
         </View>
-
         <Button
           title="تایید و ورود"
           onPress={handleVerify}
@@ -232,7 +213,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
           fullWidth
           style={styles.verifyBtn}
         />
-
         <View
           style={[
             styles.hintBox,
@@ -249,7 +229,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
           </Text>
         </View>
       </View>
-
       <Toast
         visible={toast.visible}
         message={toast.message}

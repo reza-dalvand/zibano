@@ -1,5 +1,5 @@
 // src/screens/profile/support/constants.js
-export const SUPPORT_PHONE = '02191001234';
+export const SUPPORT_PHONE = '09121234567';
 export const SUPPORT_PHONE_DISPLAY = '۰۲۱-۹۱۰۰۱۲۳۴';
 export const SUPPORT_EMAIL = 'support@zibano.app';
 export const SUPPORT_HOURS_SIMPLE = 'شنبه تا پنجشنبه از ساعت ۹ الی ۱۸';
