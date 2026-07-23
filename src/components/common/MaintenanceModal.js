@@ -168,22 +168,6 @@ export default function MaintenanceModal() {
             </Text>
             <Icon name="call" size={14} color={colors.primary} />
           </TouchableOpacity>
-
-          {/* ═══════ هشدار اجباری ═══════ */}
-          <View
-            style={[
-              s.forceWarning,
-              {
-                backgroundColor: '#f4ebeb10',
-                borderColor: '#ebe4e430',
-              },
-            ]}
-          >
-            <Icon name="info" size={22} color="#E53935" />
-            <Text style={[s.forceWarningText, { color: '#202321' }]}>
-             پس از پایان تغییرات اپلیکیشن بصورت خودکار مجدد در دسترس قرار خواهد گرفت.
-            </Text>
-          </View>
         </View>
       </View>
     </Modal>

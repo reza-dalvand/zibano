@@ -61,13 +61,11 @@ export default function App() {
             <BusinessProvider>
               <ReviewProvider>
                 <AppVersionProvider>
-                  {/* 🆕 اضافه کردن MaintenanceProvider */}
                   <MaintenanceProvider>
                     <NavigationContainer>
                       <RootNavigator />
-                      {/* 🆕 مدال تعمیرات - بالاتر از UpdateModal نمایش داده می‌شود */}
-                      <MaintenanceModal />
-                      <UpdateModal />
+                      {/* <MaintenanceModal />
+                      <UpdateModal /> */}
                     </NavigationContainer>
                   </MaintenanceProvider>
                 </AppVersionProvider>

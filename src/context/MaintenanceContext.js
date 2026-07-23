@@ -31,7 +31,7 @@ const MaintenanceContext = createContext(null);
 const MOCK_REMOTE_CONFIG = {
   isMaintenance: true,              // ⚠️ true = حالت تعمیرات فعال (اجباری)
   title: 'در حال بروزرسانی هستیم 🔧',
-  message: 'برای ارائه خدمات بهتر و رفع مشکلات، اپلیکیشن به‌صورت موقت در دست تعمیر است. لطفاً کمی بعد مجدداً مراجعه کنید.',
+  message: 'بعد از انجام تغییرات اپلیکیشن بصورت مجدد در دسترس قرار خواهد گرفت..',
   estimatedEnd: '۱۴۰۳/۰۵/۲۰ - ساعت ۱۸:۰۰',
   reason: 'بروزرسانی سرورها و بهبود عملکرد',
   supportPhone: '۰۲۱-۹۱۰۰۱۲۳۴',
