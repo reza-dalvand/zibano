@@ -1,5 +1,5 @@
 // src/screens/home/HomeScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,11 @@ import HomeFilterModal from '../../components/home/HomeFilterModal';
 import ModelRequestsSection from '../../components/home/ModelRequestsSection';
 import LineRentalSection from '../../components/home/LineRentalSection';
 import SeeAllButton from '../../components/home/SeeAllButton';
+import ReviewModal from '../../components/customer/ReviewModal'; // 🆕
 import { useAuth } from '../../context/AuthContext';
+import { useReview } from '../../context/ReviewContext'; // 🆕
 
-// 🎯 اضافه شدن businessId به هر آگهی
+// 🎯 داده‌های آگهی‌ها با businessId
 const MOCK_ADS = [
   {
     id: 1,
@@ -47,63 +49,89 @@ const MOCK_ADS = [
   },
 ];
 
+// 🎯 داده‌های دسته‌بندی‌ها
 const MOCK_CATEGORIES = [
   {
     id: 1,
     name: 'میکاپ',
     icon: 'face',
     color: '#E91E63',
-    count: getSubServicesForCategory(1).length, // 🎯 ۶ خدمت
+    count: getSubServicesForCategory(1).length,
   },
   {
     id: 2,
     name: 'کاشت ناخن',
     icon: 'brush',
     color: '#9C27B0',
-    count: getSubServicesForCategory(2).length, // 🎯 ۶ خدمت
+    count: getSubServicesForCategory(2).length,
   },
   {
     id: 3,
     name: 'لیزر مو',
     icon: 'flash-on',
     color: '#2196F3',
-    count: getSubServicesForCategory(3).length, // 🎯 ۵ خدمت
+    count: getSubServicesForCategory(3).length,
   },
   {
     id: 4,
     name: 'پاکسازی',
     icon: 'spa',
     color: '#4CAF50',
-    count: getSubServicesForCategory(4).length, // 🎯 ۶ خدمت
+    count: getSubServicesForCategory(4).length,
   },
   {
     id: 5,
     name: 'رنگ مو',
     icon: 'palette',
     color: '#FF9800',
-    count: getSubServicesForCategory(5).length, // 🎯 ۶ خدمت
+    count: getSubServicesForCategory(5).length,
   },
   {
     id: 6,
     name: 'کراتین',
     icon: 'auto-awesome',
     color: '#00BCD4',
-    count: getSubServicesForCategory(6).length, // 🎯 ۵ خدمت
+    count: getSubServicesForCategory(6).length,
   },
   {
     id: 7,
     name: 'مژه',
     icon: 'visibility',
     color: '#795548',
-    count: getSubServicesForCategory(7).length, // 🎯 ۶ خدمت
+    count: getSubServicesForCategory(7).length,
   },
   {
     id: 8,
     name: 'ماساژ',
     icon: 'self-improvement',
     color: '#607D8B',
-    count: getSubServicesForCategory(8).length, // 🎯 ۴ خدمت
+    count: getSubServicesForCategory(8).length,
   },
+];
+
+// 🆕 نوبت‌های انجام‌شده برای نمایش مدال نظردهی
+const MOCK_DONE_APPOINTMENTS = [
+  {
+    id: 'apt_done_1',
+    businessName: 'سالن زیبایی نیلارام',
+    businessLogo: 'https://picsum.photos/100/100?random=21',
+    serviceName: 'فیشیال تخصصی پوست',
+    employeeName: 'سارا احمدی',
+    date: '۱۴۰۳/۰۴/۱۸',
+    time: '۱۰:۳۰',
+    status: 'done',
+  },
+  // می‌توانید نوبت‌های بیشتری اضافه کنید:
+  // {
+  //   id: 'apt_done_2',
+  //   businessName: 'ناخن گالری پریا',
+  //   businessLogo: 'https://picsum.photos/100/100?random=26',
+  //   serviceName: 'کاشت ناخن ژلیش',
+  //   employeeName: 'مریم',
+  //   date: '۱۴۰۳/۰۴/۱۵',
+  //   time: '۱۴:۰۰',
+  //   status: 'done',
+  // },
 ];
 
 function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
@@ -125,17 +153,52 @@ function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { pendingReviews, addPendingReview } = useReview(); // 🆕
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filters, setFilters] = useState({});
+
+  // 🆕 state های مدال نظردهی
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [currentReviewAppointment, setCurrentReviewAppointment] = useState(null);
+
   const hasActiveFilter = Object.values(filters).some(
-    (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0)
+    (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0),
   );
   const notificationCount = 3;
 
-  // 🎯 هندلر کلیک روی آگهی اسلایدر - هدایت به صفحه دیتیل کسب‌وکار
+  // 🆕 اضافه کردن نوبت‌های انجام‌شده به لیست pendingReviews (شبیه‌سازی)
+  // در اپ واقعی، این داده‌ها از API می‌آیند
+  useEffect(() => {
+    MOCK_DONE_APPOINTMENTS.forEach((apt) => {
+      addPendingReview(apt);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 🆕 نمایش خودکار مدال نظردهی وقتی نوبت در انتظار وجود دارد
+  useEffect(() => {
+    if (pendingReviews.length > 0 && !reviewModalVisible) {
+      // تاخیر کوتاه برای اینکه کاربر اول صفحه را ببیند
+      const timer = setTimeout(() => {
+        setCurrentReviewAppointment(pendingReviews[0]);
+        setReviewModalVisible(false); // اینجا رو فعال کن تا مدال نظر سنجی باز بشه 
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingReviews, reviewModalVisible]);
+
+  // 🆕 هندلر بستن مدال نظردهی
+  const handleReviewClose = () => {
+    setReviewModalVisible(false);
+    setCurrentReviewAppointment(null);
+    // اگر نوبت دیگری در صف هست، بعداً نمایش داده می‌شود
+  };
+
+  // 🎯 هندلر کلیک روی آگهی اسلایدر
   const handleAdPress = (ad) => {
     if (ad.businessId) {
       navigation.navigate('BusinessDetails', { businessId: ad.businessId });
@@ -157,13 +220,11 @@ export default function HomeScreen({ navigation }) {
         onFilterPress={() => setFilterModalVisible(true)}
         hasActiveFilter={hasActiveFilter}
       />
+
       <View style={s.bodyContainer}>
         {/* ۱. اسلایدر تبلیغات */}
         <View style={s.section}>
-          <AdSlider
-            ads={MOCK_ADS}
-            onPress={handleAdPress}
-          />
+          <AdSlider ads={MOCK_ADS} onPress={handleAdPress} />
         </View>
 
         {/* ۲. دسته‌بندی خدمات */}
@@ -188,21 +249,32 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* ۳. فرصت‌های مدلینگ - ✅ بدون props (خودش navigation دارد) */}
+        {/* ۳. فرصت‌های مدلینگ */}
         <ModelRequestsSection />
 
-        {/* ۴. فرصت‌های همکاری / اجاره لاین - ✅ بدون props (خودش navigation دارد) */}
+        {/* ۴. فرصت‌های همکاری / اجاره لاین */}
         <LineRentalSection />
       </View>
+
+      {/* مدال اعلان‌ها */}
       <NotificationModal
         visible={notificationModalVisible}
         onClose={() => setNotificationModalVisible(false)}
       />
+
+      {/* مدال فیلتر خانه */}
       <HomeFilterModal
         visible={filterModalVisible}
         onClose={() => setFilterModalVisible(false)}
         onApply={setFilters}
         currentFilters={filters}
+      />
+
+      {/* 🆕 مدال نظردهی پس از انجام نوبت */}
+      <ReviewModal
+        visible={reviewModalVisible}
+        appointment={currentReviewAppointment}
+        onClose={handleReviewClose}
       />
     </ScreenWrapper>
   );

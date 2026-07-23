@@ -10,6 +10,7 @@ import { BusinessProvider } from './src/context/BusinessContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator'; // ✅ import شده
 import ErrorBoundary from './src/components/common/ErrorBoundary';
+import { ReviewProvider } from './src/context/ReviewContext'; // 🆕
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -35,7 +36,7 @@ function RootNavigator() {
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-      {showAuth ? <AuthNavigator /> : <AppNavigator />}
+      {showAuth ? <AppNavigator /> : <AppNavigator />}
     </Animated.View>
   );
 }
@@ -54,9 +55,11 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <BusinessProvider>
-              <NavigationContainer>
-                <RootNavigator />
-              </NavigationContainer>
+              <ReviewProvider> 
+                <NavigationContainer>
+                  <RootNavigator />
+                </NavigationContainer>
+              </ReviewProvider>
             </BusinessProvider>
           </AuthProvider>
         </ThemeProvider>
