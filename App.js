@@ -11,6 +11,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator'; // ✅ import شده
 import ErrorBoundary from './src/components/common/ErrorBoundary';
 import { ReviewProvider } from './src/context/ReviewContext'; // 🆕
+import { AppVersionProvider } from './src/context/AppVersionContext'; // 🆕
+import UpdateModal from './src/components/common/UpdateModal'; // 🆕
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -56,9 +58,12 @@ export default function App() {
           <AuthProvider>
             <BusinessProvider>
               <ReviewProvider> 
-                <NavigationContainer>
-                  <RootNavigator />
-                </NavigationContainer>
+                <AppVersionProvider> 
+                  <NavigationContainer>
+                    <RootNavigator />
+                    <UpdateModal />
+                  </NavigationContainer>
+                </AppVersionProvider>
               </ReviewProvider>
             </BusinessProvider>
           </AuthProvider>
