@@ -15,6 +15,7 @@ import { AppVersionProvider } from './src/context/AppVersionContext'; // 🆕
 import UpdateModal from './src/components/common/UpdateModal'; // 🆕
 import { MaintenanceProvider } from './src/context/MaintenanceContext';
 import MaintenanceModal from './src/components/common/MaintenanceModal';
+import OfflineBanner from './src/components/common/OfflineBanner';
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -62,11 +63,16 @@ export default function App() {
               <ReviewProvider>
                 <AppVersionProvider>
                   <MaintenanceProvider>
-                    <NavigationContainer>
-                      <RootNavigator />
-                      {/* <MaintenanceModal />
-                      <UpdateModal /> */}
-                    </NavigationContainer>
+                    {/* 🆕 اضافه کردن NetworkProvider */}
+                    <NetworkProvider>
+                      <NavigationContainer>
+                        <RootNavigator />
+                        {/* 🆕 بنر آفلاین - بالاتر از همه مدال‌ها */}
+                        <OfflineBanner />
+                        {/* <MaintenanceModal />
+                        <UpdateModal /> */}
+                      </NavigationContainer>
+                    </NetworkProvider>
                   </MaintenanceProvider>
                 </AppVersionProvider>
               </ReviewProvider>
