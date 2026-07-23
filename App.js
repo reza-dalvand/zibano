@@ -13,6 +13,8 @@ import ErrorBoundary from './src/components/common/ErrorBoundary';
 import { ReviewProvider } from './src/context/ReviewContext'; // 🆕
 import { AppVersionProvider } from './src/context/AppVersionContext'; // 🆕
 import UpdateModal from './src/components/common/UpdateModal'; // 🆕
+import { MaintenanceProvider } from './src/context/MaintenanceContext';
+import MaintenanceModal from './src/components/common/MaintenanceModal';
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -57,12 +59,17 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <BusinessProvider>
-              <ReviewProvider> 
-                <AppVersionProvider> 
-                  <NavigationContainer>
-                    <RootNavigator />
-                    <UpdateModal />
-                  </NavigationContainer>
+              <ReviewProvider>
+                <AppVersionProvider>
+                  {/* 🆕 اضافه کردن MaintenanceProvider */}
+                  <MaintenanceProvider>
+                    <NavigationContainer>
+                      <RootNavigator />
+                      {/* 🆕 مدال تعمیرات - بالاتر از UpdateModal نمایش داده می‌شود */}
+                      <MaintenanceModal />
+                      <UpdateModal />
+                    </NavigationContainer>
+                  </MaintenanceProvider>
                 </AppVersionProvider>
               </ReviewProvider>
             </BusinessProvider>
