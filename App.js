@@ -8,7 +8,7 @@ import { ThemeProvider } from './src/theme/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { BusinessProvider } from './src/context/BusinessContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import AuthNavigator from './src/navigation/AuthNavigator'; // ✅ import شده
+import AuthNavigator from './src/navigation/AuthNavigator'; 
 import ErrorBoundary from './src/components/common/ErrorBoundary';
 import { ReviewProvider } from './src/context/ReviewContext'; // 🆕
 import { AppVersionProvider } from './src/context/AppVersionContext'; // 🆕
@@ -16,6 +16,7 @@ import UpdateModal from './src/components/common/UpdateModal'; // 🆕
 import { MaintenanceProvider } from './src/context/MaintenanceContext';
 import MaintenanceModal from './src/components/common/MaintenanceModal';
 import OfflineBanner from './src/components/common/OfflineBanner';
+import { NetworkProvider } from './src/context/NetworkContext';
 
 function RootNavigator() {
   const { isAuthenticated } = useAuth();
