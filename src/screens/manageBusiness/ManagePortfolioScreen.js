@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import EmptyState from '../../components/common/EmptyState';
@@ -16,8 +16,10 @@ import {
 
 export default function ManagePortfolioScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, addPortfolio, updatePortfolio, deletePortfolio } = useBusiness();
-
+  const businessData = useBusinessStore((s) => s.businessData);
+  const addPortfolio = useBusinessStore((s) => s.addPortfolio);
+  const updatePortfolio = useBusinessStore((s) => s.updatePortfolio);
+  const deletePortfolio = useBusinessStore((s) => s.deletePortfolio);
   const [formVisible, setFormVisible] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);

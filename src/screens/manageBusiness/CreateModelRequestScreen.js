@@ -1,16 +1,16 @@
 // src/screens/manageBusiness/CreateModelRequestScreen.js
 import React, { useState } from 'react';
 import { StyleSheet, Alert } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Toast from '../../components/common/Toast';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ModelRequestForm from '../../components/manageBusiness/modelRequest/ModelRequestForm';
 
 export default function CreateModelRequestScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const { businessData } = useBusiness();
+  const businessData = useBusinessStore((s) => s.businessData);
   const existingRequest = route.params?.request || null;
   const isEditMode = !!existingRequest;
 

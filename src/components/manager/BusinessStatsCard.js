@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useTheme} from '../../theme/ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const STATS = [
   {key: 'bookings', label: 'رزرو',    icon: 'event',         color: '#1E88E5'},

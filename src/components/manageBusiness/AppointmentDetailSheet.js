@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import BottomSheet from '../common/BottomSheet';
 import Avatar from '../common/Avatar';
 import Card from '../common/Card';

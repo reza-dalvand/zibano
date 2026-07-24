@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 
 const formatPrice = (num) => `${num.toLocaleString('fa-IR')} تومان`;

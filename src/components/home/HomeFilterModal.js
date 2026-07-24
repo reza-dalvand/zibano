@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import BottomSheet from '../common/BottomSheet';
 import Dropdown from '../common/Dropdown';
 import { PROVINCES, CITIES } from '../../constants/exploreFilters';

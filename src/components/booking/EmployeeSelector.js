@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Avatar from '../common/Avatar';
 
 const ROLE_ICONS = {

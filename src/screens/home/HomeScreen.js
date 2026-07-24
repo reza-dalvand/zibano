@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { getSubServicesForCategory } from '../../constants/categorySubServices';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import HomeHeader from '../../components/home/HomeHeader';
 import AdSlider from '../../components/home/AdSlider';
@@ -18,8 +18,8 @@ import ModelRequestsSection from '../../components/home/ModelRequestsSection';
 import LineRentalSection from '../../components/home/LineRentalSection';
 import SeeAllButton from '../../components/home/SeeAllButton';
 import ReviewModal from '../../components/customer/ReviewModal'; // 🆕
-import { useAuth } from '../../context/AuthContext';
-import { useReview } from '../../context/ReviewContext'; // 🆕
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useReviewStore } from '../../stores/useReviewStore';
 
 // 🎯 داده‌های آگهی‌ها با businessId
 const MOCK_ADS = [
@@ -152,9 +152,9 @@ function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user } = useAuth();
-  const { pendingReviews, addPendingReview } = useReview(); // 🆕
-
+  const user = useAuthStore((s) => s.user);
+  const pendingReviews = useReviewStore((s) => s.pendingReviews);
+  const addPendingReview = useReviewStore((s) => s.addPendingReview);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);

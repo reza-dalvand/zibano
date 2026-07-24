@@ -13,10 +13,10 @@ import {
   Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Avatar from '../common/Avatar';
 import Button from '../common/Button';
-import { useReview } from '../../context/ReviewContext';
+import { useReviewStore } from '../../stores/useReviewStore';
 
 const MAX_COMMENT_LENGTH = 300;
 
@@ -31,7 +31,7 @@ const REVIEW_TAGS = [
 
 export default function ReviewModal({ visible, appointment, onClose }) {
   const { colors } = useTheme();
-  const { submitReview } = useReview();
+  const submitReview = useReviewStore((s) => s.submitReview);
 
   const [selectedTags, setSelectedTags] = useState([]);
   const [comment, setComment] = useState('');

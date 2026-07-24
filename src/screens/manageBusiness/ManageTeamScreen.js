@@ -1,14 +1,16 @@
 // src/screens/manageBusiness/ManageTeamScreen.js
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useBusiness } from '../../context/BusinessContext';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import TeamManagement from '../../components/createbusiness/TeamManagement';
 
 export default function ManageTeamScreen({ navigation }) {
-  const { businessData, addTeamMember, updateTeamMember, deleteTeamMember } =
-    useBusiness();
+  const businessData = useBusinessStore((s) => s.businessData);
+  const addTeamMember = useBusinessStore((s) => s.addTeamMember);
+  const updateTeamMember = useBusinessStore((s) => s.updateTeamMember);
+  const deleteTeamMember = useBusinessStore((s) => s.deleteTeamMember);
 
   const handleChange = updatedTeam => {
     const currentTeam = businessData.team || [];

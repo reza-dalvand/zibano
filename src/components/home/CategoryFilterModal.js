@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import BottomSheet from '../common/BottomSheet';
 import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';

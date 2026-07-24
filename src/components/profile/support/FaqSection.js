@@ -11,7 +11,7 @@ import {
   UIManager,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
 import { FAQ_ITEMS, FAQ_CATEGORIES } from './constants';
 

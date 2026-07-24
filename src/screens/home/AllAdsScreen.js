@@ -1,7 +1,7 @@
 // src/screens/home/AllAdsScreen.js
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import AllAdsHeader from '../../components/home/AllAdsHeader';
 import AllAdsCard from '../../components/home/AllAdsCard';

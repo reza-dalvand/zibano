@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -31,8 +31,8 @@ const toPersianDigit = (str) =>
 
 export default function EditProfileScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user, logout } = useAuth(); // ✅ logout اضافه شد
-
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const [formData, setFormData] = useState({
     name: user?.name || 'مریم حسینی',
     avatarUrl: user?.avatar || 'https://i.pravatar.cc/150?img=5',

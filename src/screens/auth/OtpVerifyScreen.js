@@ -9,8 +9,8 @@ import {
   Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Button from '../../components/common/Button';
@@ -22,7 +22,7 @@ const MOCK_OTP = '12345';
 
 export default function OtpVerifyScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const { login } = useAuth();
+  const login = useAuthStore((s) => s.login);
   const { phone } = route.params;
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const [currentBox, setCurrentBox] = useState(0);

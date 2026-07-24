@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
 
 const toPersianDigit = (str) =>

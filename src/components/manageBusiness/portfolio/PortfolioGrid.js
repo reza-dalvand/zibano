@@ -1,7 +1,7 @@
 // src/components/manageBusiness/portfolio/PortfolioGrid.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import PortfolioCard from './PortfolioCard';
 
 export default function PortfolioGrid({ portfolios, services, onPortfolioPress, onEdit, onDelete }) {

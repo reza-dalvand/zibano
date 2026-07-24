@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Map, Camera, UserLocation } from '@maplibre/maplibre-react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const MAPTILER_KEY = 'L73LG8NW7ZJ9HyUyCEZu';

@@ -6,7 +6,7 @@ import {
   RefreshControl,
   ScrollView,
 } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import EmptyState from '../../components/common/EmptyState';
 import CategoryHeader from '../../components/home/CategoryHeader';

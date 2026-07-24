@@ -6,7 +6,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import BusinessHero from '../../components/home/BusinessHero';
 import BusinessInfoCard from '../../components/home/BusinessInfoCard';

@@ -2,8 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import SearchBar from '../../components/common/SearchBar';
@@ -14,8 +14,9 @@ import ServiceEmptyState from '../../components/manageBusiness/services/ServiceE
 
 export default function ManageServicesScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, updateService, deleteService } = useBusiness();
-  const [searchQuery, setSearchQuery] = useState('');
+  const businessData = useBusinessStore((s) => s.businessData);
+  const updateService = useBusinessStore((s) => s.updateService);
+   const deleteService = useBusinessStore((s) => s.deleteService);  const [searchQuery, setSearchQuery] = useState('');
 
   const services = businessData.services || [];
 

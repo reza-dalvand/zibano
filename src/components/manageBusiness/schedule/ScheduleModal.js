@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import BottomSheet from '../../common/BottomSheet';
 import Button from '../../common/Button';
 import Card from '../../common/Card';

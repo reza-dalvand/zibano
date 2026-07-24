@@ -4,34 +4,35 @@ import { Animated } from 'react-native';
 import BootSplash from 'react-native-bootsplash';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from './src/theme/ThemeContext';
-import { AuthProvider, useAuth } from './src/context/AuthContext';
-import { BusinessProvider } from './src/context/BusinessContext';
+
 import AppNavigator from './src/navigation/AppNavigator';
-import AuthNavigator from './src/navigation/AuthNavigator'; 
+import AuthNavigator from './src/navigation/AuthNavigator';
 import ErrorBoundary from './src/components/common/ErrorBoundary';
-import { ReviewProvider } from './src/context/ReviewContext'; // 🆕
-import { AppVersionProvider } from './src/context/AppVersionContext'; // 🆕
-import UpdateModal from './src/components/common/UpdateModal'; // 🆕
-import { MaintenanceProvider } from './src/context/MaintenanceContext';
-import MaintenanceModal from './src/components/common/MaintenanceModal';
+
+// 🎯 فقط import کردن store ها برای initialization
+import { useAuthStore } from './src/stores/useAuthStore';
+import { useNetworkStore } from './src/stores/useNetworkStore';
+import { useMaintenanceStore } from './src/stores/useMaintenanceStore';
+import { useAppVersionStore } from './src/stores/useAppVersionStore';
+import { useThemeStore } from './src/stores/useThemeStore';
+
+// 🎯 حذف شده - نیازی به OfflineBanner و UpdateModal و MaintenanceModal نیست
+// چون خودشون مستقیماً از store استفاده می‌کنن
 import OfflineBanner from './src/components/common/OfflineBanner';
-import { NetworkProvider } from './src/context/NetworkContext';
 
 function RootNavigator() {
-  const { isAuthenticated } = useAuth();
+  // 🎯 دسترسی مستقیم به store
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const [showAuth, setShowAuth] = React.useState(!isAuthenticated);
 
   useEffect(() => {
-    // fade out
     Animated.timing(fadeAnim, {
       toValue: 0,
       duration: 200,
       useNativeDriver: true,
     }).start(() => {
       setShowAuth(!isAuthenticated);
-      // fade in
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 200,
@@ -42,44 +43,43 @@ function RootNavigator() {
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-      {showAuth ? <AppNavigator /> : <AppNavigator />}
+      {showAuth ? <AppNavigator /> : <AuthNavigator />}
     </Animated.View>
   );
 }
 
 export default function App() {
+  // 🎯 Initialization یک‌باره
   useEffect(() => {
+    const netSub = useNetworkStore.getState().init();
+    const themeSub = useThemeStore.getState().initSystemListener();
+    const appSub1 = useMaintenanceStore.getState().initAppStateListener();
+    const appSub2 = useAppVersionStore.getState().initAppStateListener();
+
+    useMaintenanceStore.getState().checkMaintenance();
+    useAppVersionStore.getState().checkForUpdate();
+
     const init = async () => {};
     init().finally(async () => {
       await BootSplash.hide({ fade: true });
     });
+
+    return () => {
+      netSub?.remove?.();
+      themeSub?.();
+      appSub1?.remove?.();
+      appSub2?.remove?.();
+    };
   }, []);
 
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <BusinessProvider>
-              <ReviewProvider>
-                <AppVersionProvider>
-                  <MaintenanceProvider>
-                    {/* 🆕 اضافه کردن NetworkProvider */}
-                    <NetworkProvider>
-                      <NavigationContainer>
-                        <RootNavigator />
-                        {/* 🆕 بنر آفلاین - بالاتر از همه مدال‌ها */}
-                        <OfflineBanner />
-                        {/* <MaintenanceModal />
-                        <UpdateModal /> */}
-                      </NavigationContainer>
-                    </NetworkProvider>
-                  </MaintenanceProvider>
-                </AppVersionProvider>
-              </ReviewProvider>
-            </BusinessProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        {/* 🎯 بدون هیچ Provider ای! */}
+        <NavigationContainer>
+          <RootNavigator />
+          <OfflineBanner />
+        </NavigationContainer>
       </SafeAreaProvider>
     </ErrorBoundary>
   );

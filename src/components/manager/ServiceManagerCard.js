@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, Switch, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useTheme} from '../theme/ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const ServiceManagerCard = ({service, onToggle, onEdit}) => {
   const {colors} = useTheme();

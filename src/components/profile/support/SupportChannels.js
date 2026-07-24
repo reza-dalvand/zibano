@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import { SUPPORT_CHANNELS } from './constants';
 
 export default function SupportChannels() {

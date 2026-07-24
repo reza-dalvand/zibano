@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Card from '../../common/Card';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 
 export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }) {
   const { colors } = useTheme();

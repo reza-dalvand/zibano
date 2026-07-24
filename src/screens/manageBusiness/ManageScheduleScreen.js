@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import EmptyState from '../../components/common/EmptyState';
@@ -35,7 +35,8 @@ const formatDuration = (minutes) => {
 
 export default function ManageScheduleScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, updateSchedule } = useBusiness();
+  const businessData = useBusinessStore((s) => s.businessData);
+  const updateSchedule = useBusinessStore((s) => s.updateSchedule);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });

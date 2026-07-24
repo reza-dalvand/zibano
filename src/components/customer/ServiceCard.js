@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import {useTheme} from './ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const ServiceCard = ({service, onPress}) => {
   const {colors} = useTheme();

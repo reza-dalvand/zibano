@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ScrollView, Share, Alert, StyleSheet, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';

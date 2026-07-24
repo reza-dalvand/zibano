@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Share, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import Button from '../../common/Button';
 import QRCodeSection from './QRCodeSection';
 

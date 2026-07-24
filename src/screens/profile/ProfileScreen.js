@@ -9,21 +9,21 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Button from '../../components/common/Button';
-import { useAuth } from '../../context/AuthContext';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileStatsCard from '../../components/profile/ProfileStatsCard';
 import ProfileMenuList from '../../components/profile/ProfileMenuList';
 import ThemeToggleItem from '../../components/profile/ThemeToggleItem';
 import Toast from '../../components/common/Toast';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 export default function ProfileScreen({ navigation }) {
   // ═══════════ همه Hook‌ها در ابتدا ═══════════
   const { colors, resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-  const { logout } = useAuth();
+  const { logout } = useAuthStore();
   const [toast, setToast] = useState({
     visible: false,
     message: '',

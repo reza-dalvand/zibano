@@ -2,17 +2,16 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Card from '../../components/common/Card';
-import { useBusiness } from '../../context/BusinessContext';
-import BookingLinkCard from '../../components/manageBusiness/bookingLink/BookingLinkCard';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';import BookingLinkCard from '../../components/manageBusiness/bookingLink/BookingLinkCard';
 // import ShareBookingLinkModal from '../../components/manageBusiness/bookingLink/ShareBookingLinkModal';
 
 export default function BookingLinkScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData } = useBusiness();
+  const businessData = useBusinessStore((s) => s.businessData);
   const [shareModalVisible, setShareModalVisible] = useState(false);
 
   // تولید لینک اختصاصی (در آینده از API)

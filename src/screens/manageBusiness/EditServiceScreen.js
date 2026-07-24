@@ -4,8 +4,8 @@ import {
   View, Text, StyleSheet, ScrollView, Switch, Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Input from '../../components/common/Input';
@@ -58,8 +58,8 @@ const formatPriceInput = (text) => {
 
 export default function EditServiceScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const { addService, updateService } = useBusiness();
-
+  const addService = useBusinessStore((s) => s.addService);
+  const updateService = useBusinessStore((s) => s.updateService);
   const existingService = route.params?.service || null;
   const isEditMode = !!existingService;
 

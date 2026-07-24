@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -20,7 +20,7 @@ const toPersianDigit = str =>
 
 export default function InviteFriendsScreen() {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const user = useAuthStore((s) => s.user);
   const [copied, setCopied] = useState(false);
 
   const referralCode = 'ZIBANO-' + (user?.phone?.slice(-4) || '0000');

@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Alert } from 'react-native';
 import Card from '../../common/Card';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useTheme } from '../../../stores/useThemeStore';
 import { TX_STATUS_META, formatPrice, toPersianDigit } from './constants';
 
 export default function TransactionItem({ tx, onPress }) {

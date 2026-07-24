@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, Switch, StyleSheet} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const DAYS = [
   {key: 'sat', label: 'شنبه'},

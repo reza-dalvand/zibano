@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Chip from '../common/Chip';
 import { PROVINCES, CITIES, MIN_RATINGS } from '../../constants/exploreFilters';
 

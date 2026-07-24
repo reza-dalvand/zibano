@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useTheme} from '../../theme/ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const STATUS = {
   pending:   {label: 'در انتظار', color: '#FFA000', icon: 'schedule'},

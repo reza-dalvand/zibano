@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useTheme } from '../../theme/ThemeContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Input from '../../components/common/Input';
@@ -35,8 +35,9 @@ const CATEGORIES = [
 
 export default function BusinessSettingsScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData, updateBusinessInfo, deleteBusiness } = useBusiness();
-
+  const businessData = useBusinessStore((s) => s.businessData);
+  const updateBusinessInfo = useBusinessStore((s) => s.updateBusinessInfo);
+  const deleteBusiness = useBusinessStore((s) => s.deleteBusiness);
   const [formData, setFormData] = useState({
     name: '',
     categoryId: null,

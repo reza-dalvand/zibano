@@ -7,14 +7,14 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
 import EmptyState from '../../components/common/EmptyState';
-import { useAuth } from '../../context/AuthContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 
 import {
   FinancialStatsCards,
@@ -30,8 +30,8 @@ import {
 
 export default function FinancialManagementScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user } = useAuth();
-  const { businessData } = useBusiness();
+  const user = useAuthStore((s) => s.user);
+  const businessData = useBusinessStore((s) => s.businessData);
 
   // state‌های اصلی
   const [transactions] = useState(MOCK_TRANSACTIONS);

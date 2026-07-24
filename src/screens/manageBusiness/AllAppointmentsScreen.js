@@ -1,7 +1,7 @@
 // src/screens/manageBusiness/AllAppointmentsScreen.js
 import React, { useState, useMemo } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';

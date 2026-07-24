@@ -1,21 +1,14 @@
 // src/components/common/MaintenanceModal.js
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  Linking,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useMaintenance } from '../../context/MaintenanceContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useMaintenanceStore } from '../../stores/useMaintenanceStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function MaintenanceModal() {
   const { colors } = useTheme();
-  const { maintenanceInfo } = useMaintenance();
+  const maintenanceInfo = useMaintenanceStore((s) => s.maintenanceInfo);
 
   if (!maintenanceInfo) return null;
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useTheme} from './ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 // status: 'available' | 'booked' | 'selected'
 const BookingTimeSlot = ({time, status = 'available', onPress}) => {

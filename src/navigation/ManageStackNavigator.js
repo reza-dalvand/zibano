@@ -1,7 +1,7 @@
 // src/navigation/ManageStackNavigator.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../stores/useThemeStore';
 import Header from '../components/common/Header';
 
 // صفحات موجود

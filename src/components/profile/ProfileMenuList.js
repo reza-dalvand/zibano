@@ -1,7 +1,7 @@
 // src/components/profile/ProfileMenuList.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import ProfileMenuCard from './ProfileMenuCard';
 
 export default function ProfileMenuList({ title, items, onItemPress }) {

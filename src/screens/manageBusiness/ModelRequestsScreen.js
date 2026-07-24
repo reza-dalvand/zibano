@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Toast from '../../components/common/Toast';
-import { useBusiness } from '../../context/BusinessContext';
 import ModelRequestCard from '../../components/manageBusiness/modelRequest/ModelRequestCard';
 import ModelRequestEmptyState from '../../components/manageBusiness/modelRequest/ModelRequestEmptyState';
 import ModelRequestStats from '../../components/manageBusiness/modelRequest/ModelRequestStats';
@@ -59,7 +59,7 @@ const MOCK_MODEL_REQUESTS = [
 
 export default function ModelRequestsScreen({ navigation }) {
   const { colors } = useTheme();
-  const { businessData } = useBusiness();
+  const businessData = useBusinessStore((s) => s.businessData);
   const [requests, setRequests] = useState(MOCK_MODEL_REQUESTS);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 

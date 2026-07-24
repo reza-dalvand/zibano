@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useTheme} from './ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const TeamMemberCard = ({member, isSelected, onPress}) => {
   const {colors} = useTheme();

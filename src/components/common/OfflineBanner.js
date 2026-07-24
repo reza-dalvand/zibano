@@ -3,8 +3,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../theme/ThemeContext';
-import { useNetwork } from '../../context/NetworkContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useNetworkStore } from '../../stores/useNetworkStore';
+import { useShallow } from 'zustand/react/shallow';
 
 const CONNECTION_LABELS = {
   wifi: 'وای‌فای',
@@ -23,7 +24,15 @@ export default function OfflineBanner() {
     connectionType,
     showOfflineBanner,
     dismissBanner,
-  } = useNetwork();
+  } = useNetworkStore(
+    useShallow((s) => ({
+    isConnected: s.isConnected,
+    isInternetReachable: s.isInternetReachable,
+    connectionType: s.connectionType,
+    showOfflineBanner: s.showOfflineBanner,
+    dismissBanner: s.dismissBanner,
+    }))
+  );
 
   // فقط وقتی بنر را نشان بده که واقعاً قطع باشد
   const isOffline = !isConnected || isInternetReachable === false;

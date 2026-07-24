@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
@@ -25,7 +25,7 @@ const NAVBAR_HEIGHT = 90;
 
 export default function CreateBusinessScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const user = useAuthStore((s) => s.user);
   const insets = useSafeAreaInsets();
 
   const [termsAccepted, setTermsAccepted] = useState(false);

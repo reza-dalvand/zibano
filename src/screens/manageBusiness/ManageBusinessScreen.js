@@ -8,13 +8,13 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import StarRating from '../../components/common/StarRating';
-import { useAuth } from '../../context/AuthContext';
-import { useBusiness } from '../../context/BusinessContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useBusinessStore } from '../../stores/useBusinessStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ============ دیتای موقت کسب‌وکار ============
@@ -33,8 +33,8 @@ const toPersianDigit = str =>
 
 export default function ManageBusinessScreen({ navigation }) {
   const { colors } = useTheme();
-  const { user } = useAuth();
-  const { businessData } = useBusiness();
+  const user = useAuthStore((s) => s.user);
+  const businessData = useBusinessStore((s) => s.businessData);
   const insets = useSafeAreaInsets();
 
   const [currentGreeting, setCurrentGreeting] = useState('');

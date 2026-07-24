@@ -1,18 +1,10 @@
 // src/components/common/UpdateModal.js
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  Linking,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
-import { useAppVersion } from '../../context/AppVersionContext';
+import { useTheme } from '../../stores/useThemeStore';
+import { useAppVersionStore } from '../../stores/useAppVersionStore';
+import { useShallow } from 'zustand/react/shallow';
 
 const toPersianDigit = (str) =>
   String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -32,8 +24,13 @@ const SUPPORT_PHONE = '02191001234';
 
 export default function UpdateModal() {
   const { colors } = useTheme();
-  const { updateInfo, dismissOptionalUpdate, openStore } = useAppVersion();
-
+  const { updateInfo, dismissOptionalUpdate, openStore } = useAppVersionStore(
+    useShallow((s) => ({
+      updateInfo: s.updateInfo,
+      dismissOptionalUpdate: s.dismissOptionalUpdate,
+      openStore: s.openStore,
+    }))
+  );
   if (!updateInfo) return null;
 
   const isForce = updateInfo.isForceUpdate;

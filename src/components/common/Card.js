@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 
 /**
  * variant: 'default' | 'flat' | 'elevated'

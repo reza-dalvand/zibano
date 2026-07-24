@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import BottomSheet from '../../components/common/BottomSheet';
 import Button from '../../components/common/Button';
 import BookingDateSelector from '../../components/booking/BookingDateSelector';

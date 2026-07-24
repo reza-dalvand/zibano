@@ -1,7 +1,7 @@
 // src/components/explore/ActiveFilterChips.js
 import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Chip from '../common/Chip';
 import { PROVINCES, CITIES, BUSINESS_TYPES } from '../../constants/exploreFilters';
 

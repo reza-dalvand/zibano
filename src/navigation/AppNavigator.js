@@ -2,7 +2,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ExploreScreen from '../screens/explore/ExploreScreen';
 import CreateBusinessScreen from '../screens/createBusiness/CreateBusinessScreen';

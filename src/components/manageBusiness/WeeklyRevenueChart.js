@@ -1,7 +1,7 @@
 // src/components/manager/WeeklyRevenueChart.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Card from '../common/Card';
 
 const formatNumber = (num) => num.toLocaleString('fa-IR');

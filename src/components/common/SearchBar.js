@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function SearchBar({

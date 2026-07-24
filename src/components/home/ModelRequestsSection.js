@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme } from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 import { useNavigation } from '@react-navigation/native'; // 🆕
 import ModelRequestCard from './ModelRequestCard';
 import SeeAllButton from './SeeAllButton';

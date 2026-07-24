@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useTheme} from '../../theme/ThemeContext';
+import { useTheme } from '../../stores/useThemeStore';
 
 const ExplorePostCard = ({post, onPress, onSave}) => {
   const {colors} = useTheme();

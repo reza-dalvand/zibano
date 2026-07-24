@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
-import {useTheme} from './ThemeContext';
+import {useTheme} from '../../stores/useThemeStore';
 
 const PaymentSummary = ({items, discount = 0, total}) => {
   const {colors} = useTheme();
