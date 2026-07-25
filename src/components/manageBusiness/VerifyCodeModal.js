@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import Avatar from '../common/Avatar';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 
 
 const CODE_LENGTH = 4; // ✅ تغییر از 6 به 4
