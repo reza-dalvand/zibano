@@ -20,21 +20,7 @@ import Card from '../../components/common/Card';
 import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
-
-const SERVICE_TYPES = [
-  { id: 'facial', label: 'فیشیال و پاکسازی پوست' },
-  { id: 'nail', label: 'کاشت و طراحی ناخن' },
-  { id: 'hair_color', label: 'رنگ و مش مو' },
-  { id: 'keratin', label: 'کراتین و احیای مو' },
-  { id: 'laser', label: 'لیزر موهای زائد' },
-  { id: 'makeup', label: 'میکاپ و گریم' },
-  { id: 'eyelash', label: 'کاشت مژه و ابرو' },
-  { id: 'waxing', label: 'اپیلاسیون' },
-  { id: 'massage', label: 'ماساژ' },
-  { id: 'tattoo', label: 'تتو و هاشور' },
-  { id: 'skincare', label: 'مراقبت پوست' },
-  { id: 'other', label: 'سایر' },
-];
+import { SERVICE_TYPES } from '../../constants';
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;

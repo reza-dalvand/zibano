@@ -8,19 +8,14 @@ import Avatar from '../common/Avatar';
 import Card from '../common/Card';
 import Divider from '../common/Divider';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { APPOINTMENT_STATUS_META } from '../../constants/meta';
 
-const STATUS_META = {
-  reserved: { label: 'رزرو شده', color: '#2196F3', icon: 'event-available', bg: '#2196F320' },
-  cancelled_by_salon: { label: 'لغو توسط سالن', color: '#E53935', icon: 'cancel', bg: '#E5393520' },
-  done: { label: 'انجام شده', color: '#43A047', icon: 'task-alt', bg: '#43A04720' },
-};
 
 // 🎯 پروپ‌های اکشن حذف شدند
 export default function AppointmentDetailSheet({ visible, appointment, onClose }) {
   const { colors } = useTheme();
   if (!appointment) return null;
-
-  const meta = STATUS_META[appointment.status] || STATUS_META.reserved;
+  const meta = APPOINTMENT_STATUS_META[appointment.status] || APPOINTMENT_STATUS_META.reserved;
   const isCancelledBySalon = appointment.status === 'cancelled_by_salon';
   const isDone = appointment.status === 'done';
   const isReserved = appointment.status === 'reserved';

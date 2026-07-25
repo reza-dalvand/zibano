@@ -17,6 +17,7 @@ import Avatar from '../../components/common/Avatar';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { APPOINTMENT_STATUS_META } from '../../constants/meta';
 
 
 // ⏱️ زمان بین دریافت مجدد کد (۵ دقیقه = ۳۰۰ ثانیه)
@@ -103,26 +104,6 @@ const MOCK_APPOINTMENTS = [
   },
 ];
 
-const STATUS_META = {
-  reserved: {
-    label: 'رزرو',
-    color: '#2196F3',
-    icon: 'event-available',
-    gradient: ['#2196F3', '#1976D2'],
-  },
-  done: {
-    label: 'انجام شده',
-    color: '#43A047',
-    icon: 'task-alt',
-    gradient: ['#43A047', '#2E7D32'],
-  },
-  cancelled_by_salon: {
-    label: 'لغو توسط سالن',
-    color: '#E53935',
-    icon: 'cancel',
-    gradient: ['#E53935', '#C62828'],
-  },
-};
 
 // ⏲️ کامپوننت تایمر و کد تایید نوبت
 function VerificationCodeCard({ appointment, colors, onToast }) {
@@ -289,7 +270,7 @@ export default function AppointmentsScreen({ navigation }) {
   );
 
   const renderAppointment = apt => {
-    const meta = STATUS_META[apt.status] || STATUS_META.reserved;
+    const meta = APPOINTMENT_STATUS_META[appointment.status] || APPOINTMENT_STATUS_META.reserved;
     const showVerificationCard =
       apt.isUpcoming && apt.status === 'reserved' && apt.verificationCode;
 

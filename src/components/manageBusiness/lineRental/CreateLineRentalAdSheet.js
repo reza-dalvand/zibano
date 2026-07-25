@@ -16,86 +16,12 @@ import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Dropdown from '../../common/Dropdown';
 import Card from '../../common/Card';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { toPersianDigit } from '../../../utils/numberUtils';
+import { SERVICE_TYPES } from '../../../constants';
+import { COLLAB_TYPES, LIMITS } from '../../../constants/collabTypes';
 
-const SERVICE_TYPES = [
-  {
-    id: 'facial',
-    label: 'فیشیال و پاکسازی پوست',
-    icon: 'face-retouching-natural',
-    color: '#C2185B',
-  },
-  { id: 'nail', label: 'کاشت و طراحی ناخن', icon: 'brush', color: '#7B1FA2' },
-  {
-    id: 'hair_color',
-    label: 'رنگ و مش مو',
-    icon: 'auto-awesome',
-    color: '#0277BD',
-  },
-  {
-    id: 'keratin',
-    label: 'کراتین و احیای مو',
-    icon: 'flare',
-    color: '#E65100',
-  },
-  { id: 'laser', label: 'لیزر موهای زائد', icon: 'flash-on', color: '#00838F' },
-  { id: 'makeup', label: 'میکاپ و گریم', icon: 'palette', color: '#AD1457' },
-  {
-    id: 'eyelash',
-    label: 'کاشت مژه و ابرو',
-    icon: 'visibility',
-    color: '#4527A0',
-  },
-  { id: 'waxing', label: 'اپیلاسیون', icon: 'spa', color: '#2E7D32' },
-  { id: 'massage', label: 'ماساژ', icon: 'self-improvement', color: '#558B2F' },
-  { id: 'tattoo', label: 'تتو و هاشور', icon: 'edit', color: '#D84315' },
-  {
-    id: 'skincare',
-    label: 'مراقبت پوست',
-    icon: 'water-drop',
-    color: '#00695C',
-  },
-  {
-    id: 'hair_cut',
-    label: 'کوتاهی و حالت مو',
-    icon: 'content-cut',
-    color: '#5D4037',
-  },
-  { id: 'bridal', label: 'خدمات عروس', icon: 'diamond', color: '#880E4F' },
-  {
-    id: 'hair_extensions',
-    label: 'اکستنشن مو',
-    icon: 'extension',
-    color: '#4E342E',
-  },
-  { id: 'other', label: 'سایر خدمات', icon: 'more-horiz', color: '#455A64' },
-];
 
-const COLLAB_TYPES = [
-  {
-    id: 'percent',
-    label: 'درصدی',
-    icon: 'pie-chart',
-    color: '#9C27B0',
-    hint: 'تقسیم درآمد با درصد توافقی',
-  },
-  {
-    id: 'fixed',
-    label: 'اجاره ثابت',
-    icon: 'attach-money',
-    color: '#2196F3',
-    hint: 'مبلغ ثابت ماهانه + رهن (اختیاری)',
-  },
-  {
-    id: 'hourly',
-    label: 'ساعتی',
-    icon: 'schedule',
-    color: '#FF9800',
-    hint: 'به ازای هر ساعت',
-  },
-];
-
-const MAX_DESC_LENGTH = 300;
+const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 
 const toEnglishDigits = str =>
   String(str || '')

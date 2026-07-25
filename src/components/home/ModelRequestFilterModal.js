@@ -8,6 +8,8 @@ import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';
 import Chip from '../common/Chip';
 import Divider from '../common/Divider';
+import { SERVICE_TYPES } from '../../constants';
+
 
 // 🎯 نوع هزینه - ۳ گزینه اصلی
 const COST_TYPES = [
@@ -17,18 +19,6 @@ const COST_TYPES = [
   { id: 'paid', label: 'با هزینه', icon: 'attach-money', color: '#2196F3' },
 ];
 
-// 🎯 نوع خدمت
-const SERVICE_TYPES = [
-  { id: 'all', label: 'همه خدمات' },
-  { id: 'facial', label: 'فیشیال و پوست' },
-  { id: 'nail', label: 'کاشت ناخن' },
-  { id: 'hair', label: 'رنگ و لایت مو' },
-  { id: 'keratin', label: 'کراتین و احیا' },
-  { id: 'laser', label: 'لیزر' },
-  { id: 'makeup', label: 'میکاپ و گریم' },
-  { id: 'eyelash', label: 'کاشت مژه' },
-  { id: 'massage', label: 'ماساژ' },
-];
 
 export default function ModelRequestFilterModal({
   visible,

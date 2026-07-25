@@ -5,8 +5,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
 import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { LIMITS } from '../../../constants/collabTypes';
 
-const MAX_DESC_LENGTH = 300;
+const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 
 const COLLAB_TYPE_META = {
   percent: { label: 'درصدی', color: '#9C27B0', bg: '#9C27B018', icon: 'pie-chart' },

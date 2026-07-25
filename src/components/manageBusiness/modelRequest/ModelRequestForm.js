@@ -8,14 +8,15 @@ import Input from '../../common/Input';
 import Dropdown from '../../common/Dropdown';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { toPersianDigit } from '../../../utils/numberUtils';
+import { LIMITS } from '../../../constants/collabTypes';
 
 const toEnglishDigits = (str) =>
   String(str || '')
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const MAX_DESC_LENGTH = 300;
+const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 
 // 🎯 ۳ گزینه هزینه
 const COST_TYPE_OPTIONS = [

@@ -8,29 +8,12 @@ import Dropdown from '../common/Dropdown';
 import Button from '../common/Button';
 import Chip from '../common/Chip';
 import Divider from '../common/Divider';
+import { SERVICE_TYPES } from '../../constants';
+import { COLLAB_TYPES, LIMITS } from '../../constants/collabTypes';
 
-// 🎯 نوع همکاری
-const COLLAB_TYPES = [
-  { id: 'all', label: 'همه', icon: 'apps', color: '#607D8B' },
-  { id: 'percent', label: 'درصدی', icon: 'pie-chart', color: '#9C27B0' },
-  { id: 'fixed', label: 'اجاره ثابت', icon: 'attach-money', color: '#2196F3' },
-  { id: 'hourly', label: 'ساعتی', icon: 'schedule', color: '#FF9800' },
-];
 
-// 🎯 نوع خدمت
-const SERVICE_TYPES = [
-  { id: 'all', label: 'همه خدمات' },
-  { id: 'facial', label: 'فیشیال و پوست' },
-  { id: 'nail', label: 'کاشت ناخن' },
-  { id: 'hair_color', label: 'رنگ و لایت مو' },
-  { id: 'keratin', label: 'کراتین و احیا' },
-  { id: 'laser', label: 'لیزر' },
-  { id: 'makeup', label: 'میکاپ و گریم' },
-  { id: 'eyelash', label: 'کاشت مژه' },
-  { id: 'massage', label: 'ماساژ' },
-  { id: 'hair_cut', label: 'کوتاهی مو' },
-  { id: 'bridal', label: 'خدمات عروس' },
-];
+
+
 
 export default function LineRentalFilterModal({
   visible,

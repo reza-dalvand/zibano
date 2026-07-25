@@ -9,7 +9,8 @@ import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 import { truncateText } from '../../../utils/stringUtils';
 import { LIMITS } from '../../../constants/collabTypes';
 
-const MAX_DESC_LENGTH = 300;
+const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
+
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '—';
