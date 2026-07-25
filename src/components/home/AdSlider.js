@@ -14,12 +14,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import SeeAllButton from './SeeAllButton';
 import { useNavigation } from '@react-navigation/native';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
 const CARD_SPACING = 10;
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 }) {
   const { colors } = useTheme();

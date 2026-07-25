@@ -15,6 +15,7 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Toast from '../../components/common/Toast';
+import { validatePhone } from '../../utils/phoneUtils';
 
 export default function LoginScreen({ navigation }) {
   const { colors } = useTheme();
@@ -24,11 +25,6 @@ export default function LoginScreen({ navigation }) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-  const validatePhone = (value) => {
-    const cleaned = value.replace(/[^0-9]/g, '');
-    const regex = /^09[0-9]{9}$/;
-    return regex.test(cleaned);
-  };
 
   const handleChange = (text) => {
     const cleaned = text.replace(/[^0-9]/g, '');

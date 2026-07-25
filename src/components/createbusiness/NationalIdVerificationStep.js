@@ -6,30 +6,18 @@ import { useTheme } from '../../stores/useThemeStore';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import Card from '../common/Card';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { validateNationalId } from '../../utils/validators';
+import { maskPhone } from '../../utils/phoneUtils';
 
 const toEnglishDigits = (str) =>
   String(str)
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const toPersianDigits = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
 // 🎯 کد ملی ۱۰ رقمی برای تست
 const TEST_NATIONAL_ID = '0012345679';
 
-const validateNationalId = (code) => {
-  const cleaned = toEnglishDigits(code).replace(/[^0-9]/g, '');
-  if (cleaned.length !== 10) return false;
-  if (/^(\d)\1{9}$/.test(cleaned)) return false;
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    sum += parseInt(cleaned[i], 10) * (10 - i);
-  }
-  const remainder = sum % 11;
-  const checkDigit = parseInt(cleaned[9], 10);
-  return remainder < 2 ? checkDigit === remainder : checkDigit === 11 - remainder;
-};
 
 const verifyNationalIdWithPhone = async (nationalId, phone) => {
   try {
@@ -70,11 +58,6 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
   } catch (error) {
     return { success: false, message: 'خطا در برقراری ارتباط با سامانه استعلام' };
   }
-};
-
-const maskPhone = (phone) => {
-  if (!phone || phone.length < 11) return phone || '';
-  return '\u202A' + phone.slice(0, 4) + '***' + phone.slice(-4) + '\u202C';
 };
 
 export default function NationalIdVerificationStep({
@@ -194,7 +177,7 @@ export default function NationalIdVerificationStep({
         <Text style={[s.inputLabel, { color: colors.textMain }]}>کد ملی مدیر کسب‌وکار</Text>
         <Input
           placeholder="مثال: ۰۰۱۲۳۴۵۶۷۸۹"
-          value={toPersianDigits(nationalId)}
+          value={toPersianDigit(nationalId)}
           onChangeText={handleNationalIdChange}
           keyboardType="numeric"
           maxLength={10}
@@ -211,7 +194,7 @@ export default function NationalIdVerificationStep({
               </Text>
               {nationalId.length > 0 && nationalId.length < 10 && (
                 <Text style={[s.hintCalcText, { color: '#FFA000' }]}>
-                  {toPersianDigits(nationalId.length)} از ۱۰ رقم وارد شده
+                  {toPersianDigit(nationalId.length)} از ۱۰ رقم وارد شده
                 </Text>
               )}
               {nationalId.length === 10 && !isTestMode && (
@@ -312,7 +295,7 @@ export default function NationalIdVerificationStep({
         <Text style={[s.hintText, { color: colors.textSecondary }]}>
           برای تست سریع، از کد ملی{' '}
           <Text style={{ color: colors.primary, fontFamily: 'Vazir-Bold' }}>
-            {toPersianDigits(TEST_NATIONAL_ID)}
+            {toPersianDigit(TEST_NATIONAL_ID)}
           </Text>{' '}
           استفاده کنید. این کد همیشه با هر شماره ثبت‌نام شده‌ای تطابق پیدا می‌کند.
         </Text>

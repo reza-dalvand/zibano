@@ -15,14 +15,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.94;
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.88;
 const GALLERY_HEIGHT = MODAL_HEIGHT * 0.42;
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function PortfolioDetailModal({
   visible,

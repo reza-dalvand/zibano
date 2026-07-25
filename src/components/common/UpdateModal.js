@@ -5,9 +5,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import { useAppVersionStore } from '../../stores/useAppVersionStore';
 import { useShallow } from 'zustand/react/shallow';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 // 🎯 آیکون مناسب برای هر نوع تغییر
 const CHANGE_ICON_MAP = {

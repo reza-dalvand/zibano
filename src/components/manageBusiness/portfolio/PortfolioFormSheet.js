@@ -16,11 +16,11 @@ import BottomSheet from '../../common/BottomSheet';
 import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Dropdown from '../../common/Dropdown';
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+
 
 const MAX_DESCRIPTION_LENGTH = 300;
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function PortfolioFormSheet({ visible, onClose, onSave, editingPortfolio, services }) {
   const { colors } = useTheme();

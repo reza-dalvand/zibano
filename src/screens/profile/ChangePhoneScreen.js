@@ -15,6 +15,8 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { validatePhone } from '../../utils/phoneUtils';
 
 const OTP_LENGTH = 5;
 const RESEND_SECONDS = 60;
@@ -25,10 +27,6 @@ const toEnglishDigits = str =>
     .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const validatePhone = v => /^09[0-9]{9}$/.test(v.replace(/[^0-9]/g, ''));
 
 export default function ChangePhoneScreen({ navigation }) {
   const { colors } = useTheme();

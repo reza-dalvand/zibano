@@ -16,6 +16,8 @@ import { useTheme } from '../../stores/useThemeStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useBusinessStore } from '../../stores/useBusinessStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 // ============ دیتای موقت کسب‌وکار ============
 const MOCK_BUSINESS_INFO = {
@@ -27,9 +29,6 @@ const MOCK_BUSINESS_INFO = {
   city: 'تهران، سعادت‌آباد',
   VIP: true,
 };
-
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function ManageBusinessScreen({ navigation }) {
   const { colors } = useTheme();

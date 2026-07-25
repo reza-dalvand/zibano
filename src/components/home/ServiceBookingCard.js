@@ -4,11 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Card from '../common/Card';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const formatPrice = (num) => `${num.toLocaleString('fa-IR')} تومان`;
 
 // 🎨 مپ آیکون و رنگ برای هر نوع خدمت
 const SERVICE_TYPE_CONFIG = {

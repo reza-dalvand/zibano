@@ -16,9 +16,8 @@ import { useTheme } from '../../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { cleanPhone } from '../../utils/phoneUtils';
 
 const toEnglishDigits = (str) =>
   String(str)
@@ -62,10 +61,6 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
       Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
       return;
     }
-    const cleanPhone = toEnglishDigits(request.contactPhone).replace(
-      /[^0-9+]/g,
-      '',
-    );
     if (!cleanPhone) {
       Alert.alert('خطا', 'شماره تماس معتبر نیست');
       return;

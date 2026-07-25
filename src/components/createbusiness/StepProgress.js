@@ -3,14 +3,13 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 const STEPS = [
   { id: 1, label: 'اطلاعات', icon: 'store' },
   { id: 2, label: 'احراز هویت', icon: 'verified-user' },
 ];
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function StepProgress({ currentStep, totalSteps }) {
   const { colors } = useTheme();

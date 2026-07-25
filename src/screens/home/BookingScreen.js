@@ -17,15 +17,9 @@ import BookingTimeSelector from '../../components/booking/BookingTimeSelector';
 import BookingStepIndicator from '../../components/booking/BookingStepIndicator';
 import PaymentSummaryCard from '../../components/booking/PaymentSummaryCard';
 import RulesCard from '../../components/booking/RulesCard';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { PERSIAN_MONTHS } from '../../utils/dateUtils';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const PERSIAN_MONTHS = [
-  'فروردین', 'اردیبهشت', 'خرداد', 'تیر',
-  'مرداد', 'شهریور', 'مهر', 'آبان',
-  'آذر', 'دی', 'بهمن', 'اسفند',
-];
 
 // 🎯 فقط ۳ مرحله (مرحله تایید حذف شد)
 const STEPS = [

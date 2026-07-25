@@ -13,10 +13,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import Avatar from '../common/Avatar';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 const CODE_LENGTH = 4; // ✅ تغییر از 6 به 4
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
 const toEnglishDigits = (str) =>
   String(str)
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))

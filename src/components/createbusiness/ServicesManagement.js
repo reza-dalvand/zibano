@@ -11,6 +11,8 @@ import Dropdown from '../common/Dropdown';
 import Divider from '../common/Divider';
 import EmptyState from '../common/EmptyState';
 import BottomSheet from '../common/BottomSheet';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 const SERVICE_TYPES = [
   { id: 'facial', label: 'فیشیال و پاکسازی پوست' },
@@ -35,24 +37,16 @@ const toEnglishDigits = (str) =>
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const toPersianDigits = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
 const parseNumber = (str) => {
   const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');
   return parseInt(cleaned, 10) || 0;
-};
-
-const formatPrice = (num) => {
-  const n = typeof num === 'number' ? num : parseNumber(num);
-  return toPersianDigits(n.toLocaleString('en-US'));
 };
 
 const formatPriceInput = (text) => {
   const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
   if (!cleaned) return '';
   const num = parseInt(cleaned, 10);
-  return toPersianDigits(num.toLocaleString('en-US'));
+  return toPersianDigit(num.toLocaleString('en-US'));
 };
 
 export default function ServicesManagement({ services = [], onChange }) {

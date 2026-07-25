@@ -16,9 +16,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
 import ScheduleModal from '../../components/manageBusiness/schedule/ScheduleModal';
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 // ═══════════ تبدیل ساعت به متن خوانا ═══════════
 const formatTime = (time) => toPersianDigit(time || '—');

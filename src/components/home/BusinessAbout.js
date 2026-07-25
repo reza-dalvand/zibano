@@ -4,9 +4,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Card from '../common/Card';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { cleanPhone } from '../../utils/phoneUtils';
 
-const toPersianDigit = (str) =>
-  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function BusinessAbout({ business }) {
   const { colors } = useTheme();
@@ -18,11 +18,7 @@ export default function BusinessAbout({ business }) {
       return;
     }
     try {
-      const cleanPhone = business.phone
-        .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-        .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-        .replace(/[^0-9+]/g, '');
-
+      const cleanPhone = cleanPhone(business.phone);
       const phoneUrl = `tel:${cleanPhone}`;
       const canCall = await Linking.canOpenURL(phoneUrl);
       if (canCall) {

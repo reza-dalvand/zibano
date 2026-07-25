@@ -6,9 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
 import SearchBar from '../common/SearchBar';
 import Avatar from '../common/Avatar';
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 export default function HomeHeader({
   userName,

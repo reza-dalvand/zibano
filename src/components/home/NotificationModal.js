@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const MOCK_NOTIFICATIONS = [
   {
@@ -75,9 +76,6 @@ const MOCK_NOTIFICATIONS = [
     isRead: true,
   },
 ];
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function NotificationModal({ visible, onClose }) {
   const { colors } = useTheme();

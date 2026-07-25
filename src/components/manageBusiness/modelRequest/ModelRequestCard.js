@@ -5,9 +5,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
 import Badge from '../../common/Badge';
-
-const toPersianDigit = (str) =>
-  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { truncateText } from '../../../utils/stringUtils';
+import { LIMITS } from '../../../constants/collabTypes';
 
 const MAX_DESC_LENGTH = 300;
 
@@ -16,11 +16,6 @@ const formatDate = (dateStr) => {
   return toPersianDigit(dateStr);
 };
 
-const truncateDescription = (text) => {
-  if (!text) return '';
-  if (text.length <= MAX_DESC_LENGTH) return text;
-  return text.slice(0, MAX_DESC_LENGTH).trim() + '...';
-};
 
 // 🎯 متادیتای ۳ نوع هزینه
 const COST_TYPE_META = {
@@ -88,7 +83,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
     }
   };
 
-  const truncatedDesc = truncateDescription(request.description);
+  const truncatedDesc = truncateText(request.description);
   const isTruncated = request.description && request.description.length > MAX_DESC_LENGTH;
 
   return (

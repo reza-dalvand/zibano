@@ -16,11 +16,8 @@ import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import EmptyState from '../../components/common/EmptyState';
 import Toast from '../../components/common/Toast';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-const formatPrice = num =>
-  `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
 // ⏱️ زمان بین دریافت مجدد کد (۵ دقیقه = ۳۰۰ ثانیه)
 const REGENERATE_INTERVAL = 300;

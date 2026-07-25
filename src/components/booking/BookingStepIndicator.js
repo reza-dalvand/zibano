@@ -3,15 +3,13 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const STEPS = [
   { id: 1, label: 'کارمند', icon: 'person' },
   { id: 2, label: 'تاریخ', icon: 'calendar-today' },
   { id: 3, label: 'ساعت', icon: 'access-time' },
 ];
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function BookingStepIndicator({ currentStep }) {
   const { colors } = useTheme();

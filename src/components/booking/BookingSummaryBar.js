@@ -4,14 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const formatPrice = (num) => {
-  const n = typeof num === 'number' ? num : parseInt(String(num).replace(/[^0-9]/g, ''), 10) || 0;
-  return toPersianDigit(n.toLocaleString('en-US'));
-};
 
 export default function BookingSummaryBar({
   originalPrice,

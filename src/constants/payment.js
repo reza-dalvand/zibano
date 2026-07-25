@@ -1,9 +1,3 @@
-// src/constants/payment.js
-export const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-export const formatPrice = (num) =>
-  `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
-
 export const STATUS_META = {
   success: { label: 'موفق', color: '#43A047', icon: 'check-circle', bg: '#43A04715' },
   failed: { label: 'ناموفق', color: '#E53935', icon: 'cancel', bg: '#E5393515' },

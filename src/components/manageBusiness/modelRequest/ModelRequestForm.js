@@ -8,9 +8,7 @@ import Input from '../../common/Input';
 import Dropdown from '../../common/Dropdown';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
-
-const toPersianDigit = (str) =>
-  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 
 const toEnglishDigits = (str) =>
   String(str || '')

@@ -1,10 +1,6 @@
 // داده‌های موقت و متادیتای تراکنش‌ها
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const formatPrice = num =>
-  `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
 
 // وضعیت تراکنش‌ها در سمت صاحب کسب و کار
 const TX_STATUS_META = {

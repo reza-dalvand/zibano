@@ -4,12 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import ServiceTypeIcon from './ServiceTypeIcon';
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const formatPrice = (num) =>
-  `${toPersianDigit((num || 0).toLocaleString('en-US'))}`;
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 
 export default function ServiceCard({ service, onEdit, onToggle, onDelete }) {
   const { colors } = useTheme();

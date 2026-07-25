@@ -15,6 +15,8 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Button from '../../components/common/Button';
 import Toast from '../../components/common/Toast';
+import { maskPhone } from '../../utils/phoneUtils';
+
 
 const OTP_LENGTH = 5;
 const RESEND_SECONDS = 60;
@@ -35,6 +37,7 @@ export default function OtpVerifyScreen({ navigation, route }) {
     message: '',
     type: 'info',
   });
+  const maskedPhone = maskPhone(phone);
 
   const inputRefs = useRef([]);
 
@@ -85,10 +88,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
     }
   };
 
-  // ✅ اصلاح شده با LTR marks
-  const maskedPhone = phone 
-    ? '\u202A' + phone.slice(0, 4) + '\u200C***\u200C' + phone.slice(-4) + '\u202C' 
-    : '';
 
   const handleVerify = async () => {
     const code = otp.join('');

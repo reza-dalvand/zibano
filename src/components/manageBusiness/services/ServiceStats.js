@@ -3,9 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit } from '../../../utils/numberUtils';
 
 const formatPrice = (num) => {
   if (num >= 1000000) return `${toPersianDigit((num / 1000000).toFixed(1))}M`;

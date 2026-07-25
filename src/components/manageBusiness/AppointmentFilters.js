@@ -3,6 +3,8 @@ import React from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+
 
 // 🎯 حذف cancelled_by_customer - فقط ۳ وضعیت + همه
 const FILTERS = [
@@ -11,9 +13,6 @@ const FILTERS = [
   { id: 'cancelled', label: 'لغو شده', icon: 'cancel', color: '#E53935' },
   { id: 'done', label: 'انجام شده', icon: 'task-alt', color: '#43A047' },
 ];
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function AppointmentFilters({ activeFilter, counts, onChange }) {
   const { colors } = useTheme();

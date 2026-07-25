@@ -1,7 +1,12 @@
 // src/screens/manageBusiness/EditServiceScreen.js
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Switch, Alert,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Switch,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
@@ -14,69 +19,75 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const SERVICE_TYPES = [
-  { id: 'facial',     label: 'فیشیال و پاکسازی پوست' },
-  { id: 'nail',       label: 'کاشت و طراحی ناخن' },
+  { id: 'facial', label: 'فیشیال و پاکسازی پوست' },
+  { id: 'nail', label: 'کاشت و طراحی ناخن' },
   { id: 'hair_color', label: 'رنگ و مش مو' },
-  { id: 'keratin',    label: 'کراتین و احیای مو' },
-  { id: 'laser',      label: 'لیزر موهای زائد' },
-  { id: 'makeup',     label: 'میکاپ و گریم' },
-  { id: 'eyelash',    label: 'کاشت مژه و ابرو' },
-  { id: 'waxing',     label: 'اپیلاسیون' },
-  { id: 'massage',    label: 'ماساژ' },
-  { id: 'tattoo',     label: 'تتو و هاشور' },
-  { id: 'skincare',   label: 'مراقبت پوست' },
-  { id: 'other',      label: 'سایر' },
+  { id: 'keratin', label: 'کراتین و احیای مو' },
+  { id: 'laser', label: 'لیزر موهای زائد' },
+  { id: 'makeup', label: 'میکاپ و گریم' },
+  { id: 'eyelash', label: 'کاشت مژه و ابرو' },
+  { id: 'waxing', label: 'اپیلاسیون' },
+  { id: 'massage', label: 'ماساژ' },
+  { id: 'tattoo', label: 'تتو و هاشور' },
+  { id: 'skincare', label: 'مراقبت پوست' },
+  { id: 'other', label: 'سایر' },
 ];
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
 const MAX_DESCRIPTION_LENGTH = 300;
 
-const toEnglishDigits = (str) =>
+const toEnglishDigits = str =>
   String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-const toPersianDigits = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-
-const parseNumber = (str) => {
+const parseNumber = str => {
   const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');
   return parseInt(cleaned, 10) || 0;
 };
 
-const formatPrice = (num) =>
-  toPersianDigits((typeof num === 'number' ? num : parseNumber(num)).toLocaleString('en-US'));
 
-const formatPriceInput = (text) => {
+const formatPriceInput = text => {
   const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
   if (!cleaned) return '';
-  return toPersianDigits(parseInt(cleaned, 10).toLocaleString('en-US'));
+  return toPersianDigit(parseInt(cleaned, 10).toLocaleString('en-US'));
 };
 
 export default function EditServiceScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const addService = useBusinessStore((s) => s.addService);
-  const updateService = useBusinessStore((s) => s.updateService);
+  const addService = useBusinessStore(s => s.addService);
+  const updateService = useBusinessStore(s => s.updateService);
   const existingService = route.params?.service || null;
   const isEditMode = !!existingService;
 
   const [name, setName] = useState(existingService?.name || '');
   const [typeId, setTypeId] = useState(existingService?.typeId || null);
-  const [customTypeName, setCustomTypeName] = useState(existingService?.customTypeName || '');
+  const [customTypeName, setCustomTypeName] = useState(
+    existingService?.customTypeName || '',
+  );
   const [originalPrice, setOriginalPrice] = useState(
-    existingService?.originalPrice ? formatPriceInput(String(existingService.originalPrice)) : ''
+    existingService?.originalPrice
+      ? formatPriceInput(String(existingService.originalPrice))
+      : '',
   );
   const [discountPercent, setDiscountPercent] = useState(
-    existingService?.discountPercent ? String(existingService.discountPercent) : ''
+    existingService?.discountPercent
+      ? String(existingService.discountPercent)
+      : '',
   );
   const [depositAmount, setDepositAmount] = useState(
-    existingService?.depositAmount ? formatPriceInput(String(existingService.depositAmount)) : ''
+    existingService?.depositAmount
+      ? formatPriceInput(String(existingService.depositAmount))
+      : '',
   );
   const [isActive, setIsActive] = useState(existingService?.isActive !== false);
-  const [description, setDescription] = useState(existingService?.description || '');
+  const [description, setDescription] = useState(
+    existingService?.description || '',
+  );
 
   const [errors, setErrors] = useState({});
 
@@ -91,23 +102,30 @@ export default function EditServiceScreen({ navigation, route }) {
     if (!typeId) newErrors.typeId = 'نوع خدمت را انتخاب کنید';
     if (typeId === 'other' && !customTypeName.trim())
       newErrors.customTypeName = 'نام نوع خدمت را وارد کنید';
-    if (originalNum <= 0) newErrors.originalPrice = 'قیمت اصلی باید بیشتر از صفر باشد';
-    if (discountNum > 100) newErrors.discountPercent = 'درصد تخفیف نمی‌تواند بیشتر از ۱۰۰ باشد';
+    if (originalNum <= 0)
+      newErrors.originalPrice = 'قیمت اصلی باید بیشتر از صفر باشد';
+    if (discountNum > 100)
+      newErrors.discountPercent = 'درصد تخفیف نمی‌تواند بیشتر از ۱۰۰ باشد';
     if (finalPrice > 0 && finalPrice < MIN_FINAL_PRICE) {
-      newErrors.originalPrice = `قیمت نهایی خدمت باید حداقل ${formatPrice(MIN_FINAL_PRICE)} تومان باشد`;
+      newErrors.originalPrice = `قیمت نهایی خدمت باید حداقل ${formatPrice(
+        MIN_FINAL_PRICE,
+      )} تومان باشد`;
     }
     const depositNum = parseNumber(depositAmount);
     if (depositNum > 0 && depositNum < MIN_DEPOSIT) {
-      newErrors.depositAmount = `حداقل مبلغ بیعانه ${formatPrice(MIN_DEPOSIT)} تومان است`;
+      newErrors.depositAmount = `حداقل مبلغ بیعانه ${formatPrice(
+        MIN_DEPOSIT,
+      )} تومان است`;
     }
     if (depositNum > finalPrice) {
-      newErrors.depositAmount = 'مبلغ بیعانه نمی‌تواند بیشتر از قیمت نهایی باشد';
+      newErrors.depositAmount =
+        'مبلغ بیعانه نمی‌تواند بیشتر از قیمت نهایی باشد';
     }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    const serviceType = SERVICE_TYPES.find((t) => t.id === typeId);
+    const serviceType = SERVICE_TYPES.find(t => t.id === typeId);
     const serviceData = {
       name: name.trim(),
       typeId,
@@ -144,7 +162,11 @@ export default function EditServiceScreen({ navigation, route }) {
   const isAtLimit = remainingChars === 0;
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
+    <ScreenWrapper
+      padding={0}
+      edges={['bottom', 'left', 'right']}
+      keyboardAware
+    >
       <Header
         title={isEditMode ? 'ویرایش خدمت' : 'افزودن خدمت جدید'}
         onBackPress={() => navigation.goBack()}
@@ -170,7 +192,12 @@ export default function EditServiceScreen({ navigation, route }) {
         {/* بخش اطلاعات پایه */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}>
+            <View
+              style={[
+                s.sectionIconBox,
+                { backgroundColor: colors.primary + '15' },
+              ]}
+            >
               <Icon name="info-outline" size={18} color={colors.primary} />
             </View>
             <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -182,23 +209,35 @@ export default function EditServiceScreen({ navigation, route }) {
               label="نام خدمت *"
               placeholder="مثال: فیشیال VIP پوست صورت"
               value={name}
-              onChangeText={(t) => { setName(t); if (errors.name) setErrors({ ...errors, name: '' }); }}
+              onChangeText={t => {
+                setName(t);
+                if (errors.name) setErrors({ ...errors, name: '' });
+              }}
               error={errors.name}
-              rightIcon={<Icon name="label" size={22} color={colors.textSecondary} />}
+              rightIcon={
+                <Icon name="label" size={22} color={colors.textSecondary} />
+              }
             />
             <Dropdown
               label="نوع خدمت *"
               placeholder="نوع خدمت را انتخاب کنید"
               value={typeId}
               options={SERVICE_TYPES}
-              onSelect={(val) => { setTypeId(val); if (errors.typeId) setErrors({ ...errors, typeId: '' }); }}
+              onSelect={val => {
+                setTypeId(val);
+                if (errors.typeId) setErrors({ ...errors, typeId: '' });
+              }}
             />
             {typeId === 'other' && (
               <Input
                 label="نام نوع خدمت *"
                 placeholder="نام نوع خدمت خود را وارد کنید"
                 value={customTypeName}
-                onChangeText={(t) => { setCustomTypeName(t); if (errors.customTypeName) setErrors({ ...errors, customTypeName: '' }); }}
+                onChangeText={t => {
+                  setCustomTypeName(t);
+                  if (errors.customTypeName)
+                    setErrors({ ...errors, customTypeName: '' });
+                }}
                 error={errors.customTypeName}
               />
             )}
@@ -220,29 +259,39 @@ export default function EditServiceScreen({ navigation, route }) {
               label="قیمت اصلی (تومان) *"
               placeholder="مثال: ۷۵۰,۰۰۰"
               value={originalPrice}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 setOriginalPrice(formatPriceInput(t));
-                if (errors.originalPrice) setErrors({ ...errors, originalPrice: '' });
+                if (errors.originalPrice)
+                  setErrors({ ...errors, originalPrice: '' });
               }}
               keyboardType="numeric"
               error={errors.originalPrice}
-              rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
+              rightIcon={
+                <Text style={[s.currencyText, { color: colors.textSecondary }]}>
+                  تومان
+                </Text>
+              }
             />
             <Input
               label="درصد تخفیف (اختیاری)"
               placeholder="مثال: ۲۰"
               value={discountPercent}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '');
                 if (parseNumber(cleaned) <= 100 || cleaned === '') {
                   setDiscountPercent(cleaned);
-                  if (errors.discountPercent) setErrors({ ...errors, discountPercent: '' });
+                  if (errors.discountPercent)
+                    setErrors({ ...errors, discountPercent: '' });
                 }
               }}
               keyboardType="numeric"
               maxLength={3}
               error={errors.discountPercent}
-              rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>٪</Text>}
+              rightIcon={
+                <Text style={[s.currencyText, { color: colors.textSecondary }]}>
+                  ٪
+                </Text>
+              }
             />
             {originalNum > 0 && (
               <Card
@@ -252,37 +301,53 @@ export default function EditServiceScreen({ navigation, route }) {
                 style={[
                   s.priceSummaryCard,
                   {
-                    backgroundColor: finalPrice >= MIN_FINAL_PRICE ? '#43A04710' : '#E5393515',
-                    borderColor: finalPrice >= MIN_FINAL_PRICE ? '#43A04740' : '#E5393550',
+                    backgroundColor:
+                      finalPrice >= MIN_FINAL_PRICE ? '#43A04710' : '#E5393515',
+                    borderColor:
+                      finalPrice >= MIN_FINAL_PRICE ? '#43A04740' : '#E5393550',
                   },
                 ]}
               >
                 <View style={s.summaryRow}>
-                  <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>قیمت اصلی</Text>
+                  <Text
+                    style={[s.summaryLabel, { color: colors.textSecondary }]}
+                  >
+                    قیمت اصلی
+                  </Text>
                   <Text style={[s.summaryValue, { color: colors.textMain }]}>
                     {formatPrice(originalNum)}
                   </Text>
                 </View>
                 {discountNum > 0 && (
                   <View style={s.summaryRow}>
-                    <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>
-                      تخفیف ({toPersianDigits(discountNum)}٪)
+                    <Text
+                      style={[s.summaryLabel, { color: colors.textSecondary }]}
+                    >
+                      تخفیف ({toPersianDigit(discountNum)}٪)
                     </Text>
                     <Text style={[s.summaryValue, { color: '#E53935' }]}>
                       - {formatPrice(discountAmount)}
                     </Text>
                   </View>
                 )}
-                <View style={[s.summaryDivider, { backgroundColor: colors.border }]} />
+                <View
+                  style={[s.summaryDivider, { backgroundColor: colors.border }]}
+                />
                 <View style={s.summaryRow}>
-                  <Text style={[s.summaryLabel, { color: colors.textMain, fontFamily: 'Vazir-Bold' }]}>
+                  <Text
+                    style={[
+                      s.summaryLabel,
+                      { color: colors.textMain, fontFamily: 'Vazir-Bold' },
+                    ]}
+                  >
                     قیمت نهایی
                   </Text>
                   <Text
                     style={[
                       s.summaryValue,
                       {
-                        color: finalPrice >= MIN_FINAL_PRICE ? '#43A047' : '#E53935',
+                        color:
+                          finalPrice >= MIN_FINAL_PRICE ? '#43A047' : '#E53935',
                         fontFamily: 'Vazir-Bold',
                         fontSize: 15,
                       },
@@ -311,13 +376,18 @@ export default function EditServiceScreen({ navigation, route }) {
               label="مبلغ بیعانه (تومان)"
               placeholder="مثال: ۲۰۰,۰۰۰"
               value={depositAmount}
-              onChangeText={(t) => {
+              onChangeText={t => {
                 setDepositAmount(formatPriceInput(t));
-                if (errors.depositAmount) setErrors({ ...errors, depositAmount: '' });
+                if (errors.depositAmount)
+                  setErrors({ ...errors, depositAmount: '' });
               }}
               keyboardType="numeric"
               error={errors.depositAmount}
-              rightIcon={<Text style={[s.currencyText, { color: colors.textSecondary }]}>تومان</Text>}
+              rightIcon={
+                <Text style={[s.currencyText, { color: colors.textSecondary }]}>
+                  تومان
+                </Text>
+              }
               hint={`حداقل: ${formatPrice(MIN_DEPOSIT)} تومان`}
             />
           </Card>
@@ -336,7 +406,9 @@ export default function EditServiceScreen({ navigation, route }) {
           <Card variant="elevated" padding={16} radius={18}>
             <View style={s.switchRow}>
               <View style={s.switchInfo}>
-                <Text style={[s.switchLabel, { color: colors.textMain }]}>وضعیت فعال</Text>
+                <Text style={[s.switchLabel, { color: colors.textMain }]}>
+                  وضعیت فعال
+                </Text>
                 <Text style={[s.switchHint, { color: colors.textSecondary }]}>
                   در صورت غیرفعال بودن، مشتریان نمی‌توانند این خدمت را رزرو کنند
                 </Text>
@@ -356,7 +428,7 @@ export default function EditServiceScreen({ navigation, route }) {
                 label="توضیحات (اختیاری)"
                 placeholder="توضیحاتی درباره این خدمت... (حداکثر ۳۰۰ کاراکتر)"
                 value={description}
-                onChangeText={(t) => {
+                onChangeText={t => {
                   if (t.length <= MAX_DESCRIPTION_LENGTH) {
                     setDescription(t);
                   }
@@ -371,27 +443,49 @@ export default function EditServiceScreen({ navigation, route }) {
                   <Icon
                     name="text-fields"
                     size={12}
-                    color={isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary}
+                    color={
+                      isAtLimit
+                        ? '#E53935'
+                        : isNearLimit
+                        ? '#FF9800'
+                        : colors.textSecondary
+                    }
                   />
                   <Text
                     style={[
                       s.charCounterText,
                       {
-                        color: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary,
+                        color: isAtLimit
+                          ? '#E53935'
+                          : isNearLimit
+                          ? '#FF9800'
+                          : colors.textSecondary,
                       },
                     ]}
                   >
-                    {toPersianDigits(descLength)} از {toPersianDigits(MAX_DESCRIPTION_LENGTH)} کاراکتر
+                    {toPersianDigit(descLength)} از{' '}
+                    {toPersianDigit(MAX_DESCRIPTION_LENGTH)} کاراکتر
                   </Text>
                 </View>
                 {/* نوار پیشرفت */}
-                <View style={[s.charProgressBar, { backgroundColor: colors.border }]}>
+                <View
+                  style={[
+                    s.charProgressBar,
+                    { backgroundColor: colors.border },
+                  ]}
+                >
                   <View
                     style={[
                       s.charProgressFill,
                       {
-                        width: `${(descLength / MAX_DESCRIPTION_LENGTH) * 100}%`,
-                        backgroundColor: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.primary,
+                        width: `${
+                          (descLength / MAX_DESCRIPTION_LENGTH) * 100
+                        }%`,
+                        backgroundColor: isAtLimit
+                          ? '#E53935'
+                          : isNearLimit
+                          ? '#FF9800'
+                          : colors.primary,
                       },
                     ]}
                   />
@@ -399,16 +493,26 @@ export default function EditServiceScreen({ navigation, route }) {
               </View>
               {/* هشدار نزدیک به محدودیت */}
               {isNearLimit && !isAtLimit && (
-                <View style={[s.charWarning, { backgroundColor: '#FF980010', borderColor: '#FF980030' }]}>
+                <View
+                  style={[
+                    s.charWarning,
+                    { backgroundColor: '#FF980010', borderColor: '#FF980030' },
+                  ]}
+                >
                   <Icon name="warning" size={12} color="#FF9800" />
                   <Text style={s.charWarningText}>
-                    فقط {toPersianDigits(remainingChars)} کاراکتر باقی مانده است
+                    فقط {toPersianDigit(remainingChars)} کاراکتر باقی مانده است
                   </Text>
                 </View>
               )}
               {/* پیام محدودیت کامل */}
               {isAtLimit && (
-                <View style={[s.charWarning, { backgroundColor: '#E5393510', borderColor: '#E5393530' }]}>
+                <View
+                  style={[
+                    s.charWarning,
+                    { backgroundColor: '#E5393510', borderColor: '#E5393530' },
+                  ]}
+                >
                   <Icon name="error-outline" size={12} color="#E53935" />
                   <Text style={[s.charWarningText, { color: '#E53935' }]}>
                     به حداکثر تعداد کاراکتر رسیدید

@@ -7,9 +7,7 @@ import BottomSheet from '../common/BottomSheet';
 import Avatar from '../common/Avatar';
 import Card from '../common/Card';
 import Divider from '../common/Divider';
-
-const toPersianDigit = (str) => String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
-const formatPrice = (num) => `${toPersianDigit((num || 0).toLocaleString('en-US'))} تومان`;
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const STATUS_META = {
   reserved: { label: 'رزرو شده', color: '#2196F3', icon: 'event-available', bg: '#2196F320' },

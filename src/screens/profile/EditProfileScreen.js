@@ -18,16 +18,8 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
-
-// ✅ تابع maskPhone با LTR marks (همان راه‌حل OtpVerifyScreen)
-const maskPhone = (phone) => {
-  if (!phone || phone.length < 11) return phone || '';
-  // 🎯 کلید حل مشکل: LTR marks برای جلوگیری از برعکس شدن شماره در RTL
-  return '\u202A' + phone.slice(0, 4) + '\u200C***\u200C' + phone.slice(-4) + '\u202C';
-};
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { maskPhone } from '../../utils/phoneUtils';
 
 export default function EditProfileScreen({ navigation }) {
   const { colors } = useTheme();

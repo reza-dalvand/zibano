@@ -15,9 +15,8 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import EmptyState from '../../components/common/EmptyState';
 import { PostModal } from '../../components/explore'; // ✅ اضافه شد
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 // 🎯 داده‌های کسب‌وکارهای مورد علاقه
 const MOCK_FAVORITE_BUSINESSES = [

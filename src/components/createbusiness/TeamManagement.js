@@ -10,8 +10,8 @@ import Chip from '../common/Chip';
 import EmptyState from '../common/EmptyState';
 import Divider from '../common/Divider';
 import BottomSheet from '../common/BottomSheet';
+import { validatePhone } from '../../utils/phoneUtils';
 
-const validatePhone = (v) => /^09[0-9]{9}$/.test(v.replace(/[^0-9]/g, ''));
 const toEnglishDigits = (str) =>
   String(str)
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))

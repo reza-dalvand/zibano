@@ -14,9 +14,8 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function InviteFriendsScreen() {
   const { colors } = useTheme();

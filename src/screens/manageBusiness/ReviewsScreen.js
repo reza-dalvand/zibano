@@ -15,6 +15,7 @@ import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import StarRating from '../../components/common/StarRating';
 import EmptyState from '../../components/common/EmptyState';
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'همه' },
@@ -77,8 +78,6 @@ const MOCK_REVIEWS = [
   },
 ];
 
-const toPersianDigit = str =>
-  String(str).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 export default function ReviewsScreen({ navigation }) {
   const { colors } = useTheme();

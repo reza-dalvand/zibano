@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 
 const MAX_DESC_LENGTH = 300;
 
@@ -12,9 +13,6 @@ const COLLAB_TYPE_META = {
   fixed: { label: 'اجاره ثابت', color: '#2196F3', bg: '#2196F318', icon: 'attach-money' },
   hourly: { label: 'ساعتی', color: '#FF9800', bg: '#FF980018', icon: 'schedule' },
 };
-
-const toPersianDigit = (str) =>
-  String(str || '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 const truncateDesc = (text) => {
   if (!text) return '';

@@ -20,9 +20,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.94;
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.90;
 const GALLERY_HEIGHT = MODAL_HEIGHT * 0.42;
-
-const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 export default function PortfolioModal({
   visible,
