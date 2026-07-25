@@ -16,13 +16,8 @@ import { useTheme } from '../../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
-
-const toEnglishDigits = (str) =>
-  String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const COST_TYPE_META = {
   paid: {
@@ -51,28 +46,41 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
   const { request } = route.params;
   const [isSaved, setIsSaved] = useState(false);
 
-  const costMeta =
-    COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
-
+  const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
   const shareUrl = `https://zibano.app/model-request/${request.id}`;
 
+  // ✅ هندلر تماس - با فراخوانی صحیح cleanPhone
   const handleCall = async () => {
     if (!request.contactPhone) {
       Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
       return;
     }
-    if (!cleanPhone) {
+
+    // 🎯 اصلاح باگ: فراخوانی تابع cleanPhone و ذخیره در متغیر محلی
+    const cleanedPhone = cleanPhone(request.contactPhone);
+    
+    if (!cleanedPhone) {
       Alert.alert('خطا', 'شماره تماس معتبر نیست');
       return;
     }
+
     try {
-      const phoneUrl = `tel:${cleanPhone}`;
-      await Linking.openURL(phoneUrl);
+      const phoneUrl = `tel:${cleanedPhone}`;
+      const canCall = await Linking.canOpenURL(phoneUrl);
+      
+      if (canCall) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert(
+          'خطا در برقراری تماس',
+          `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
+        );
+      }
     } catch (error) {
       console.log('Call error:', error);
       Alert.alert(
         'خطا در برقراری تماس',
-        `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanPhone)}`,
+        `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
       );
     }
   };
@@ -85,6 +93,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
 
   const handleShare = async () => {
     const shareMessage = `${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}\n🔗 ${shareUrl}`;
+
     try {
       const result = await Share.share(
         {
@@ -97,6 +106,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           excludedActivityTypes: [],
         },
       );
+
       if (result.action === Share.sharedAction) {
         console.log('✅ اشتراک‌گذاری موفق با:', result.activityType);
       } else if (result.action === Share.dismissedAction) {
@@ -120,7 +130,6 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
   const heroHeight = HERO_BASE_HEIGHT + insets.top;
 
   return (
-    // 🎯 top اضافه شد تا SafeAreaView top padding اعمال کند
     <ScreenWrapper padding={0} edges={['top', 'bottom', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ═══════ Hero Image ═══════ */}
@@ -129,7 +138,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             s.heroImageContainer,
             {
               height: heroHeight,
-              marginTop: -insets.top, // 🎯 کلید حل مشکل: container را به بالا بکش
+              marginTop: -insets.top,
             },
           ]}
         >
@@ -168,18 +177,11 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
 
         {/* ═══════ محتوا ═══════ */}
         <View style={s.content}>
-          <Text style={[s.title, { color: colors.textMain }]}>
-            {request.title}
-          </Text>
+          <Text style={[s.title, { color: colors.textMain }]}>{request.title}</Text>
 
           {/* ═══════ کارت کسب و کار ═══════ */}
           <TouchableOpacity onPress={handleBusinessPress} activeOpacity={0.85}>
-            <Card
-              variant="elevated"
-              padding={14}
-              radius={16}
-              style={s.businessCard}
-            >
+            <Card variant="elevated" padding={14} radius={16} style={s.businessCard}>
               <View style={s.businessRow}>
                 <View
                   style={[
@@ -197,23 +199,13 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                     {request.businessName}
                   </Text>
                   <View style={s.businessMeta}>
-                    <Icon
-                      name="location-on"
-                      size={12}
-                      color={colors.textSecondary}
-                    />
-                    <Text
-                      style={[s.businessCity, { color: colors.textSecondary }]}
-                    >
+                    <Icon name="location-on" size={12} color={colors.textSecondary} />
+                    <Text style={[s.businessCity, { color: colors.textSecondary }]}>
                       {request.city}
                     </Text>
                   </View>
                 </View>
-                <Icon
-                  name="chevron-left"
-                  size={24}
-                  color={colors.textSecondary}
-                />
+                <Icon name="chevron-left" size={24} color={colors.textSecondary} />
               </View>
             </Card>
           </TouchableOpacity>
@@ -221,9 +213,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           {/* ═══════ توضیحات ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#2196F315' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#2196F315' }]}>
                 <Icon name="description" size={18} color="#2196F3" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -238,9 +228,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           {/* ═══════ 🎯 دکمه‌های اکشن ═══════ */}
           <View style={s.actionButtonsSection}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#4CAF5015' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5015' }]}>
                 <Icon name="handshake" size={18} color="#4CAF50" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -257,19 +245,14 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
                 },
               ]}
             >
-              <View
-                style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}
-              >
+              <View style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}>
                 <Icon name="phone" size={20} color="#4CAF50" />
               </View>
               <View style={s.phoneInfo}>
                 <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>
                   شماره تماس صاحب آگهی
                 </Text>
-                <Text
-                  style={[s.phoneValue, { color: colors.textMain }]}
-                  selectable
-                >
+                <Text style={[s.phoneValue, { color: colors.textMain }]} selectable>
                   {request.contactPhone
                     ? toPersianDigit(request.contactPhone)
                     : 'ثبت نشده'}
@@ -318,9 +301,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           {/* ═══════ اطلاعات زمانی ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#FF980015' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#FF980015' }]}>
                 <Icon name="schedule" size={18} color="#FF9800" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -351,9 +332,7 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           <Card variant="default" padding={14} radius={14} style={s.hintCard}>
             <View style={s.hintHeader}>
               <Icon name="lightbulb" size={18} color="#FFC107" />
-              <Text style={[s.hintTitle, { color: colors.textMain }]}>
-                نکات مهم
-              </Text>
+              <Text style={[s.hintTitle, { color: colors.textMain }]}>نکات مهم</Text>
             </View>
             <View style={s.hintList}>
               <View style={s.hintItem}>
@@ -453,7 +432,6 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
-
   // ═══════ Content ═══════
   content: {
     padding: 20,
@@ -496,7 +474,6 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-
   // ═══════ سکشن‌ها ═══════
   sectionHeader: {
     flexDirection: 'row',
@@ -521,7 +498,6 @@ const s = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'justify',
   },
-
   // ═══════ دکمه‌های اکشن ═══════
   actionButtonsSection: {
     gap: 12,
@@ -603,7 +579,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
-
   // ═══════ تاریخ ═══════
   dateRow: {
     flexDirection: 'row',
@@ -621,7 +596,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
-
   // ═══════ نکات مهم ═══════
   hintCard: {
     borderWidth: 1,

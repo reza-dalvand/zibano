@@ -14,7 +14,7 @@ import {
   MONTHS,
   YEARS,
 } from '../../components/profile/paymentHistory/constants';
-import { formatPrice } from '../../components/profile/paymentHistory/helpers';
+import {formatPrice } from '../../utils/numberUtils';
 import PaymentCard from '../../components/profile/paymentHistory/PaymentCard';
 import InvoiceModal from '../../components/profile/paymentHistory/InvoiceModal';
 

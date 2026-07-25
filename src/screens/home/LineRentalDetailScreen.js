@@ -16,13 +16,8 @@ import { useTheme } from '../../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
-
-const toEnglishDigits = (str) =>
-  String(str || '')
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const COLLAB_META = {
   percent: {
@@ -52,26 +47,40 @@ export default function LineRentalDetailScreen({ navigation, route }) {
   const [isSaved, setIsSaved] = useState(false);
 
   const meta = COLLAB_META[ad.collabType] || COLLAB_META.percent;
-
   const shareUrl = `https://zibano.app/line-rental/${ad.id}`;
 
+  // ✅ هندلر تماس - با فراخوانی صحیح cleanPhone
   const handleCall = async () => {
     if (!ad.contactPhone) {
       Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
       return;
     }
-    if (!cleanPhone) {
+
+    // 🎯 اصلاح باگ: فراخوانی تابع cleanPhone و ذخیره در متغیر محلی
+    const cleanedPhone = cleanPhone(ad.contactPhone);
+    
+    if (!cleanedPhone) {
       Alert.alert('خطا', 'شماره تماس معتبر نیست');
       return;
     }
+
     try {
-      const phoneUrl = `tel:${cleanPhone}`;
-      await Linking.openURL(phoneUrl);
+      const phoneUrl = `tel:${cleanedPhone}`;
+      const canCall = await Linking.canOpenURL(phoneUrl);
+      
+      if (canCall) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        Alert.alert(
+          'خطا در برقراری تماس',
+          `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
+        );
+      }
     } catch (error) {
       console.log('Call error:', error);
       Alert.alert(
         'خطا در برقراری تماس',
-        `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanPhone)}`,
+        `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
       );
     }
   };
@@ -84,6 +93,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
 
   const handleShare = async () => {
     const shareMessage = `${ad.title}\n${ad.description || ''}\n🏪 ${ad.businessName}\n📍 ${ad.city}\n🔗 ${shareUrl}`;
+
     try {
       const result = await Share.share(
         {
@@ -96,6 +106,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
           excludedActivityTypes: [],
         },
       );
+
       if (result.action === Share.sharedAction) {
         console.log('✅ اشتراک‌گذاری موفق با:', result.activityType);
       } else if (result.action === Share.dismissedAction) {
@@ -119,7 +130,6 @@ export default function LineRentalDetailScreen({ navigation, route }) {
   const heroHeight = HERO_BASE_HEIGHT + insets.top;
 
   return (
-    // 🎯 top اضافه شد تا SafeAreaView top padding اعمال کند
     <ScreenWrapper padding={0} edges={['top', 'bottom', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ═══════ Hero Image ═══════ */}
@@ -128,7 +138,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
             s.heroImageContainer,
             {
               height: heroHeight,
-              marginTop: -insets.top, // 🎯 کلید حل مشکل: container را به بالا بکش
+              marginTop: -insets.top,
             },
           ]}
         >
@@ -180,12 +190,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
 
           {/* ═══════ کارت کسب و کار ═══════ */}
           <TouchableOpacity onPress={handleBusinessPress} activeOpacity={0.85}>
-            <Card
-              variant="elevated"
-              padding={14}
-              radius={16}
-              style={s.businessCard}
-            >
+            <Card variant="elevated" padding={14} radius={16} style={s.businessCard}>
               <View style={s.businessRow}>
                 <View
                   style={[
@@ -203,23 +208,13 @@ export default function LineRentalDetailScreen({ navigation, route }) {
                     {ad.businessName}
                   </Text>
                   <View style={s.businessMeta}>
-                    <Icon
-                      name="location-on"
-                      size={12}
-                      color={colors.textSecondary}
-                    />
-                    <Text
-                      style={[s.businessCity, { color: colors.textSecondary }]}
-                    >
+                    <Icon name="location-on" size={12} color={colors.textSecondary} />
+                    <Text style={[s.businessCity, { color: colors.textSecondary }]}>
                       {ad.city}
                     </Text>
                   </View>
                 </View>
-                <Icon
-                  name="chevron-left"
-                  size={24}
-                  color={colors.textSecondary}
-                />
+                <Icon name="chevron-left" size={24} color={colors.textSecondary} />
               </View>
             </Card>
           </TouchableOpacity>
@@ -232,9 +227,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
             style={[s.priceCard, { borderColor: meta.color + '40' }]}
           >
             <View style={s.priceHeader}>
-              <View
-                style={[s.priceIconBox, { backgroundColor: meta.color + '15' }]}
-              >
+              <View style={[s.priceIconBox, { backgroundColor: meta.color + '15' }]}>
                 <Icon name={meta.icon} size={20} color={meta.color} />
               </View>
               <View style={s.priceInfo}>
@@ -257,9 +250,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
           {/* ═══════ توضیحات ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#2196F315' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#2196F315' }]}>
                 <Icon name="description" size={18} color="#2196F3" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -274,9 +265,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
           {/* ═══════ 🎯 دکمه‌های اکشن ═══════ */}
           <View style={s.actionButtonsSection}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#4CAF5015' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5015' }]}>
                 <Icon name="handshake" size={18} color="#4CAF50" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -293,22 +282,15 @@ export default function LineRentalDetailScreen({ navigation, route }) {
                 },
               ]}
             >
-              <View
-                style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}
-              >
+              <View style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}>
                 <Icon name="phone" size={20} color="#4CAF50" />
               </View>
               <View style={s.phoneInfo}>
                 <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>
                   شماره تماس صاحب آگهی
                 </Text>
-                <Text
-                  style={[s.phoneValue, { color: colors.textMain }]}
-                  selectable
-                >
-                  {ad.contactPhone
-                    ? toPersianDigit(ad.contactPhone)
-                    : 'ثبت نشده'}
+                <Text style={[s.phoneValue, { color: colors.textMain }]} selectable>
+                  {ad.contactPhone ? toPersianDigit(ad.contactPhone) : 'ثبت نشده'}
                 </Text>
               </View>
             </View>
@@ -354,9 +336,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
           {/* ═══════ اطلاعات زمانی ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
             <View style={s.sectionHeader}>
-              <View
-                style={[s.sectionIconBox, { backgroundColor: '#FF980015' }]}
-              >
+              <View style={[s.sectionIconBox, { backgroundColor: '#FF980015' }]}>
                 <Icon name="schedule" size={18} color="#FF9800" />
               </View>
               <Text style={[s.sectionTitle, { color: colors.textMain }]}>
@@ -387,9 +367,7 @@ export default function LineRentalDetailScreen({ navigation, route }) {
           <Card variant="default" padding={14} radius={14} style={s.hintCard}>
             <View style={s.hintHeader}>
               <Icon name="lightbulb" size={18} color="#FFC107" />
-              <Text style={[s.hintTitle, { color: colors.textMain }]}>
-                نکات مهم
-              </Text>
+              <Text style={[s.hintTitle, { color: colors.textMain }]}>نکات مهم</Text>
             </View>
             <View style={s.hintList}>
               <View style={s.hintItem}>
@@ -508,7 +486,6 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Vazir-Bold',
   },
-
   // ═══════ Content ═══════
   content: {
     padding: 20,
@@ -551,7 +528,6 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-
   // ═══════ سکشن‌ها ═══════
   sectionHeader: {
     flexDirection: 'row',
@@ -570,7 +546,6 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
-
   // ═══════ کارت قیمت ═══════
   priceCard: {
     borderWidth: 1.5,
@@ -609,7 +584,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 20,
   },
-
   // ═══════ دکمه‌های اکشن ═══════
   actionButtonsSection: {
     gap: 12,
@@ -691,7 +665,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
-
   // ═══════ توضیحات ═══════
   descriptionText: {
     fontSize: 14,
@@ -699,7 +672,6 @@ const s = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'justify',
   },
-
   // ═══════ تاریخ ═══════
   dateRow: {
     flexDirection: 'row',
@@ -717,7 +689,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     flex: 1,
   },
-
   // ═══════ نکات مهم ═══════
   hintCard: {
     borderWidth: 1,

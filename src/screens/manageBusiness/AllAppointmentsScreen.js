@@ -11,6 +11,7 @@ import AppointmentCard from '../../components/manageBusiness/AppointmentCard';
 import AppointmentDetailSheet from '../../components/manageBusiness/AppointmentDetailSheet';
 import VerifyCodeModal from '../../components/manageBusiness/VerifyCodeModal';
 import CancelReasonModal from '../../components/manageBusiness/CancelReasonModal';
+import { todayJalaali } from '../../utils/dateUtils';
 
 const MOCK_APPOINTMENTS = [
   {
@@ -122,7 +123,7 @@ export default function AllAppointmentsScreen({ navigation }) {
       );
     }
     if (dateFilter) {
-      const todayJalaali = { jy: 1403, jm: 4, jd: 20 };
+      const todayJalaali = todayJalaali();
       result = result.filter(a => {
         const aptDate = a.date;
         if (dateFilter === 'today') {

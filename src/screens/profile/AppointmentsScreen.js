@@ -270,7 +270,7 @@ export default function AppointmentsScreen({ navigation }) {
   );
 
   const renderAppointment = apt => {
-    const meta = APPOINTMENT_STATUS_META[appointment.status] || APPOINTMENT_STATUS_META.reserved;
+  const meta = APPOINTMENT_STATUS_META[apt.status] || APPOINTMENT_STATUS_META.reserved;
     const showVerificationCard =
       apt.isUpcoming && apt.status === 'reserved' && apt.verificationCode;
 

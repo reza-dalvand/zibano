@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../../components/common/Card';
-import { toPersianDigit, formatPrice } from './helpers';
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 
 export default function PaymentStatsCard({ stats }) {
   const { colors } = useTheme();

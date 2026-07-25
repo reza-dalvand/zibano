@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Avatar from '../../../components/common/Avatar';
 import Button from '../../../components/common/Button';
-import { toPersianDigit, formatPrice } from './helpers';
+import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 import { APPOINTMENT_STATUS_META } from '../support/constants';
 
 export default function InvoiceModal({ visible, payment, onClose, onShare }) {

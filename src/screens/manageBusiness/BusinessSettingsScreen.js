@@ -1044,10 +1044,8 @@ const s = StyleSheet.create({
   deleteBtnText: {
     fontSize: 15,
     fontFamily: 'Vazir-Bold',
-    width:'35%',
-    alignItems:'center'
+    textAlign: 'center',
   },
-
   // ═══════════════ 🆕 مدال حذف ═══════════════
   modalBackdrop: {
     flex: 1,

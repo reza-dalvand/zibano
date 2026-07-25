@@ -166,10 +166,10 @@ export default function BusinessDetailsScreen({ navigation }) {
   const [portfolioInitialIndex, setPortfolioInitialIndex] = useState(0);
 
   // ─── Derived Values ───
-  const minServicePrice = useMemo(
-    () => Math.min(...biz.services.map((s) => s.price)),
-    [biz.services],
-  );
+  const minServicePrice = useMemo(() => {
+    if (!biz.services?.length) return 0;
+    return Math.min(...biz.services.map((s) => s.price));
+  }, [biz.services]);
 
   // ─── Handlers ───
   const openBooking = useCallback((service) => {
