@@ -81,8 +81,15 @@ export default function ExploreScreen({ navigation }) {
           <Icon name="collections" size={22} color={colors.primary} />
         </View>
 
-        {/* تایتل وسط */}
-        <Text style={[styles.headerTitle, { color: colors.textMain }]}>ویترین</Text>
+        {/* ✅ تایتل و subtitle وسط */}
+        <View style={styles.headerTitleBox}>
+          <Text style={[styles.headerTitle, { color: colors.textMain }]}>
+            ویترین
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            نمونه کار‌های تمام مشاغل در زیبانو
+          </Text>
+        </View>
 
         {/* دکمه فیلتر سمت چپ */}
         <TouchableOpacity
@@ -158,11 +165,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // ✅ container برای title و subtitle
+  headerTitleBox: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     fontSize: 18,
     fontFamily: 'Vazir-Bold',
-    flex: 1,
     textAlign: 'center',
+  },
+  // ✅ subtitle جدید
+  headerSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    textAlign: 'center',
+    marginTop: 2,
   },
   filterBtn: {
     width: 40,

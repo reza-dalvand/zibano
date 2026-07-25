@@ -15,7 +15,6 @@ import ServiceBookingCard from '../../components/home/ServiceBookingCard';
 import PortfolioGrid from '../../components/home/PortfolioGrid';
 import PortfolioModal from '../../components/home/PortfolioModal';
 import BusinessAbout from '../../components/home/BusinessAbout';
-import StickyBookingBar from '../../components/home/StickyBookingBar';
 import BookingModal from './BookingScreen';
 import BusinessMapButton from '../../components/home/BusinessMapButton';
 
@@ -276,9 +275,6 @@ export default function BusinessDetailsScreen({ navigation }) {
         {/* ─── Bottom Spacer for Sticky Bar ─── */}
         <View style={s.bottomSpacer} />
       </ScrollView>
-
-      {/* ═══ Sticky Booking Bar ═══ */}
-      <StickyBookingBar minPrice={minServicePrice} onBookPress={openBooking} />
 
       {/* ═══ Booking Modal ═══ */}
       <BookingModal
