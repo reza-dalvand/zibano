@@ -3,7 +3,6 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
-import { toPersianDigit } from '../../../utils/numberUtils';
 import { toPersianDigit, formatPriceShort } from '../../../utils/numberUtils';
 
 
