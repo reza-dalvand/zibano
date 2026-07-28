@@ -1,20 +1,18 @@
-// src/components/business/StickyBookingBar.js
+// src/components/home/StickyBookingBar.js
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
-
-const formatPrice = (num) => `${num.toLocaleString('fa-IR')} تومان`;
+import { formatPrice } from '../../utils/numberUtils';
 
 export default function StickyBookingBar({ minPrice, onBookPress }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  // 🎯 محاسبه دقیق: فاصله از پایین = insets.bottom + ارتفاع Navbar شناور (حدود ۷۰)
-  // این عدد باید دقیقاً با ارتفاع tab bar در AppNavigator هماهنگ باشد
-  const NAVBAR_HEIGHT = 80; // ارتفاع تقریبی Navbar شناور
+  // 🎯 محاسبه دقیق: فاصله از پایین = insets.bottom + ارتفاع Navbar شناور
+  const NAVBAR_HEIGHT = 80;
   const bottomOffset = Math.max(insets.bottom, 12) + NAVBAR_HEIGHT;
 
   return (
@@ -24,7 +22,7 @@ export default function StickyBookingBar({ minPrice, onBookPress }) {
         {
           backgroundColor: colors.cardBackground,
           borderTopColor: colors.border,
-          bottom: bottomOffset, // 🎯 کلید حل مشکل: فاصله از پایین کافی است
+          bottom: bottomOffset,
           paddingBottom: 12,
         },
       ]}
@@ -34,6 +32,7 @@ export default function StickyBookingBar({ minPrice, onBookPress }) {
           <Text style={[s.bottomBarFrom, { color: colors.textSecondary }]}>
             شروع از
           </Text>
+          {/* 🎯 استفاده از formatPrice مشترک */}
           <Text style={[s.bottomBarPriceValue, { color: colors.primary }]}>
             {formatPrice(minPrice)}
           </Text>

@@ -20,6 +20,7 @@ import SeeAllButton from '../../components/home/SeeAllButton';
 import ReviewModal from '../../components/customer/ReviewModal'; // 🆕
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useReviewStore } from '../../stores/useReviewStore';
+import SectionHeader from '../../components/common/SectionHeader';
 
 // 🎯 داده‌های آگهی‌ها با businessId
 const MOCK_ADS = [
@@ -134,21 +135,7 @@ const MOCK_DONE_APPOINTMENTS = [
   // },
 ];
 
-function SectionHeader({ title, onSeeAll, colors, icon, iconColor, count }) {
-  return (
-    <View style={s.sectionHeader}>
-      <View style={s.titleRow}>
-        {icon && (
-          <View style={[s.iconBox, { backgroundColor: (iconColor || colors.primary) + '15' }]}>
-            <Icon name={icon} size={18} color={iconColor || colors.primary} />
-          </View>
-        )}
-        <Text style={[s.sectionTitle, { color: colors.textMain }]}>{title}</Text>
-      </View>
-      {onSeeAll && <SeeAllButton onPress={onSeeAll} count={count} />}
-    </View>
-  );
-}
+
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
@@ -230,11 +217,10 @@ export default function HomeScreen({ navigation }) {
         {/* ۲. دسته‌بندی خدمات */}
         <View style={s.section}>
           <SectionHeader
-            title="دسته‌بندی خدمات"
-            colors={colors}
             icon="category"
             iconColor="#FF9800"
-            count={MOCK_CATEGORIES.length}
+            title="دسته‌بندی خدمات"
+            rightElement={<SeeAllButton onPress={() => {}} count={MOCK_CATEGORIES.length} />}
           />
           <CategoryGrid
             categories={MOCK_CATEGORIES}

@@ -6,174 +6,102 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
-  Linking,
-  Alert,
   Share,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
+import DetailHero from '../../components/common/DetailHero';
+import ActionButtons from '../../components/common/ActionButtons';
+import SectionHeader from '../../components/common/SectionHeader';
+import InfoRow from '../../components/common/InfoRow';
+import CostTypeBadge from '../../components/common/CostTypeBadge';
 import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
 
-const COST_TYPE_META = {
-  paid: {
-    label: 'با هزینه',
-    icon: 'attach-money',
-    color: '#2196F3',
-    description: 'مدل بخشی از هزینه خدمت را پرداخت می‌کند',
-  },
-  material_cost: {
-    label: 'با هزینه مواد',
-    icon: 'science',
-    color: '#FF9800',
-    description: 'فقط هزینه مواد مصرفی دریافت می‌شود',
-  },
-  free: {
-    label: 'کاملاً رایگان',
-    icon: 'redeem',
-    color: '#4CAF50',
-    description: 'هیچ هزینه‌ای از مدل دریافت نمی‌شود',
-  },
-};
-
 export default function ModelRequestDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const { request } = route.params;
   const [isSaved, setIsSaved] = useState(false);
+
+  // 🎯 متادیتای نوع هزینه
+  const COST_TYPE_META = {
+    paid: {
+      label: 'با هزینه',
+      icon: 'attach-money',
+      color: '#2196F3',
+      description: 'مدل بخشی از هزینه خدمت را پرداخت می‌کند',
+    },
+    material_cost: {
+      label: 'با هزینه مواد',
+      icon: 'science',
+      color: '#FF9800',
+      description: 'فقط هزینه مواد مصرفی دریافت می‌شود',
+    },
+    free: {
+      label: 'کاملاً رایگان',
+      icon: 'redeem',
+      color: '#4CAF50',
+      description: 'هیچ هزینه‌ای از مدل دریافت نمی‌شود',
+    },
+  };
 
   const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
   const shareUrl = `https://zibano.app/model-request/${request.id}`;
 
-  // ✅ هندلر تماس - با فراخوانی صحیح cleanPhone
-  const handleCall = async () => {
+  // 🎯 هندلرهای ActionButtons
+  const handleCall = () => {
     if (!request.contactPhone) {
       Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
       return;
     }
-
-    // 🎯 اصلاح باگ: فراخوانی تابع cleanPhone و ذخیره در متغیر محلی
     const cleanedPhone = cleanPhone(request.contactPhone);
-    
     if (!cleanedPhone) {
       Alert.alert('خطا', 'شماره تماس معتبر نیست');
       return;
     }
-
-    try {
-      const phoneUrl = `tel:${cleanedPhone}`;
-      const canCall = await Linking.canOpenURL(phoneUrl);
-      
-      if (canCall) {
-        await Linking.openURL(phoneUrl);
-      } else {
-        Alert.alert(
-          'خطا در برقراری تماس',
-          `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
-        );
-      }
-    } catch (error) {
-      console.log('Call error:', error);
-      Alert.alert(
-        'خطا در برقراری تماس',
-        `لطفاً به صورت دستی با شماره زیر تماس بگیرید:\n${toPersianDigit(cleanedPhone)}`,
-      );
-    }
-  };
-
-  const handleBusinessPress = () => {
-    navigation.navigate('BusinessDetails', {
-      businessId: request.businessId || '1',
-    });
   };
 
   const handleShare = async () => {
     const shareMessage = `${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}\n🔗 ${shareUrl}`;
-
     try {
-      const result = await Share.share(
-        {
-          message: shareMessage,
-          url: shareUrl,
-          title: request.title,
-        },
-        {
-          dialogTitle: 'اشتراک‌گذاری آگهی',
-          excludedActivityTypes: [],
-        },
-      );
-
-      if (result.action === Share.sharedAction) {
-        console.log('✅ اشتراک‌گذاری موفق با:', result.activityType);
-      } else if (result.action === Share.dismissedAction) {
-        console.log('کاربر انصراف داد');
-      }
+      await Share.share({ message: shareMessage, url: shareUrl, title: request.title });
     } catch (error) {
-      console.log('Share error:', error);
-      Alert.alert(
-        'خطا در اشتراک‌گذاری',
-        'متاسفانه امکان اشتراک‌گذاری وجود ندارد. لطفاً دوباره تلاش کنید.',
-      );
+      Alert.alert('خطا در اشتراک‌گذاری', 'متاسفانه امکان اشتراک‌گذاری وجود ندارد.');
     }
   };
 
-  const handleSaveToggle = () => {
-    setIsSaved(!isSaved);
+  const handleSaveToggle = () => setIsSaved(!isSaved);
+
+  const handleBusinessPress = () => {
+    navigation.navigate('BusinessDetails', { businessId: request.businessId || '1' });
   };
 
-  // 🎯 محاسبه ارتفاع hero
-  const HERO_BASE_HEIGHT = 320;
-  const heroHeight = HERO_BASE_HEIGHT + insets.top;
+  // 🎯 Badges برای DetailHero
+  const heroBadges = [
+    {
+      container: [styles.costBadgeHero, { backgroundColor: costMeta.color }],
+      icon: costMeta.icon,
+      iconSize: 12,
+      iconColor: '#fff',
+      text: costMeta.label,
+      textStyle: styles.costBadgeHeroText,
+    },
+  ];
 
   return (
     <ScreenWrapper padding={0} edges={['top', 'bottom', 'left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ═══════ Hero Image ═══════ */}
-        <View
-          style={[
-            s.heroImageContainer,
-            {
-              height: heroHeight,
-              marginTop: -insets.top,
-            },
-          ]}
-        >
-          <Image source={{ uri: request.serviceImage }} style={s.heroImage} />
-          <View style={s.heroGradient} />
-
-          {/* دکمه‌های بالا - با فاصله از notch */}
-          <View style={[s.heroTopActions, { top: insets.top + 12 }]}>
-            <TouchableOpacity
-              style={s.heroActionButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Icon name="arrow-forward" size={22} color="#fff" />
-            </TouchableOpacity>
-            <View style={{ flex: 1 }} />
-            <TouchableOpacity
-              style={s.heroActionButton}
-              onPress={handleSaveToggle}
-            >
-              <Icon
-                name={isSaved ? 'bookmark' : 'bookmark-border'}
-                size={22}
-                color={isSaved ? '#FFD700' : '#fff'}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Badge‌ها */}
-          <View style={s.heroBadges}>
-            <View style={[s.costBadge, { backgroundColor: costMeta.color }]}>
-              <Icon name={costMeta.icon} size={12} color="#fff" />
-              <Text style={s.costBadgeText}>{costMeta.label}</Text>
-            </View>
-          </View>
-        </View>
+        {/* ═══════ 🎯 DetailHero مشترک ═══════ */}
+        <DetailHero
+          imageUrl={request.serviceImage}
+          onBack={() => navigation.goBack()}
+          onSave={handleSaveToggle}
+          isSaved={isSaved}
+          badges={heroBadges}
+        />
 
         {/* ═══════ محتوا ═══════ */}
         <View style={s.content}>
@@ -183,19 +111,11 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
           <TouchableOpacity onPress={handleBusinessPress} activeOpacity={0.85}>
             <Card variant="elevated" padding={14} radius={16} style={s.businessCard}>
               <View style={s.businessRow}>
-                <View
-                  style={[
-                    s.businessIconBox,
-                    { backgroundColor: colors.primary + '15' },
-                  ]}
-                >
+                <View style={[s.businessIconBox, { backgroundColor: colors.primary + '15' }]}>
                   <Icon name="store" size={22} color={colors.primary} />
                 </View>
                 <View style={s.businessInfo}>
-                  <Text
-                    style={[s.businessName, { color: colors.textMain }]}
-                    numberOfLines={1}
-                  >
+                  <Text style={[s.businessName, { color: colors.textMain }]} numberOfLines={1}>
                     {request.businessName}
                   </Text>
                   <View style={s.businessMeta}>
@@ -210,39 +130,58 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             </Card>
           </TouchableOpacity>
 
-          {/* ═══════ توضیحات ═══════ */}
-          <Card variant="elevated" padding={16} radius={16}>
-            <View style={s.sectionHeader}>
-              <View style={[s.sectionIconBox, { backgroundColor: '#2196F315' }]}>
-                <Icon name="description" size={18} color="#2196F3" />
+          {/* ═══════ 🎯 کارت نوع هزینه با CostTypeBadge ═══════ */}
+          <Card
+            variant="elevated"
+            padding={16}
+            radius={16}
+            style={[s.costCard, { borderColor: costMeta.color + '40' }]}
+          >
+            <View style={s.costHeader}>
+              <View style={[s.costIconBox, { backgroundColor: costMeta.color + '15' }]}>
+                <Icon name={costMeta.icon} size={20} color={costMeta.color} />
               </View>
-              <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-                توضیحات آگهی
-              </Text>
+              <View style={s.costInfo}>
+                <Text style={[s.costLabel, { color: colors.textSecondary }]}>
+                  وضعیت هزینه
+                </Text>
+                {/* 🎯 استفاده از CostTypeBadge مشترک */}
+                <CostTypeBadge
+                  type={request.costType}
+                  variant="default"
+                />
+              </View>
             </View>
+            <Text style={[s.costDescription, { color: colors.textSecondary }]}>
+              {costMeta.description}
+            </Text>
+          </Card>
+
+          {/* ═══════ 🎯 توضیحات با SectionHeader ═══════ */}
+          <Card variant="elevated" padding={16} radius={16}>
+            <SectionHeader
+              icon="description"
+              iconColor="#2196F3"
+              title="توضیحات آگهی"
+            />
             <Text style={[s.descriptionText, { color: colors.textMain }]}>
               {request.description}
             </Text>
           </Card>
 
-          {/* ═══════ 🎯 دکمه‌های اکشن ═══════ */}
+          {/* ═══════ 🎯 دکمه‌های اکشن با ActionButtons مشترک ═══════ */}
           <View style={s.actionButtonsSection}>
-            <View style={s.sectionHeader}>
-              <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5015' }]}>
-                <Icon name="handshake" size={18} color="#4CAF50" />
-              </View>
-              <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-                ارتباط و رزرو
-              </Text>
-            </View>
+            <SectionHeader
+              icon="handshake"
+              iconColor="#4CAF50"
+              title="ارتباط و رزرو"
+            />
 
+            {/* نمایش شماره تلفن */}
             <View
               style={[
                 s.phoneDisplayBox,
-                {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
-                },
+                { backgroundColor: colors.background, borderColor: colors.border },
               ]}
             >
               <View style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}>
@@ -260,99 +199,56 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={handleCall}
-              activeOpacity={0.85}
-              style={[s.callBtn, { backgroundColor: '#4CAF50' }]}
-            >
-              <View style={s.callBtnIconWrap}>
-                <Icon name="call" size={20} color="#fff" />
-              </View>
-              <View style={s.callBtnTextCol}>
-                <Text style={s.callBtnTitle}>رزرو و تماس</Text>
-                <Text style={s.callBtnSubtitle}>
-                  {request.contactPhone
-                    ? toPersianDigit(request.contactPhone)
-                    : 'شماره ثبت نشده'}
-                </Text>
-              </View>
-              <Icon name="arrow-back" size={22} color="#fff" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleShare}
-              activeOpacity={0.85}
-              style={[
-                s.shareBtn,
-                {
-                  backgroundColor: colors.cardBackground,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Icon name="share" size={20} color={colors.primary} />
-              <Text style={[s.shareBtnText, { color: colors.textMain }]}>
-                اشتراک‌گذاری این فرصت با دوستان
-              </Text>
-              <Icon name="arrow-back" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
+            {/* 🎯 استفاده از ActionButtons مشترک */}
+            <ActionButtons
+              phone={cleanPhone(request.contactPhone)}
+              shareMessage={`${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}`}
+              shareUrl={shareUrl}
+            />
           </View>
 
-          {/* ═══════ اطلاعات زمانی ═══════ */}
+          {/* ═══════ 🎯 اطلاعات زمانی با SectionHeader و InfoRow ═══════ */}
           <Card variant="elevated" padding={16} radius={16}>
-            <View style={s.sectionHeader}>
-              <View style={[s.sectionIconBox, { backgroundColor: '#FF980015' }]}>
-                <Icon name="schedule" size={18} color="#FF9800" />
-              </View>
-              <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-                اطلاعات زمانی
-              </Text>
-            </View>
-            <View style={s.dateRow}>
-              <Icon name="event-note" size={16} color="#43A047" />
-              <Text style={[s.dateLabel, { color: colors.textSecondary }]}>
-                تاریخ ایجاد:
-              </Text>
-              <Text style={[s.dateValue, { color: colors.textMain }]}>
-                {request.createdAt}
-              </Text>
-            </View>
-            <View style={s.dateRow}>
-              <Icon name="event-busy" size={16} color="#E53935" />
-              <Text style={[s.dateLabel, { color: colors.textSecondary }]}>
-                تاریخ انقضا:
-              </Text>
-              <Text style={[s.dateValue, { color: colors.textMain }]}>
-                {request.expiresAt}
-              </Text>
-            </View>
+            <SectionHeader
+              icon="schedule"
+              iconColor="#FF9800"
+              title="اطلاعات زمانی"
+            />
+            <InfoRow
+              icon="event-note"
+              iconColor="#43A047"
+              label="تاریخ ایجاد:"
+              value={request.createdAt}
+              showDivider
+            />
+            <InfoRow
+              icon="event-busy"
+              iconColor="#E53935"
+              label="تاریخ انقضا:"
+              value={request.expiresAt}
+            />
           </Card>
 
           {/* ═══════ نکات مهم ═══════ */}
           <Card variant="default" padding={14} radius={14} style={s.hintCard}>
-            <View style={s.hintHeader}>
-              <Icon name="lightbulb" size={18} color="#FFC107" />
-              <Text style={[s.hintTitle, { color: colors.textMain }]}>نکات مهم</Text>
-            </View>
+            <SectionHeader
+              icon="lightbulb"
+              iconColor="#FFC107"
+              title="نکات مهم"
+            />
             <View style={s.hintList}>
-              <View style={s.hintItem}>
-                <Icon name="check-circle" size={14} color="#4CAF50" />
-                <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  قبل از تماس، شرایط آگهی را به دقت مطالعه کنید
-                </Text>
-              </View>
-              <View style={s.hintItem}>
-                <Icon name="check-circle" size={14} color="#4CAF50" />
-                <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  برای رزرو نوبت با سالن تماس بگیرید
-                </Text>
-              </View>
-              <View style={s.hintItem}>
-                <Icon name="check-circle" size={14} color="#4CAF50" />
-                <Text style={[s.hintText, { color: colors.textSecondary }]}>
-                  مدل‌ها اجازه استفاده از تصاویر را به سالن می‌دهند
-                </Text>
-              </View>
+              {[
+                'قبل از تماس، شرایط آگهی را به دقت مطالعه کنید',
+                'برای رزرو نوبت با سالن تماس بگیرید',
+                'مدل‌ها اجازه استفاده از تصاویر را به سالن می‌دهند',
+              ].map((text, i) => (
+                <View key={i} style={s.hintItem}>
+                  <Icon name="check-circle" size={14} color="#4CAF50" />
+                  <Text style={[s.hintText, { color: colors.textSecondary }]}>
+                    {text}
+                  </Text>
+                </View>
+              ))}
             </View>
           </Card>
 
@@ -364,75 +260,6 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
 }
 
 const s = StyleSheet.create({
-  // ═══════ Hero Image ═══════
-  heroImageContainer: {
-    width: '100%',
-    position: 'relative',
-    backgroundColor: '#000',
-  },
-  heroImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    resizeMode: 'cover',
-  },
-  heroGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 120,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-  },
-  heroTopActions: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  heroActionButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-  heroBadges: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  costBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  costBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
-  },
-  // ═══════ Content ═══════
   content: {
     padding: 20,
     gap: 16,
@@ -474,29 +301,35 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
-  // ═══════ سکشن‌ها ═══════
-  sectionHeader: {
+  // ═══════ کارت نوع هزینه ═══════
+  costCard: {
+    borderWidth: 1.5,
+    gap: 10,
+  },
+  costHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 12,
   },
-  sectionIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 11,
+  costIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sectionTitle: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
+  costInfo: {
+    flex: 1,
+    gap: 4,
   },
-  descriptionText: {
-    fontSize: 14,
+  costLabel: {
+    fontSize: 12,
     fontFamily: 'Vazir',
-    lineHeight: 26,
-    textAlign: 'justify',
+  },
+  costDescription: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
+    lineHeight: 20,
   },
   // ═══════ دکمه‌های اکشن ═══════
   actionButtonsSection: {
@@ -530,85 +363,16 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     letterSpacing: 1,
   },
-  callBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  callBtnIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  callBtnTextCol: {
-    flex: 1,
-    gap: 2,
-  },
-  callBtnTitle: {
-    color: '#fff',
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-  },
-  callBtnSubtitle: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  shareBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  shareBtnText: {
+  // ═══════ توضیحات ═══════
+  descriptionText: {
     fontSize: 14,
-    fontFamily: 'Vazir-Bold',
-    flex: 1,
-  },
-  // ═══════ تاریخ ═══════
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 6,
-  },
-  dateLabel: {
-    fontSize: 13,
     fontFamily: 'Vazir',
-    minWidth: 90,
-  },
-  dateValue: {
-    fontSize: 13,
-    fontFamily: 'Vazir-Bold',
-    flex: 1,
+    lineHeight: 26,
+    textAlign: 'justify',
   },
   // ═══════ نکات مهم ═══════
   hintCard: {
     borderWidth: 1,
-  },
-  hintHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 10,
-  },
-  hintTitle: {
-    fontSize: 14,
-    fontFamily: 'Vazir-Bold',
   },
   hintList: {
     gap: 8,
@@ -623,5 +387,24 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     flex: 1,
     lineHeight: 20,
+  },
+  // ═══════ Badges برای DetailHero ═══════
+  costBadgeHero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  costBadgeHeroText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
   },
 });

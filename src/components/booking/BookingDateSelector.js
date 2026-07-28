@@ -3,12 +3,13 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 import { 
   toJalaali, 
   PERSIAN_MONTHS, 
   PERSIAN_WEEKDAYS 
 } from '../../utils/dateUtils';
+import SectionHeader from '../common/SectionHeader';
 
 // تولید روزهای موجود (شبیه‌سازی - در آینده از API)
 const generateAvailableDates = () => {
@@ -65,19 +66,12 @@ export default function BookingDateSelector({ selectedDate, onDateSelect }) {
 
   return (
     <View style={s.container}>
-      <View style={s.sectionHeader}>
-        <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}>
-          <Icon name="event" size={18} color={colors.primary} />
-        </View>
-        <View style={s.sectionHeaderText}>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-            روز مورد نظر را انتخاب کنید
-          </Text>
-          <Text style={[s.sectionSubtitle, { color: colors.textSecondary }]}>
-            {toPersianDigit(availableDates.length)} روز فعال برای رزرو
-          </Text>
-        </View>
-      </View>
+      <SectionHeader
+        icon="event"
+        iconColor={colors.primary}
+        title="روز مورد نظر را انتخاب کنید"
+        subtitle={`${toPersianDigit(availableDates.length)} روز فعال برای رزرو`}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

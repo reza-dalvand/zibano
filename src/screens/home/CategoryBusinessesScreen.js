@@ -12,6 +12,7 @@ import EmptyState from '../../components/common/EmptyState';
 import CategoryHeader from '../../components/home/CategoryHeader';
 import BusinessListCard from '../../components/home/BusinessListCard';
 import CategoryFilterModal from '../../components/home/CategoryFilterModal';
+import EmptyStateVariants from '../../components/common/EmptyStateVariants';
 
 const CATEGORY_META = {
   1: { icon: 'face', color: '#E91E63' },
@@ -258,32 +259,16 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
         }
       >
         <View style={s.listContainer}>
-          {filteredData.length > 0 ? (
-            filteredData.map((business) => (
-              <BusinessListCard
-                key={business.id}
-                business={business}
-                categoryIcon={categoryMeta.icon}
-                onPress={() => handleBusinessPress(business)}
-              />
-            ))
-          ) : (
+          {filteredData.length === 0 && (
             <View style={s.emptyContainer}>
-              <EmptyState
-                icon="🔍"
+              <EmptyStateVariants
+                variant="service"
                 title="کسب‌وکاری یافت نشد"
-                description={
-                  search
-                    ? 'با این عبارت جستجو نتیجه‌ای پیدا نشد.'
-                    : 'فیلترهای خود را تغییر دهید تا نتایج بیشتری ببینید.'
-                }
+                description={search ? 'با این عبارت جستجو نتیجه‌ای پیدا نشد.' : 'فیلترهای خود را تغییر دهید'}
                 actionLabel={search ? 'پاک کردن جستجو' : 'حذف فیلترها'}
                 onAction={() => {
-                  if (search) {
-                    setSearch('');
-                  } else {
-                    setFilters({ serviceType: null, sortBy: 'all' });
-                  }
+                  if (search) setSearch('');
+                  else setFilters({ serviceType: null, sortBy: 'all' });
                 }}
               />
             </View>

@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import EmptyStateVariants from '../common/EmptyStateVariants';
 
 const MOCK_NOTIFICATIONS = [
   {
@@ -148,26 +149,11 @@ export default function NotificationModal({ visible, onClose }) {
             
             {/* Actions Bar */}
             {notifications.length > 0 && (
-              <View style={[s.actionsBar, { borderBottomColor: colors.border }]}>
-                {unreadCount > 0 && (
-                  <TouchableOpacity
-                    onPress={markAllAsRead}
-                    style={s.actionBtn}
-                  >
-                    <Icon name="done-all" size={16} color={colors.primary} />
-                    <Text style={[s.actionText, { color: colors.primary }]}>
-                      خواندن همه
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                <View style={{ flex: 1 }} />
-                <TouchableOpacity onPress={deleteAll} style={s.actionBtn}>
-                  <Icon name="delete-sweep" size={16} color="#E53935" />
-                  <Text style={[s.actionText, { color: '#E53935' }]}>
-                    پاک کردن همه
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <EmptyStateVariants
+                variant="appointment"
+                title="اعلانی وجود ندارد"
+                description="در حال حاضر اعلان جدیدی برای نمایش وجود ندارد"
+              />
             )}
             
             {/* Notifications List */}

@@ -17,8 +17,9 @@ import BookingTimeSelector from '../../components/booking/BookingTimeSelector';
 import BookingStepIndicator from '../../components/booking/BookingStepIndicator';
 import PaymentSummaryCard from '../../components/booking/PaymentSummaryCard';
 import RulesCard from '../../components/booking/RulesCard';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 import { PERSIAN_MONTHS } from '../../utils/dateUtils';
+import PriceBreakdown from '../../components/common/PriceBreakdown';
 
 
 // 🎯 فقط ۳ مرحله (مرحله تایید حذف شد)
@@ -429,7 +430,16 @@ export default function BookingModal({
               </View>
             </View>
             {currentService && (
-              <PaymentSummaryCard service={currentService} colors={colors} />
+              <PriceBreakdown
+                originalPrice={originalPrice}
+                discountPercent={discountPercent}
+                finalPrice={finalPrice}
+                hasDeposit={hasDeposit}
+                depositPercent={depositPercent}
+                depositAmount={depositAmount}
+                showRemaining={true}
+                variant="detailed"
+              />           
             )}
 
             {/* بخش ۲: قوانین رزرو */}
