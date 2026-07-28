@@ -55,8 +55,7 @@ export const formatJalaaliDate = (dateStr) => {
   // حالت ۱: string با فرمت YYYY/MM/DD (مثل "1405/02/02" یا "۱۴۰۵/۰۲/۰۲")
   if (typeof dateStr === 'string') {
     // بررسی فرمت تاریخ شمسی
-    const normalizedStr = dateStr.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-    if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(normalizedStr)) {
+      const normalizedStr = dateStr.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));    if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(normalizedStr)) {
       // تبدیل ارقام فارسی/عربی به انگلیسی
       const eng = normalizedStr
         .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
