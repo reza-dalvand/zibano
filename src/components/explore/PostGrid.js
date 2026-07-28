@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import PostThumbnail from './PostThumbnail';
+import EmptyStateVariants from '../common/EmptyStateVariants';
 
 export default function PostGrid({
   posts,
@@ -13,26 +14,15 @@ export default function PostGrid({
   ListHeaderComponent, // 🆕 هدر سفارشی (شامل هدر صفحه + چیپ‌ها)
 }) {
   const { colors } = useTheme();
-
+  
   const renderEmpty = () => (
-    <View style={styles.emptyState}>
-      <Icon name="search-off" size={64} color={colors.textSecondary + '60'} />
-      <Text style={[styles.emptyTitle, { color: colors.textMain }]}>
-        نتیجه‌ای یافت نشد
-      </Text>
-      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-        فیلترهای خود را تغییر دهید
-      </Text>
-      {onClearFilters && (
-        <Button
-          title="حذف فیلترها"
-          onPress={onClearFilters}
-          variant="outline"
-          size="md"
-          style={{ marginTop: 16 }}
-        />
-      )}
-    </View>
+    <EmptyStateVariants
+      variant="portfolio"
+      title="نتیجه‌ای یافت نشد"
+      description="فیلترهای خود را تغییر دهید"
+      actionLabel={onClearFilters ? "حذف فیلترها" : null}
+      onAction={onClearFilters}
+    />
   );
 
   return (

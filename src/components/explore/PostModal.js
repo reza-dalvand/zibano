@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   Modal,
   ScrollView,
   TouchableOpacity,
@@ -36,12 +35,12 @@ export default function PostModal({
 }) {
   const { colors, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-
+  
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const modalScale = useRef(new Animated.Value(0.85)).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
-
+  
   const [isSaved, setIsSaved] = useState(post?.saved || false);
 
   // ✅ تشخیص نوع پست (مجله یا کسب‌وکار)
@@ -104,6 +103,29 @@ export default function PostModal({
     }, 300);
   };
 
+  // 🎯 ساخت badges برای DetailHero
+  const heroBadges = [];
+  if (isMagazine) {
+    heroBadges.push({
+      container: styles.magazineBadge,
+      icon: 'auto-awesome',
+      iconSize: 12,
+      iconColor: '#fff',
+      text: 'مجله زیبانو',
+      textStyle: styles.magazineBadgeText,
+    });
+  }
+  if (post.gallery && post.gallery.length > 1) {
+    heroBadges.push({
+      container: styles.imageCounterBadge,
+      icon: 'arrow-forward-ios',
+      iconSize: 12,
+      iconColor: '#fff',
+      text: `${toPersianDigit(post.gallery.length)} تصویر`,
+      textStyle: styles.imageCounterText,
+    });
+  }
+
   return (
     <Modal
       visible={visible}
@@ -123,7 +145,7 @@ export default function PostModal({
           ]}
         />
       </TouchableWithoutFeedback>
-
+      
       <Animated.View
         style={[
           styles.modal,
@@ -159,9 +181,7 @@ export default function PostModal({
           >
             <Icon name="close" size={22} color={colors.textMain} />
           </TouchableOpacity>
-
           <View style={{ flex: 1 }} />
-
           <TouchableOpacity
             onPress={handleShare}
             style={[
@@ -172,7 +192,6 @@ export default function PostModal({
           >
             <Icon name="share" size={20} color={colors.textMain} />
           </TouchableOpacity>
-
           <TouchableOpacity
             onPress={handleSave}
             style={[
@@ -192,31 +211,9 @@ export default function PostModal({
           </TouchableOpacity>
         </View>
 
-        {/* اسلایدر تصاویر */}
+        {/* 🎯 استفاده از GallerySlider برای گالری تصاویر */}
         <View style={styles.galleryWrapper}>
           <GallerySlider gallery={post.gallery} containerWidth={MODAL_WIDTH} />
-
-          {/* تگ منبع روی گالری (فقط برای مجله) */}
-          {isMagazine && (
-            <View style={styles.sourceBadgeOnGallery}>
-              <Icon name="auto-awesome" size={12} color="#fff" />
-              <Text style={styles.sourceBadgeText}>مجله زیبانو</Text>
-            </View>
-          )}
-
-          {post.gallery && post.gallery.length > 1 && (
-            <View
-              style={[
-                styles.imageCounter,
-                { backgroundColor: 'rgba(0, 0, 0, 0.65)' },
-              ]}
-            >
-              <Icon name="arrow-forward-ios" size={12} color="#fff" />
-              <Text style={styles.imageCounterText}>
-                {toPersianDigit(post.gallery.length)} تصویر
-              </Text>
-            </View>
-          )}
         </View>
 
         {/* اطلاعات کسب‌وکار - فقط برای پست‌های کسب‌وکار */}
@@ -463,7 +460,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: '#000',
   },
-  sourceBadgeOnGallery: {
+  magazineBadge: {
     position: 'absolute',
     top: 16,
     left: 16,
@@ -480,12 +477,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  sourceBadgeText: {
+  magazineBadgeText: {
     color: '#fff',
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
-  imageCounter: {
+  imageCounterBadge: {
     position: 'absolute',
     top: 16,
     right: 16,

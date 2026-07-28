@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
+import SectionHeader from '../../components/common/SectionHeader';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   FilterModal,
@@ -22,7 +23,6 @@ const INITIAL_FILTERS = {
 export default function ExploreScreen({ navigation }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [activePost, setActivePost] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -76,39 +76,31 @@ export default function ExploreScreen({ navigation }) {
           },
         ]}
       >
-        {/* آیکون ویترین سمت راست */}
-        <View style={[styles.headerIconBox, { backgroundColor: colors.primary + '15' }]}>
-          <Icon name="collections" size={22} color={colors.primary} />
-        </View>
-
-        {/* ✅ تایتل و subtitle وسط */}
-        <View style={styles.headerTitleBox}>
-          <Text style={[styles.headerTitle, { color: colors.textMain }]}>
-            ویترین
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-            نمونه کار‌های تمام مشاغل در زیبانو
-          </Text>
-        </View>
-
-        {/* دکمه فیلتر سمت چپ */}
-        <TouchableOpacity
-          onPress={() => setFilterVisible(true)}
-          style={[
-            styles.filterBtn,
-            {
-              backgroundColor: hasActiveFilter ? colors.primary + '15' : colors.cardBackground,
-              borderColor: hasActiveFilter ? colors.primary : colors.border,
-            },
-          ]}
-        >
-          <Icon name="tune" size={20} color={hasActiveFilter ? colors.primary : colors.textMain} />
-          {hasActiveFilter && (
-            <View style={[styles.filterBadge, { backgroundColor: colors.primary }]} />
-          )}
-        </TouchableOpacity>
+        {/* 🎯 استفاده از SectionHeader */}
+        <SectionHeader
+          icon="collections"
+          title="ویترین"
+          subtitle="نمونه کار‌های تمام مشاغل در زیبانو"
+          iconColor={colors.primary}
+          rightElement={
+            <TouchableOpacity
+              onPress={() => setFilterVisible(true)}
+              style={[
+                styles.filterBtn,
+                {
+                  backgroundColor: hasActiveFilter ? colors.primary + '15' : colors.cardBackground,
+                  borderColor: hasActiveFilter ? colors.primary : colors.border,
+                },
+              ]}
+            >
+              <Icon name="tune" size={20} color={hasActiveFilter ? colors.primary : colors.textMain} />
+              {hasActiveFilter && (
+                <View style={[styles.filterBadge, { backgroundColor: colors.primary }]} />
+              )}
+            </TouchableOpacity>
+          }
+        />
       </View>
-
       {/* چیپ‌های فیلتر فعال */}
       <ActiveFilterChips filters={filters} onChange={setFilters} />
     </View>
@@ -128,7 +120,6 @@ export default function ExploreScreen({ navigation }) {
         onClearFilters={hasActiveFilter ? handleClearFilters : null}
         ListHeaderComponent={renderHeader()}
       />
-
       {/* مدال فیلتر */}
       <FilterModal
         visible={filterVisible}
@@ -136,7 +127,6 @@ export default function ExploreScreen({ navigation }) {
         onApply={setFilters}
         currentFilters={filters}
       />
-
       {/* مدال پست */}
       <PostModal
         post={activePost}
@@ -151,37 +141,9 @@ export default function ExploreScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-  },
-  headerIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // ✅ container برای title و subtitle
-  headerTitleBox: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: 'Vazir-Bold',
-    textAlign: 'center',
-  },
-  // ✅ subtitle جدید
-  headerSubtitle: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-    textAlign: 'center',
-    marginTop: 2,
   },
   filterBtn: {
     width: 40,

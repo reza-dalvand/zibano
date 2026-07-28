@@ -22,7 +22,6 @@ export default function PostActionBar({ post, onSave, onShare }) {
           {post.saved ? 'ذخیره‌شده' : 'علاقه‌مندی'}
         </Text>
       </TouchableOpacity>
-
       <TouchableOpacity
         style={[styles.btn, { borderColor: colors.border }]}
         onPress={() => onShare(post)}
