@@ -4,12 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import { toPersianDigit } from '../../../utils/numberUtils';
+import { toPersianDigit, formatPriceShort } from '../../../utils/numberUtils';
 
-const formatPrice = (num) => {
-  if (num >= 1000000) return `${toPersianDigit((num / 1000000).toFixed(1))}M`;
-  if (num >= 1000) return `${toPersianDigit((num / 1000).toFixed(0))}K`;
-  return toPersianDigit(num);
-};
 
 const STATS = [
   { key: 'total',     icon: 'apps',              color: '#667eea', label: 'کل خدمات' },
@@ -29,7 +25,7 @@ export default function ServiceStats({ services }) {
   const values = {
     total: toPersianDigit(total),
     active: toPersianDigit(active),
-    avgPrice: formatPrice(avgPrice),
+    avgPrice: formatPriceShort(avgPrice),
   };
 
   return (

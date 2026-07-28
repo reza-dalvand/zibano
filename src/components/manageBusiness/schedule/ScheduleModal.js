@@ -23,7 +23,8 @@ import {
   isLeapJalaaliYear,
   jalaaliMonthLength,
   minutesToTime,
-  timeToMinutes
+  timeToMinutes,
+  getFirstDayOfWeekJalaali
 } from '../../../utils/dateUtils';
 
 
@@ -345,34 +346,7 @@ function CalendarStep({ selectedDate, onSelect }) {
 
   const monthLength = jalaaliMonthLength(viewMonth.jy, viewMonth.jm);
 
-  const firstDayOfWeek = useMemo(() => {
-    const { jy, jm } = viewMonth;
-    let gy = (jy <= 979) ? 621 : 1600;
-    let tempJy = jy - ((jy <= 979) ? 0 : 979);
-    let days = (365 * tempJy) + (Math.floor(tempJy / 33) * 8)
-      + Math.floor(((tempJy % 33) + 3) / 4) + 78 + 1
-      + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
-    gy += 400 * Math.floor(days / 146097);
-    days %= 146097;
-    if (days > 36524) {
-      gy += 100 * Math.floor(--days / 36524);
-      days %= 36524;
-      if (days >= 365) days++;
-    }
-    gy += 4 * Math.floor(days / 1461);
-    days %= 1461;
-    if (days > 365) {
-      gy += Math.floor((days - 1) / 365);
-      days = (days - 1) % 365;
-    }
-    let gd = days + 1;
-    const sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28,
-      31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let gm = 0;
-    for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
-    const d = new Date(gy, gm - 1, gd);
-    return (d.getDay() + 1) % 7;
-  }, [viewMonth]);
+  const firstDayOfWeek = getFirstDayOfWeekJalaali(viewMonth.jy, viewMonth.jm);
 
   const isSameDate = (d1, d2) =>
     d1 && d2 && d1.jy === d2.jy && d1.jm === d2.jm && d1.jd === d2.jd;

@@ -4,10 +4,11 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Linking, Alert } from 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { toPersianDigit } from '../../../utils/numberUtils';
 import { LIMITS } from '../../../constants/collabTypes';
 import CollabBadge from '../../common/CollabBadge';
 import { COLLAB_TYPE_META } from '../../../constants/meta';
+import { formatJalaaliDate } from '../../../utils/dateUtils';
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 
@@ -17,36 +18,6 @@ const truncateDesc = (text) => {
   return text.slice(0, MAX_DESC_LENGTH).trim() + '...';
 };
 
-// 🎯 تابع فرمت تاریخ - پشتیبانی از string و object جلالی
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—';
-  
-  // حالت ۱: string با فرمت YYYY/MM/DD (مثل "1405/02/02" یا "۱۴۰۵/۰۲/۰۲")
-  if (typeof dateStr === 'string' && /^\d{4}\/\d{1,2}\/\d{1,2}$/.test(dateStr.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))) {
-    // تبدیل ارقام فارسی/عربی به انگلیسی
-    const eng = dateStr
-      .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-      .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-    const parts = eng.split('/');
-    if (parts.length === 3) {
-      const jy = parts[0].padStart(4, '0');
-      const jm = parts[1].padStart(2, '0');
-      const jd = parts[2].padStart(2, '0');
-      return toPersianDigit(`${jy}/${jm}/${jd}`);
-    }
-  }
-  
-  // حالت ۲: object جلالی { jy, jm, jd }
-  if (typeof dateStr === 'object' && dateStr.jy) {
-    const jy = String(dateStr.jy).padStart(4, '0');
-    const jm = String(dateStr.jm).padStart(2, '0');
-    const jd = String(dateStr.jd).padStart(2, '0');
-    return toPersianDigit(`${jy}/${jm}/${jd}`);
-  }
-  
-  // حالت ۳: متن ساده (مثل "۳ روز پیش")
-  return toPersianDigit(String(dateStr));
-};
 
 export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
   const { colors } = useTheme();
@@ -202,14 +173,14 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
           <Icon name="event-note" size={14} color="#43A047" />
           <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ ایجاد:</Text>
           <Text style={[s.dateValue, { color: colors.textMain }]}>
-            {formatDate(ad.createdAt)}
+            {formatJalaaliDate(ad.createdAt)}
           </Text>
         </View>
         <View style={s.dateRow}>
           <Icon name="event-busy" size={14} color="#FF9800" />
           <Text style={[s.dateLabel, { color: colors.textSecondary }]}>تاریخ انقضا:</Text>
           <Text style={[s.dateValue, { color: colors.textMain }]}>
-            {formatDate(ad.expiresAt)}
+            {formatJalaaliDate(ad.expiresAt)}
           </Text>
         </View>
       </View>
