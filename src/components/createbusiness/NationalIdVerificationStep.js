@@ -6,6 +6,8 @@ import { useTheme } from '../../stores/useThemeStore';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import Card from '../common/Card';
+import SectionHeader from '../common/SectionHeader';
+import InfoRow from '../common/InfoRow';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 import { validateNationalId } from '../../utils/validators';
 import { maskPhone } from '../../utils/phoneUtils';
@@ -15,17 +17,14 @@ const toEnglishDigits = (str) =>
     .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
     .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
-// 🎯 کد ملی ۱۰ رقمی برای تست
 const TEST_NATIONAL_ID = '0012345679';
-
 
 const verifyNationalIdWithPhone = async (nationalId, phone) => {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const cleanedId = toEnglishDigits(nationalId).replace(/[^0-9]/g, '');
     const cleanedPhone = toEnglishDigits(phone || '').replace(/[^0-9]/g, '');
-    
-    // 🎯 اولویت ۱: کد تست - همیشه موفق است
+
     if (cleanedId === TEST_NATIONAL_ID) {
       return {
         success: true,
@@ -33,16 +32,14 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
         message: 'کد ملی با شماره ثبت‌نام شده تطابق دارد',
       };
     }
-    
-    // 🎯 اولویت ۲: اعتبارسنجی الگوریتم
+
     if (!validateNationalId(cleanedId)) {
       return {
         success: false,
         message: 'فرمت کد ملی صحیح نیست',
       };
     }
-    
-    // 🎯 اولویت ۳: شبیه‌سازی استعلام
+
     if (Math.random() > 0.3 && cleanedPhone.startsWith('09')) {
       return {
         success: true,
@@ -50,7 +47,7 @@ const verifyNationalIdWithPhone = async (nationalId, phone) => {
         message: 'کد ملی با شماره ثبت‌نام شده تطابق دارد',
       };
     }
-    
+
     return {
       success: false,
       message: 'کد ملی وارد شده با شماره موبایل ثبت‌نام شده شما تطابق ندارد',
@@ -99,10 +96,10 @@ export default function NationalIdVerificationStep({
     setLoading(true);
     setError('');
     setVerificationResult(null);
-    
+
     const phoneToVerify = registeredPhone || '09123456789';
     const result = await verifyNationalIdWithPhone(nationalId, phoneToVerify);
-    
+
     if (result.success) {
       setVerificationResult('success');
       setVerifiedName(result.name);
@@ -120,21 +117,15 @@ export default function NationalIdVerificationStep({
   const canVerify = nationalId.length === 10 && !loading;
   const isTestMode = nationalId === TEST_NATIONAL_ID;
 
-  // 🎯 تغییر اصلی: ScrollView به View تبدیل شد
   return (
     <View style={s.scrollContent}>
       {/* هدر بخش */}
-      <View style={s.sectionHeader}>
-        <View style={[s.headerIconBox, { backgroundColor: '#4CAF5015' }]}>
-          <Icon name="verified-user" size={24} color="#4CAF50" />
-        </View>
-        <View style={s.headerTextCol}>
-          <Text style={[s.stepTitle, { color: colors.textMain }]}>احراز هویت مدیر</Text>
-          <Text style={[s.stepHint, { color: colors.textSecondary }]}>
-            کد ملی شما با شماره ثبت‌نام شده تطبیق داده می‌شود
-          </Text>
-        </View>
-      </View>
+      <SectionHeader
+        icon="verified-user"
+        title="احراز هویت مدیر"
+        subtitle="کد ملی شما با شماره ثبت‌نام شده تطبیق داده می‌شود"
+        iconColor="#4CAF50"
+      />
 
       {/* کارت شماره ثبت‌نام */}
       <Card
@@ -143,18 +134,15 @@ export default function NationalIdVerificationStep({
         radius={14}
         style={[s.phoneCard, { backgroundColor: colors.primary + '10', borderColor: colors.primary + '30' }]}
       >
-        <View style={s.phoneRow}>
-          <View style={[s.phoneIconWrapper, { backgroundColor: colors.primary + '20' }]}>
-            <Icon name="smartphone" size={22} color={colors.primary} />
-          </View>
-          <View style={s.phoneInfo}>
-            <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>شماره ثبت‌نام شده شما</Text>
-            <Text style={[s.phoneValue, { color: colors.primary }]}>
-              {maskPhone(registeredPhone) || '۰۹۱۲***۶۷۸۹'}
-            </Text>
-          </View>
-          <Icon name="verified-user" size={20} color={colors.primary} />
-        </View>
+        <InfoRow
+          icon="smartphone"
+          iconColor={colors.primary}
+          label="شماره ثبت‌نام شده شما"
+          value={maskPhone(registeredPhone) || '۰۹۱۲***۶۷۸۹'}
+          valueColor={colors.primary}
+          valueBold
+          showDivider={false}
+        />
       </Card>
 
       {/* کارت امنیت */}
@@ -164,12 +152,13 @@ export default function NationalIdVerificationStep({
         radius={14}
         style={[s.infoCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
       >
-        <View style={s.infoRow}>
-          <Icon name="shield" size={20} color="#2196F3" />
-          <Text style={[s.infoText, { color: colors.textMain }]}>
-            اطلاعات شما محرمانه است و فقط برای احراز هویت استفاده می‌شود
-          </Text>
-        </View>
+        <InfoRow
+          icon="shield"
+          iconColor="#2196F3"
+          label=""
+          value="اطلاعات شما محرمانه است و فقط برای احراز هویت استفاده می‌شود"
+          showDivider={false}
+        />
       </Card>
 
       {/* فیلد کد ملی */}
@@ -305,44 +294,13 @@ export default function NationalIdVerificationStep({
 }
 
 const s = StyleSheet.create({
-  // 🎯 flex: 1 اضافه شد
-  scrollContent: { 
-    // flex: 1,
-    paddingHorizontal: 20, 
-    paddingTop: 8, 
-    gap: 16 
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    gap: 16
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  headerIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTextCol: { flex: 1, gap: 4 },
-  stepTitle: { fontSize: 18, fontFamily: 'Vazir-Bold' },
-  stepHint: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18 },
   phoneCard: { borderWidth: 1 },
-  phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  phoneIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phoneInfo: { flex: 1, alignItems: 'flex-start', gap: 2 },
-  phoneLabel: { fontSize: 12, fontFamily: 'Vazir' },
-  phoneValue: { fontSize: 16, fontFamily: 'Vazir-Bold' },
   infoCard: { borderWidth: 1 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  infoText: { flex: 1, fontSize: 12, fontFamily: 'Vazir', lineHeight: 20 },
   inputSection: { gap: 8 },
   inputLabel: { fontSize: 13, fontFamily: 'Vazir-Medium' },
   inputIconBox: {

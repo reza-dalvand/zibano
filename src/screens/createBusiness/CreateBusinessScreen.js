@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import { useAuthStore } from '../../stores/useAuthStore'
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Button from '../../components/common/Button';
+import SectionHeader from '../../components/common/SectionHeader';
 import StepProgress from '../../components/createbusiness/StepProgress';
 import BasicInfoStep from '../../components/createbusiness/BasicInfoStep';
 import NationalIdVerificationStep from '../../components/createbusiness/NationalIdVerificationStep';
@@ -27,14 +28,11 @@ export default function CreateBusinessScreen({ navigation }) {
   const { colors } = useTheme();
   const user = useAuthStore((s) => s.user);
   const insets = useSafeAreaInsets();
-
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
-
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   const [isStepValid, setIsStepValid] = useState(false);
-
   const [formData, setFormData] = useState({
     name: '',
     provinceId: null,
@@ -99,7 +97,6 @@ export default function CreateBusinessScreen({ navigation }) {
       );
       return;
     }
-
     if (isLastStep) {
       handleFinalSubmit();
     } else {
@@ -214,7 +211,6 @@ export default function CreateBusinessScreen({ navigation }) {
           ]}
         >
           <View style={s.footerRow}>
-            {/* دکمه اصلی — در RTL force شده سمت راست قرار می‌گیره */}
             <Button
               title={isLastStep ? 'ثبت نهایی' : 'مرحله بعد'}
               onPress={handleNextStep}
@@ -231,8 +227,6 @@ export default function CreateBusinessScreen({ navigation }) {
               }
               iconPosition="right"
             />
-
-            {/* دکمه مرحله قبل — سمت چپ */}
             {!isFirstStep && (
               <Button
                 title="مرحله قبل"
@@ -247,7 +241,6 @@ export default function CreateBusinessScreen({ navigation }) {
               />
             )}
           </View>
-
           {!canGoNext() && (
             <View
               style={[
@@ -268,7 +261,6 @@ export default function CreateBusinessScreen({ navigation }) {
             </View>
           )}
         </View>
-
         <View style={{ height: NAVBAR_HEIGHT + insets.bottom + 20 }} />
       </ScrollView>
 
@@ -315,8 +307,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     color: '#fff',
   },
-
-  // ═══════ فوتر دکمه‌ها ═══════
   footerControls: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -330,12 +320,12 @@ const s = StyleSheet.create({
     elevation: 8,
   },
   footerRow: {
-    flexDirection: 'row-reverse',  // در RTL force شده، row از راست شروع می‌کنه
+    flexDirection: 'row-reverse',
     gap: 10,
     alignItems: 'stretch',
   },
   nextButton: {
-    flex: 1.6,   // دکمه اصلی پهن‌تر
+    flex: 1.6,
     height: 54,
     borderRadius: 16,
   },

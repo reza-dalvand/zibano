@@ -15,11 +15,9 @@ import Input from '../common/Input';
 import Card from '../common/Card';
 import Dropdown from '../common/Dropdown';
 import MapPicker from '../common/MapPicker';
+import SectionHeader from '../common/SectionHeader';
 import { PROVINCES, CITIES } from '../../constants/exploreFilters';
 
-// ═══════════════════════════════════════════════════════
-//              دسته‌بندی‌های نوع کسب‌وکار
-// ═══════════════════════════════════════════════════════
 const BUSINESS_CATEGORIES = [
   { id: 'salon', label: 'سالن زیبایی (چند منظوره)' },
   { id: 'clinic', label: 'کلینیک پوست و مو' },
@@ -39,9 +37,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
   const [touched, setTouched] = useState({});
   const [isValid, setIsValid] = useState(false);
 
-  // ═══════════════════════════════════════════════════════
-  //                    اعتبارسنجی
-  // ═══════════════════════════════════════════════════════
   const validateField = useCallback((field, value) => {
     switch (field) {
       case 'name':
@@ -126,9 +121,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     onValidationChange,
   ]);
 
-  // ═══════════════════════════════════════════════════════
-  //                    Handler‌ها
-  // ═══════════════════════════════════════════════════════
   const handleFieldChange = (field, value) => {
     onUpdate(field, value);
     const error = validateField(field, value);
@@ -159,7 +151,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
 
   const showError = (field) => touched[field] && errors[field];
 
-  // ═══════ انتخاب تصویر کاور ═══════
   const pickCoverImage = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
     if (!result.didCancel && result.assets) {
@@ -168,7 +159,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     }
   };
 
-  // ═══════ انتخاب تصویر صاحب کسب‌وکار ═══════
   const pickOwnerPhoto = async () => {
     const result = await launchImageLibrary({
       mediaType: 'photo',
@@ -194,7 +184,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     ]);
   };
 
-  // ═══════ مدیریت استان و شهر ═══════
   const handleProvinceChange = (provinceId) => {
     handleFieldChange('provinceId', provinceId);
     onUpdate('cityId', null);
@@ -214,42 +203,28 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
     markTouched('location');
   };
 
-  // ═══════ انتخاب دسته‌بندی (Dropdown) ═══════
   const handleCategoryChange = (categoryId) => {
     handleFieldChange('categoryId', categoryId);
     markTouched('categoryId');
   };
 
-  // ═══════════════════════════════════════════════════════
-  //                      Render
-  // ═══════════════════════════════════════════════════════
   return (
     <View style={s.scrollContent}>
       {/* ═══════════════ هدر بخش ═══════════════ */}
-      <View style={s.sectionHeader}>
-        <View style={[s.headerIconBox, { backgroundColor: colors.primary + '15' }]}>
-          <Icon name="store" size={24} color={colors.primary} />
-        </View>
-        <View style={s.headerTextCol}>
-          <Text style={[s.stepTitle, { color: colors.textMain }]} numberOfLines={1}>
-            اطلاعات پایه کسب‌وکار
-          </Text>
-          <Text style={[s.stepHint, { color: colors.textSecondary }]} numberOfLines={2}>
-            مشخصات اصلی و موقعیت مکانی سالن خود را وارد کنید
-          </Text>
-        </View>
-      </View>
+      <SectionHeader
+        icon="store"
+        title="اطلاعات پایه کسب‌وکار"
+        subtitle="مشخصات اصلی و موقعیت مکانی سالن خود را وارد کنید"
+        iconColor={colors.primary}
+      />
 
       {/* ═══════════════ بخش ۱: تصاویر ═══════════════ */}
       <View style={s.section}>
-        <View style={s.sectionTitleRow}>
-          <View style={[s.sectionIconBox, { backgroundColor: '#E91E6318' }]}>
-            <Icon name="photo-library" size={18} color="#E91E63" />
-          </View>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]} numberOfLines={1}>
-            تصاویر
-          </Text>
-        </View>
+        <SectionHeader
+          icon="photo-library"
+          title="تصاویر"
+          iconColor="#E91E63"
+        />
 
         {/* کارت تصویر کاور */}
         <Card
@@ -331,7 +306,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
               </Text>
             </View>
           </View>
-
           <View style={s.ownerPhotoWrapper}>
             <TouchableOpacity
               onPress={pickOwnerPhoto}
@@ -375,7 +349,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
                 <Icon name="photo-camera" size={16} color="#fff" />
               </View>
             </TouchableOpacity>
-
             {formData.ownerPhoto && (
               <TouchableOpacity
                 onPress={removeOwnerPhoto}
@@ -392,14 +365,11 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
               </TouchableOpacity>
             )}
           </View>
-
           <Text style={[s.ownerHint, { color: colors.textSecondary }]} numberOfLines={1}>
             {formData.ownerPhoto
               ? 'برای تغییر عکس، روی آن ضربه بزنید'
               : 'عکس واقعی خود را آپلود کنید'}
           </Text>
-
-          {/* باکس اعتماد‌سازی */}
           <View
             style={[
               s.ownerTrustBox,
@@ -417,7 +387,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
               </Text>
             </Text>
           </View>
-
           {showError('ownerPhoto') && (
             <View style={s.errorRow}>
               <Icon name="error-outline" size={14} color="#E53935" />
@@ -431,14 +400,11 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
 
       {/* ═══════════════ بخش ۲: مشخصات کسب‌وکار ═══════════════ */}
       <View style={s.section}>
-        <View style={s.sectionTitleRow}>
-          <View style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}>
-            <Icon name="info" size={18} color={colors.primary} />
-          </View>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]} numberOfLines={1}>
-            مشخصات کسب‌وکار
-          </Text>
-        </View>
+        <SectionHeader
+          icon="info"
+          title="مشخصات کسب‌وکار"
+          iconColor={colors.primary}
+        />
 
         <Input
           label="نام کسب‌وکار *"
@@ -454,7 +420,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
           }
         />
 
-        {/* ═══════ Dropdown نوع کسب‌وکار ═══════ */}
         <Dropdown
           label="نوع کسب‌وکار *"
           placeholder="نوع کسب‌وکار خود را انتخاب کنید"
@@ -462,7 +427,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
           options={BUSINESS_CATEGORIES}
           onSelect={handleCategoryChange}
         />
-
         {showError('categoryId') && (
           <View style={[s.errorRow, { marginTop: -8, marginBottom: 8 }]}>
             <Icon name="error-outline" size={14} color="#E53935" />
@@ -475,14 +439,12 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
 
       {/* ═══════════════ بخش ۳: موقعیت مکانی ═══════════════ */}
       <View style={s.section}>
-        <View style={s.sectionTitleRow}>
-          <View style={[s.sectionIconBox, { backgroundColor: '#E5393515' }]}>
-            <Icon name="location-on" size={18} color="#E53935" />
-          </View>
-          <Text style={[s.sectionTitle, { color: colors.textMain }]} numberOfLines={1}>
-            موقعیت مکانی
-          </Text>
-        </View>
+        <SectionHeader
+          icon="location-on"
+          title="موقعیت مکانی"
+          iconColor="#E53935"
+        />
+
         <Text style={[s.sectionHint, { color: colors.textSecondary }]}>
           استان و شهر را انتخاب کنید و موقعیت دقیق سالن را روی نقشه مشخص کنید
         </Text>
@@ -622,49 +584,13 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
   );
 }
 
-// ═══════════════════════════════════════════════════════
-//                      Styles
-// ═══════════════════════════════════════════════════════
 const s = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
     gap: 20,
   },
-
-  // ═══════ هدر ═══════
-  sectionHeader: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  headerIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTextCol: { flex: 1, gap: 4 },
-  stepTitle: { fontSize: 18, fontFamily: 'Vazir-Bold' },
-  stepHint: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18 },
-
-  // ═══════ بخش‌ها ═══════
   section: { gap: 12 },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  sectionIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-    flex: 1, // ✅ کلید حل مشکل: اجازه می‌دهد متن فضا را بگیرد اما نشکند
-  },
   sectionHint: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18, marginBottom: 4 },
   inputIconBox: {
     width: 32,
@@ -673,8 +599,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // ═══════ تصویر کاور ═══════
   coverCard: { borderWidth: 1 },
   coverLabelRow: {
     flexDirection: 'row',
@@ -686,12 +610,12 @@ const s = StyleSheet.create({
   coverLabel: {
     fontSize: 14,
     fontFamily: 'Vazir-Bold',
-    flex: 1, // ✅ فضا را بگیرد اما نشکند
+    flex: 1,
   },
   coverHint: {
     fontSize: 11,
     fontFamily: 'Vazir',
-    flexShrink: 0, // ✅ هیچوقت کوچک نشود
+    flexShrink: 0,
   },
   coverPicker: {
     width: '100%',
@@ -730,8 +654,6 @@ const s = StyleSheet.create({
   },
   coverText: { fontSize: 15, fontFamily: 'Vazir-Bold' },
   coverHintText: { fontSize: 12, fontFamily: 'Vazir', textAlign: 'center' },
-
-  // ═══════ تصویر صاحب کسب‌وکار ═══════
   ownerCard: { borderWidth: 1 },
   ownerLabelRow: {
     flexDirection: 'row',
@@ -752,7 +674,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
-    flexShrink: 0, // ✅ هیچوقت نشکند
+    flexShrink: 0,
   },
   ownerBadgeText: { fontSize: 10, fontFamily: 'Vazir-Bold' },
   ownerPhotoWrapper: {
@@ -840,8 +762,6 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
-
-  // ═══════ نقشه ═══════
   mapCard: { borderWidth: 1, overflow: 'hidden' },
   mapHeader: {
     flexDirection: 'row',
@@ -877,8 +797,6 @@ const s = StyleSheet.create({
     borderWidth: 1,
   },
   coordsText: { fontSize: 11, fontFamily: 'Vazir-Medium', flexShrink: 1 },
-
-  // ═══════ خطا ═══════
   errorRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -887,8 +805,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 4,
   },
   errorText: { fontSize: 12, fontFamily: 'Vazir', flex: 1 },
-
-  // ═══════ راهنما ═══════
   hintCard: { borderWidth: 1 },
   hintHeader: {
     flexDirection: 'row',

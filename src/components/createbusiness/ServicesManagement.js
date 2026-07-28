@@ -9,13 +9,17 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 import Dropdown from '../common/Dropdown';
 import Divider from '../common/Divider';
-import EmptyState from '../common/EmptyState';
+import EmptyStateVariants from '../common/EmptyStateVariants';
+import SectionHeader from '../common/SectionHeader';
+import CharCounter from '../common/CharCounter';
+import PriceBreakdown from '../common/PriceBreakdown';
 import BottomSheet from '../common/BottomSheet';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
+const MAX_DESCRIPTION_LENGTH = 300;
 
 const toEnglishDigits = (str) =>
   String(str)
@@ -131,6 +135,7 @@ export default function ServicesManagement({ services = [], onChange }) {
     const updatedServices = editingId
       ? services.map((s) => (s.id === editingId ? serviceData : s))
       : [...services, serviceData];
+
     onChange?.(updatedServices);
     closeModal();
   };
@@ -153,20 +158,17 @@ export default function ServicesManagement({ services = [], onChange }) {
         contentContainerStyle={[s.scrollContent, { paddingTop: insets.top + 16 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={s.sectionHeader}>
-          <View style={s.titleRow}>
-            <View style={[s.iconBox, { backgroundColor: colors.primary + '15' }]}>
-              <Icon name="spa" size={20} color={colors.primary} />
+        <SectionHeader
+          icon="spa"
+          title="خدمات سالن"
+          subtitle={`خدماتی که ارائه می‌دهید را اضافه کنید. این خدمات به کارمندان اختصاص داده می‌شوند.`}
+          iconColor={colors.primary}
+          rightElement={
+            <View style={[s.countBadge, { backgroundColor: colors.primary + '15' }]}>
+              <Text style={[s.countText, { color: colors.primary }]}>{services.length} خدمت</Text>
             </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>خدمات سالن</Text>
-          </View>
-          <View style={[s.countBadge, { backgroundColor: colors.primary + '15' }]}>
-            <Text style={[s.countText, { color: colors.primary }]}>{services.length} خدمت</Text>
-          </View>
-        </View>
-        <Text style={[s.sectionHint, { color: colors.textSecondary }]}>
-          خدماتی که ارائه می‌دهید را اضافه کنید. این خدمات به کارمندان اختصاص داده می‌شوند.
-        </Text>
+          }
+        />
 
         {services.length > 0 ? (
           <View style={s.servicesList}>
@@ -199,36 +201,27 @@ export default function ServicesManagement({ services = [], onChange }) {
                   </View>
                 </View>
                 <Divider spacing={10} />
-                <View style={s.priceRow}>
-                  <View style={s.priceItem}>
-                    <Text style={[s.priceLabel, { color: colors.textSecondary }]}>قیمت اصلی</Text>
-                    <Text style={[s.priceValue, { color: colors.textMain }]}>{formatPrice(service.originalPrice)}</Text>
-                  </View>
-                  {service.discountPercent > 0 && (
-                    <View style={s.priceItem}>
-                      <Text style={[s.priceLabel, { color: colors.textSecondary }]}>با تخفیف</Text>
-                      <Text style={[s.priceValue, { color: '#4CAF50' }]}>{formatPrice(service.finalPrice)}</Text>
-                    </View>
-                  )}
-                  <View style={s.priceItem}>
-                    <Text style={[s.priceLabel, { color: colors.textSecondary }]}>بیعانه رزرو</Text>
-                    <Text style={[s.priceValue, { color: colors.primary }]}>{formatPrice(service.depositAmount)}</Text>
-                  </View>
-                </View>
+                <PriceBreakdown
+                  originalPrice={service.originalPrice}
+                  discountPercent={service.discountPercent}
+                  finalPrice={service.finalPrice}
+                  hasDeposit={service.hasDeposit}
+                  depositAmount={service.depositAmount}
+                  showRemaining={false}
+                  variant="inline"
+                />
               </Card>
             ))}
           </View>
         ) : (
           <Card variant="default" padding={0} radius={16} style={s.emptyCard}>
-            <EmptyState
-              icon="💆‍♀️"
-              title="هنوز خدمتی ثبت نکرده‌اید"
-              description="اولین خدمت خود را اضافه کنید تا مشتریان بتوانند از شما نوبت بگیرند"
-              actionLabel="افزودن اولین خدمت"
+            <EmptyStateVariants
+              variant="service"
               onAction={openAddModal}
             />
           </Card>
         )}
+
         <Button
           title="افزودن خدمت جدید"
           onPress={openAddModal}
@@ -239,6 +232,7 @@ export default function ServicesManagement({ services = [], onChange }) {
           iconPosition="right"
           style={s.addButton}
         />
+
         <View style={{ height: 140 }} />
       </ScrollView>
 
@@ -272,6 +266,7 @@ export default function ServicesManagement({ services = [], onChange }) {
             error={errors.name}
             rightIcon={<Icon name="label" size={22} color={colors.textSecondary} />}
           />
+
           <Dropdown
             label="نوع خدمت *"
             placeholder="نوع خدمت را انتخاب کنید"
@@ -279,6 +274,7 @@ export default function ServicesManagement({ services = [], onChange }) {
             options={SERVICE_TYPES}
             onSelect={(val) => { setTypeId(val); if (errors.typeId) setErrors({ ...errors, typeId: '' }); }}
           />
+
           {typeId === 'other' && (
             <Input
               label="نام نوع خدمت *"
@@ -288,7 +284,9 @@ export default function ServicesManagement({ services = [], onChange }) {
               error={errors.customTypeName}
             />
           )}
+
           <Divider label="قیمت‌گذاری" spacing={16} />
+
           <Input
             label="قیمت اصلی (تومان) *"
             placeholder="مثال: ۷۵۰,۰۰۰"
@@ -314,6 +312,7 @@ export default function ServicesManagement({ services = [], onChange }) {
               </View>
             }
           />
+
           <Input
             label="درصد تخفیف (اختیاری)"
             placeholder="مثال: ۲۰"
@@ -331,6 +330,7 @@ export default function ServicesManagement({ services = [], onChange }) {
             rightIcon={<Text style={[s.currencyIcon, { color: colors.textSecondary }]}>٪</Text>}
             hint={discountNum > 0 && originalNum > 0 ? `تخفیف: ${formatPrice(discountAmount)} تومان` : ''}
           />
+
           {originalNum > 0 && (
             <Card
               variant="default"
@@ -350,32 +350,14 @@ export default function ServicesManagement({ services = [], onChange }) {
                   {finalPrice >= MIN_FINAL_PRICE ? 'قیمت معتبر ✓' : 'قیمت نهایی کمتر از حد مجاز'}
                 </Text>
               </View>
-              <View style={s.priceSummaryRow}>
-                <Text style={[s.priceSummaryLabel, { color: colors.textSecondary }]}>قیمت اصلی</Text>
-                <Text style={[s.priceSummaryValue, { color: colors.textMain }]}>{formatPrice(originalNum)} تومان</Text>
-              </View>
-              {discountNum > 0 && (
-                <View style={s.priceSummaryRow}>
-                  <Text style={[s.priceSummaryLabel, { color: colors.textSecondary }]}>تخفیف ({formatPrice(discountNum)}٪)</Text>
-                  <Text style={[s.priceSummaryValue, { color: '#E57373' }]}>- {formatPrice(discountAmount)} تومان</Text>
-                </View>
-              )}
-              <View style={[s.priceSummaryDivider, { backgroundColor: colors.border }]} />
-              <View style={s.priceSummaryRow}>
-                <Text style={[s.priceSummaryLabel, { color: colors.textMain, fontFamily: 'Vazir-Bold' }]}>قیمت نهایی</Text>
-                <Text
-                  style={[
-                    s.priceSummaryValue,
-                    {
-                      color: finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373',
-                      fontFamily: 'Vazir-Bold',
-                      fontSize: 15,
-                    },
-                  ]}
-                >
-                  {formatPrice(finalPrice)} تومان
-                </Text>
-              </View>
+              <PriceBreakdown
+                originalPrice={originalNum}
+                discountPercent={discountNum}
+                finalPrice={finalPrice}
+                hasDeposit={false}
+                showRemaining={false}
+                variant="detailed"
+              />
               {finalPrice < MIN_FINAL_PRICE && (
                 <Text style={[s.priceSummaryWarning, { color: '#E57373' }]}>
                   ⚠️ قیمت نهایی باید حداقل {formatPrice(MIN_FINAL_PRICE)} تومان باشد. لطفاً قیمت اصلی را افزایش دهید یا تخفیف را کاهش دهید.
@@ -383,7 +365,9 @@ export default function ServicesManagement({ services = [], onChange }) {
               )}
             </Card>
           )}
+
           <Divider label="بیعانه رزرو" spacing={16} />
+
           <Input
             label="مبلغ بیعانه (تومان) *"
             placeholder="مثال: ۲۰۰,۰۰۰"
@@ -403,7 +387,9 @@ export default function ServicesManagement({ services = [], onChange }) {
               </View>
             }
           />
+
           <Divider label="تنظیمات" spacing={16} />
+
           <View style={s.switchRow}>
             <View style={s.switchInfo}>
               <Text style={[s.switchLabel, { color: colors.textMain }]}>وضعیت فعال</Text>
@@ -413,14 +399,23 @@ export default function ServicesManagement({ services = [], onChange }) {
             </View>
             <Switch value={isActive} onValueChange={setIsActive} thumbColor={isActive ? colors.primary : '#ccc'} trackColor={{ true: colors.primary + '55', false: '#ddd' }} />
           </View>
+
           <Input
             label="توضیحات (اختیاری)"
             placeholder="توضیحات بیشتری درباره این خدمت..."
             value={description}
-            onChangeText={setDescription}
+            onChangeText={(t) => {
+              if (t.length <= MAX_DESCRIPTION_LENGTH) {
+                setDescription(t);
+              }
+            }}
             multiline
             numberOfLines={3}
+            maxLength={MAX_DESCRIPTION_LENGTH}
           />
+          
+          <CharCounter current={description.length} max={MAX_DESCRIPTION_LENGTH} />
+
           <View style={{ height: 20 }} />
         </ScrollView>
       </BottomSheet>
@@ -431,13 +426,8 @@ export default function ServicesManagement({ services = [], onChange }) {
 const s = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 20 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  iconBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  sectionTitle: { fontSize: 17, fontFamily: 'Vazir-Bold' },
   countBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   countText: { fontSize: 12, fontFamily: 'Vazir-Bold' },
-  sectionHint: { fontSize: 13, fontFamily: 'Vazir', lineHeight: 20, marginBottom: 20 },
   servicesList: { gap: 12, marginBottom: 16 },
   serviceCard: { marginBottom: 0 },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
@@ -446,10 +436,6 @@ const s = StyleSheet.create({
   serviceType: { fontSize: 12, fontFamily: 'Vazir' },
   cardActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   actionBtn: { paddingVertical: 4, paddingHorizontal: 4 },
-  priceRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' },
-  priceItem: { alignItems: 'flex-start', gap: 2, minWidth: 60 },
-  priceLabel: { fontSize: 11, fontFamily: 'Vazir' },
-  priceValue: { fontSize: 13, fontFamily: 'Vazir-Bold' },
   emptyCard: {
     marginBottom: 16,
     padding: 6,
@@ -471,9 +457,5 @@ const s = StyleSheet.create({
   priceSummaryCard: { borderWidth: 1.5, marginBottom: 8 },
   priceSummaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   priceSummaryTitle: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  priceSummaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 4 },
-  priceSummaryLabel: { fontSize: 12, fontFamily: 'Vazir' },
-  priceSummaryValue: { fontSize: 13, fontFamily: 'Vazir-Bold' },
-  priceSummaryDivider: { height: 1, marginVertical: 8 },
   priceSummaryWarning: { fontSize: 11, fontFamily: 'Vazir', lineHeight: 18, marginTop: 8 },
 });
