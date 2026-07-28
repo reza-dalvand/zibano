@@ -11,6 +11,7 @@ import ScreenWrapper from '../../components/common/ScreenWrapper';
 import CategoryHeader from '../../components/home/CategoryHeader';
 import CategoryFilterModal from '../../components/home/CategoryFilterModal';
 import EmptyStateVariants from '../../components/common/EmptyStateVariants';
+import BusinessListCard from '../../components/home/BusinessListCard';
 
 const CATEGORY_META = {
   1: { icon: 'face', color: '#E91E63' },
@@ -271,6 +272,29 @@ export default function CategoryBusinessesScreen({ navigation, route }) {
               />
             </View>
           )}
+        </View>
+        <View style={s.listContainer}>
+          {filteredData.length > 0 ? (
+            filteredData.map((business) => (
+              <BusinessListCard
+                key={business.id}
+                business={business}
+                categoryIcon={categoryMeta.icon}
+                onPress={() => handleBusinessPress(business)}
+              />
+            ))
+          ) : (
+              <EmptyStateVariants
+                variant="service"
+                title="کسب‌وکاری یافت نشد"
+                description={search ? 'با این عبارت جستجو نتیجه‌ای پیدا نشد.' : 'فیلترهای خود را تغییر دهید'}
+                actionLabel={search ? 'پاک کردن جستجو' : 'حذف فیلترها'}
+                onAction={() => {
+                  if (search) setSearch('');
+                  else setFilters({ serviceType: null, sortBy: 'all' });
+                }}
+              />          
+            )}
         </View>
       </ScrollView>
 
