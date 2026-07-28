@@ -16,37 +16,13 @@ import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Dropdown from '../../common/Dropdown';
 import Card from '../../common/Card';
-import { toPersianDigit } from '../../../utils/numberUtils';
+import { toPersianDigit, toEnglishDigits, parseNumber, formatPriceInput, formatPercentInput } from '../../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../../constants';
 import { COLLAB_TYPES, LIMITS } from '../../../constants/collabTypes';
 import CharCounter from '../../common/CharCounter';
 
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
-
-const toEnglishDigits = str =>
-  String(str || '')
-    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-
-const parseNumber = str => {
-  const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');
-  return parseInt(cleaned, 10) || 0;
-};
-
-const formatPriceInput = text => {
-  const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
-  if (!cleaned) return '';
-  const num = parseInt(cleaned, 10);
-  return toPersianDigit(num.toLocaleString('en-US'));
-};
-
-const formatPercentInput = text => {
-  const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
-  if (!cleaned) return '';
-  const num = Math.min(parseInt(cleaned, 10), 100);
-  return toPersianDigit(String(num));
-};
 
 const getPriceSectionTitle = collabType => {
   switch (collabType) {

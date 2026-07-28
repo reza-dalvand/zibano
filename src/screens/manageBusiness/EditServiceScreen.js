@@ -19,7 +19,7 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit, formatPrice, toEnglishDigits, parseNumber, formatPriceInput } from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 import CharCounter from '../../components/common/CharCounter';
 
@@ -27,22 +27,6 @@ const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
 const MAX_DESCRIPTION_LENGTH = 300;
 
-const toEnglishDigits = str =>
-  String(str)
-    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-
-const parseNumber = str => {
-  const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');
-  return parseInt(cleaned, 10) || 0;
-};
-
-
-const formatPriceInput = text => {
-  const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
-  if (!cleaned) return '';
-  return toPersianDigit(parseInt(cleaned, 10).toLocaleString('en-US'));
-};
 
 export default function EditServiceScreen({ navigation, route }) {
   const { colors } = useTheme();

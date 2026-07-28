@@ -16,6 +16,8 @@ import { useTheme } from '../../../stores/useThemeStore';
 import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
+import { toEnglishDigits } from '../../../utils/numberUtils';
+
 
 export default function BankEditModal({ visible, onClose, onSave, bankInfo, businessOwnerName }) {
   const { colors } = useTheme();
@@ -42,12 +44,12 @@ export default function BankEditModal({ visible, onClose, onSave, bankInfo, busi
   // اعتبارسنجی
   const validate = () => {
     const e = {};
-    const enNational = toEn(form.nationalId).replace(/[^0-9]/g, '');
+    const enNational = toEnglishDigits(form.nationalId).replace(/[^0-9]/g, '');
     if (enNational.length !== 10) {
       e.nationalId = 'کد ملی باید ۱۰ رقم باشد';
     }
 
-    const enSheba = toEn(form.sheba);
+    const enSheba = toEnglishDigits(form.sheba);
     const cleanedSheba = enSheba.replace(/IR|ir/gi, '').replace(/[^0-9]/g, '');
     if (cleanedSheba.length !== 24) {
       e.sheba = 'شماره شبا باید ۲۴ رقم بعد از IR باشد';
@@ -56,7 +58,7 @@ export default function BankEditModal({ visible, onClose, onSave, bankInfo, busi
       e.sheba = 'شماره شبا باید با IR شروع شود';
     }
 
-    const enCard = toEn(form.cardNumber).replace(/[^0-9]/g, '');
+    const enCard = toEnglishDigits(form.cardNumber).replace(/[^0-9]/g, ''); 
     if (enCard.length !== 16) {
       e.cardNumber = 'شماره کارت باید ۱۶ رقم باشد';
     }

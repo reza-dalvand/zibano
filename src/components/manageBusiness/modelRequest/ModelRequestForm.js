@@ -8,14 +8,10 @@ import Input from '../../common/Input';
 import Dropdown from '../../common/Dropdown';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
-import { toPersianDigit } from '../../../utils/numberUtils';
+import { toPersianDigit, toEnglishDigits } from '../../../utils/numberUtils';
 import { LIMITS } from '../../../constants/collabTypes';
 import CharCounter from '../../common/CharCounter';
 
-const toEnglishDigits = (str) =>
-  String(str || '')
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 

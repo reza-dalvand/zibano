@@ -16,6 +16,7 @@ import Header from '../../components/common/Header';
 import Button from '../../components/common/Button';
 import Toast from '../../components/common/Toast';
 import { maskPhone } from '../../utils/phoneUtils';
+import { toEnglishDigits } from '../../utils/numberUtils';
 
 
 const OTP_LENGTH = 5;
@@ -50,11 +51,6 @@ export default function OtpVerifyScreen({ navigation, route }) {
     }
     return () => clearInterval(interval);
   }, [timer]);
-
-  const toEnglishDigits = str =>
-    str
-      .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
   const handleChange = (text, index) => {
     const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');

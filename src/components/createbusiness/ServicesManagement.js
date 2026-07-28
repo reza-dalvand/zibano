@@ -14,17 +14,12 @@ import SectionHeader from '../common/SectionHeader';
 import CharCounter from '../common/CharCounter';
 import PriceBreakdown from '../common/PriceBreakdown';
 import BottomSheet from '../common/BottomSheet';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit, formatPrice, toEnglishDigits, parseNumber, formatPriceInput } from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
 const MAX_DESCRIPTION_LENGTH = 300;
-
-const toEnglishDigits = (str) =>
-  String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const parseNumber = (str) => {
   const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');

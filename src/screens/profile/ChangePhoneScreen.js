@@ -15,18 +15,12 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit, toEnglishDigits } from '../../utils/numberUtils';
 import { validatePhone } from '../../utils/phoneUtils';
 
 const OTP_LENGTH = 5;
 const RESEND_SECONDS = 60;
 const MOCK_OTP = '12345';
-
-const toEnglishDigits = str =>
-  String(str)
-    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-
 
 export default function ChangePhoneScreen({ navigation }) {
   const { colors } = useTheme();

@@ -13,15 +13,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import Avatar from '../common/Avatar';
-import { toPersianDigit } from '../../utils/numberUtils';
+import { toPersianDigit, toEnglishDigits } from '../../utils/numberUtils';
 
 
 const CODE_LENGTH = 4; // ✅ تغییر از 6 به 4
-
-const toEnglishDigits = (str) =>
-  String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 export default function VerifyCodeModal({ visible, appointment, onClose, onConfirm }) {
   const { colors } = useTheme();

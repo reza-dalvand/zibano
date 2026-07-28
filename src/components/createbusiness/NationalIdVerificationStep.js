@@ -8,14 +8,9 @@ import Button from '../common/Button';
 import Card from '../common/Card';
 import SectionHeader from '../common/SectionHeader';
 import InfoRow from '../common/InfoRow';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit, toEnglishDigits } from '../../utils/numberUtils';
 import { validateNationalId } from '../../utils/validators';
 import { maskPhone } from '../../utils/phoneUtils';
-
-const toEnglishDigits = (str) =>
-  String(str)
-    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
 
 const TEST_NATIONAL_ID = '0012345679';
 

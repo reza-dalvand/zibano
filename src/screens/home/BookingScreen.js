@@ -17,7 +17,7 @@ import BookingTimeSelector from '../../components/booking/BookingTimeSelector';
 import BookingStepIndicator from '../../components/booking/BookingStepIndicator';
 import PaymentSummaryCard from '../../components/booking/PaymentSummaryCard';
 import RulesCard from '../../components/booking/RulesCard';
-import { toPersianDigit } from '../../utils/numberUtils';
+import { toPersianDigit, parseNumber } from '../../utils/numberUtils';
 import { PERSIAN_MONTHS } from '../../utils/dateUtils';
 import PriceBreakdown from '../../components/common/PriceBreakdown';
 
@@ -56,17 +56,6 @@ const MOCK_SERVICE = {
   duration: 60,
 };
 
-const parsePrice = (val) => {
-  if (typeof val === 'number' && !isNaN(val)) return val;
-  if (typeof val === 'string') {
-    const eng = val
-      .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-      .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-    const cleaned = eng.replace(/[^0-9]/g, '');
-    return parseInt(cleaned, 10) || 0;
-  }
-  return 0;
-};
 
 export default function BookingModal({
   visible,
@@ -85,12 +74,12 @@ export default function BookingModal({
   const [showSuccess, setShowSuccess] = useState(false);
 
   // محاسبه depositAmount
-  const originalPrice = parsePrice(currentService.originalPrice ?? currentService.price);
-  const discountPercent = parsePrice(currentService.discount);
+  const originalPrice = parseNumber(currentService.originalPrice ?? currentService.price);
+  const discountPercent = parseNumber(currentService.discount);
   const discountAmount = Math.round((originalPrice * discountPercent) / 100);
   const finalPrice = Math.max(0, originalPrice - discountAmount);
   const hasDeposit = currentService.hasDeposit || false;
-  const depositPercent = parsePrice(currentService.depositPercent) || 30;
+  const depositPercent = parseNumber(currentService.depositPercent) || 30;
   const depositAmount = hasDeposit
     ? Math.round((finalPrice * depositPercent) / 100)
     : finalPrice;
