@@ -44,7 +44,11 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
   };
 
   const handleShare = async () => {
-    const shareMessage = `${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}\n🔗 ${shareUrl}`;
+    const shareMessage = `${request.title}
+${request.description}
+🏪 ${request.businessName}
+📍 ${request.city}
+🔗 ${shareUrl}`;
     try {
       await Share.share({ message: shareMessage, url: shareUrl, title: request.title });
     } catch (error) {
@@ -61,12 +65,12 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
   // 🎯 Badges برای DetailHero
   const heroBadges = [
     {
-      container: [styles.costBadgeHero, { backgroundColor: costMeta.color }],
+      container: [s.costBadgeHero, { backgroundColor: costMeta.color }],  // ✅ styles → s
       icon: costMeta.icon,
       iconSize: 12,
       iconColor: '#fff',
       text: costMeta.label,
-      textStyle: styles.costBadgeHeroText,
+      textStyle: s.costBadgeHeroText,  // ✅ styles → s
     },
   ];
 
@@ -181,7 +185,10 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             {/* 🎯 استفاده از ActionButtons مشترک */}
             <ActionButtons
               phone={cleanPhone(request.contactPhone)}
-              shareMessage={`${request.title}\n${request.description}\n🏪 ${request.businessName}\n📍 ${request.city}`}
+              shareMessage={`${request.title}
+${request.description}
+🏪 ${request.businessName}
+📍 ${request.city}`}
               shareUrl={shareUrl}
             />
           </View>
@@ -280,6 +287,7 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir',
   },
+
   // ═══════ کارت نوع هزینه ═══════
   costCard: {
     borderWidth: 1.5,
@@ -310,6 +318,7 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 20,
   },
+
   // ═══════ دکمه‌های اکشن ═══════
   actionButtonsSection: {
     gap: 12,
@@ -342,6 +351,7 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir-Bold',
     letterSpacing: 1,
   },
+
   // ═══════ توضیحات ═══════
   descriptionText: {
     fontSize: 14,
@@ -349,6 +359,7 @@ const s = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'justify',
   },
+
   // ═══════ نکات مهم ═══════
   hintCard: {
     borderWidth: 1,
@@ -367,6 +378,7 @@ const s = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
+
   // ═══════ Badges برای DetailHero ═══════
   costBadgeHero: {
     flexDirection: 'row',

@@ -13,13 +13,13 @@ import {
   Animated,
   Easing,
   TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import StarRating from '../common/StarRating';
 import GallerySlider from './GallerySlider';
 import { toPersianDigit } from '../../utils/numberUtils';
-
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.92;
@@ -36,15 +36,12 @@ export default function PostModal({
 }) {
   const { colors, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
-  
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const modalScale = useRef(new Animated.Value(0.85)).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
-  
   const [isSaved, setIsSaved] = useState(post?.saved || false);
 
-  // ✅ تشخیص نوع پست (مجله یا کسب‌وکار)
   const isMagazine = post?.source === 'magazine';
 
   useEffect(() => {
@@ -73,6 +70,9 @@ export default function PostModal({
 
   if (!post) return null;
 
+  // 🎯 اصلاح اصلی: fallback ایمن برای gallery یا images
+  const media = post.gallery || post.images || [];
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -96,7 +96,6 @@ export default function PostModal({
     onSave?.(post.id);
   };
 
-  // ✅ هندلر رزرو نوبت - هدایت به صفحه کسب‌وکار
   const handleBooking = () => {
     onClose();
     setTimeout(() => {
@@ -104,7 +103,6 @@ export default function PostModal({
     }, 300);
   };
 
-  // 🎯 ساخت badges برای DetailHero
   const heroBadges = [];
   if (isMagazine) {
     heroBadges.push({
@@ -116,13 +114,14 @@ export default function PostModal({
       textStyle: styles.magazineBadgeText,
     });
   }
-  if (post.gallery && post.gallery.length > 1) {
+  
+  if (media.length > 1) {
     heroBadges.push({
       container: styles.imageCounterBadge,
       icon: 'arrow-forward-ios',
       iconSize: 12,
       iconColor: '#fff',
-      text: `${toPersianDigit(post.gallery.length)} تصویر`,
+      text: `${toPersianDigit(media.length)} تصویر`,
       textStyle: styles.imageCounterText,
     });
   }
@@ -146,7 +145,6 @@ export default function PostModal({
           ]}
         />
       </TouchableWithoutFeedback>
-      
       <Animated.View
         style={[
           styles.modal,
@@ -211,12 +209,12 @@ export default function PostModal({
             />
           </TouchableOpacity>
         </View>
-
+        
         {/* 🎯 استفاده از GallerySlider برای گالری تصاویر */}
         <View style={styles.galleryWrapper}>
-          <GallerySlider gallery={post.gallery} containerWidth={MODAL_WIDTH} />
+          <GallerySlider gallery={media} containerWidth={MODAL_WIDTH} />
         </View>
-
+        
         {/* اطلاعات کسب‌وکار - فقط برای پست‌های کسب‌وکار */}
         {!isMagazine && (
           <TouchableOpacity
@@ -245,7 +243,7 @@ export default function PostModal({
             <Icon name="chevron-left" size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
-
+        
         {/* هدر مجله زیبانو - فقط برای مجله */}
         {isMagazine && (
           <View
@@ -272,7 +270,7 @@ export default function PostModal({
             </View>
           </View>
         )}
-
+        
         {/* محتوای اسکرولی */}
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
@@ -302,7 +300,7 @@ export default function PostModal({
               <StarRating value={post.rating} size="md" />
             </View>
           )}
-
+          
           {/* 📝 کپشن / توضیحات */}
           <View style={[styles.captionCard, { borderColor: colors.border }]}>
             <View style={styles.captionHeader}>
@@ -326,7 +324,7 @@ export default function PostModal({
               {post.caption}
             </Text>
           </View>
-
+          
           {/* 🏷️ تگ‌های خدمت - فقط برای کسب‌وکار */}
           {!isMagazine && (
             <View style={styles.tagsSection}>
@@ -365,7 +363,7 @@ export default function PostModal({
               </View>
             </View>
           )}
-
+          
           {/* 💡 راهنما */}
           <View
             style={[
@@ -387,11 +385,11 @@ export default function PostModal({
                 : 'با رزرو نوبت از این کسب‌وکار، از تخفیف‌های ویژه بهره‌مند شوید'}
             </Text>
           </View>
-
+          
           {/* فضای خالی برای دکمه CTA */}
           {!isMagazine && <View style={{ height: 100 }} />}
         </Animated.ScrollView>
-
+        
         {/* 🎯 دکمه CTA پایین - فقط برای کسب‌وکارها نمایش داده می‌شود */}
         {!isMagazine && (
           <View

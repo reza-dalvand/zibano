@@ -8,8 +8,14 @@ const { width } = Dimensions.get('window');
 export const THUMBNAIL_SIZE = width / 3;
 
 export default function PostThumbnail({ post, onPress }) {
+  if (!post) return null;
+
   const isMagazine = post.source === 'magazine';
   const hasDiscount = post.discount > 0;
+  
+  // 🎯 اصلاح اصلی: fallback ایمن برای gallery یا images
+  const media = post.gallery || post.images || [];
+  const firstImage = media[0] || 'https://picsum.photos/400/400?random=0'; // تصویر پیش‌فرض در صورت نبود آرایه
 
   return (
     <TouchableOpacity
@@ -17,8 +23,8 @@ export default function PostThumbnail({ post, onPress }) {
       onPress={() => onPress(post)}
       style={styles.container}
     >
-      <Image source={{ uri: post.gallery[0] }} style={styles.image} />
-
+      <Image source={{ uri: firstImage }} style={styles.image} />
+      
       {/* ✅ تگ منبع (مجله / کسب‌وکار) */}
       {isMagazine && (
         <View style={styles.magazineTag}>
@@ -26,16 +32,16 @@ export default function PostThumbnail({ post, onPress }) {
           <Text style={styles.magazineTagText}>مجله</Text>
         </View>
       )}
-
+      
       {/* ✅ تگ تخفیف (فقط برای کسب‌وکارها) */}
       {hasDiscount && !isMagazine && (
         <View style={styles.discountTag}>
           <Text style={styles.discountTagText}>{post.discount}٪</Text>
         </View>
       )}
-
+      
       {/* آیکون چندتصویری */}
-      {post.gallery.length > 1 && (
+      {media.length > 1 && (
         <View style={styles.carouselIcon}>
           <Icon name="collections" size={16} color="#FFF" />
         </View>
@@ -56,7 +62,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     borderRadius: 4,
   },
-  // ✅ تگ مجله زیبانو
   magazineTag: {
     position: 'absolute',
     top: 8,
@@ -79,7 +84,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: 'Vazir-Bold',
   },
-  // ✅ تگ تخفیف
   discountTag: {
     position: 'absolute',
     top: 8,
