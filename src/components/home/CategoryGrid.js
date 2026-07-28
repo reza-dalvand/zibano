@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import { toPersianDigit } from '../../constants/exploreFilters';
+import { toPersianDigit } from '../../utils/numberUtils';
 
 const CategoryGrid = ({ categories = [], onSelect, selectedId }) => {
   const { colors } = useTheme();

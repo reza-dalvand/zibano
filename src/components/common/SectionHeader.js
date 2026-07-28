@@ -1,4 +1,4 @@
-//src/components/commom/SectionHeader.js
+// src/components/common/SectionHeader.js  // ✅ اصلاح شد
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -14,7 +14,7 @@ export default function SectionHeader({
 }) {
   const { colors } = useTheme();
   const bgColor = iconColor || colors.primary;
-
+  
   return (
     <View style={[s.container, style]}>
       <View style={s.left}>

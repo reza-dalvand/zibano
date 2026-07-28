@@ -1,6 +1,6 @@
 //src/components/common/DetailHero.js
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,17 +13,19 @@ export default function DetailHero({
 }) {
   const insets = useSafeAreaInsets();
   const heroHeight = 320 + insets.top;
-
+  
   return (
     <View style={[s.container, { height: heroHeight, marginTop: -insets.top }]}>
       <Image source={{ uri: imageUrl }} style={s.image} />
       <View style={s.gradient} />
-
+      
       <View style={[s.topActions, { top: insets.top + 12 }]}>
         <TouchableOpacity style={s.actionBtn} onPress={onBack}>
           <Icon name="arrow-forward" size={22} color="#fff" />
         </TouchableOpacity>
+        
         <View style={{ flex: 1 }} />
+        
         {onSave && (
           <TouchableOpacity style={s.actionBtn} onPress={onSave}>
             <Icon
@@ -34,17 +36,31 @@ export default function DetailHero({
           </TouchableOpacity>
         )}
       </View>
-
+      
+      {/* ✅ بهبود: اعتبارسنجی ساختار badges */}
       {badges.length > 0 && (
         <View style={s.badgesContainer}>
-          {badges.map((badge, i) => (
-            <View key={i} style={badge.container}>
-              {badge.icon && (
-                <Icon name={badge.icon} size={badge.iconSize || 12} color={badge.iconColor || '#fff'} />
-              )}
-              <Text style={badge.textStyle}>{badge.text}</Text>
-            </View>
-          ))}
+          {badges.map((badge, i) => {
+            // اعتبارسنجی - اگر badge ساختار صحیح نداشت، نادیده بگیر
+            if (!badge || !badge.container) return null;
+            
+            return (
+              <View key={i} style={badge.container}>
+                {badge.icon && (
+                  <Icon 
+                    name={badge.icon} 
+                    size={badge.iconSize || 12} 
+                    color={badge.iconColor || '#fff'} 
+                  />
+                )}
+                {badge.text && (
+                  <Text style={badge.textStyle || s.defaultBadgeText}>
+                    {badge.text}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
         </View>
       )}
     </View>
@@ -89,5 +105,11 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     flexWrap: 'wrap',
+  },
+  // ✅ اضافه شد - استایل پیش‌فرض برای متن badge
+  defaultBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: 'Vazir-Bold',
   },
 });

@@ -25,13 +25,13 @@ export default function MapPicker({
   initialLocation,
   onLocationSelect,
   readOnly = false,
+  height = 260, // ✅ اضافه شد - با مقدار پیش‌فرض
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const cameraRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const latestLocationRef = useRef(initialLocation || DEFAULT_LOCATION);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmedLocation, setConfirmedLocation] = useState(initialLocation || null);
   const [confirmedAddress, setConfirmedAddress] = useState('');
@@ -96,11 +96,9 @@ export default function MapPicker({
     setTempAddress('در حال جستجوی موقعیت...');
     setLoading(true);
     setHasValidLocation(false);
-
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
     debounceTimerRef.current = setTimeout(async () => {
       const addr = await getAddressFromCoordinates(lat, lng);
       setTempAddress(addr);
@@ -236,11 +234,9 @@ export default function MapPicker({
             <View style={{ width: 38 }} />
           </View>
 
-          {/* Map Wrapper */}
-          <View style={s.mapWrapper}>
+          {/* Map Wrapper - ✅ با ارتفاع قابل تنظیم */}
+          <View style={[s.mapWrapper, { height }]}>
             {renderedMap}
-            
-            {/* 🎯 مارکر ثابت قرمز در مرکز نقشه */}
             {modalVisible && (
               <View style={s.pinWrapper} pointerEvents="none">
                 <View style={s.markerContainer}>
@@ -292,7 +288,6 @@ export default function MapPicker({
             ]}
           >
             <View style={s.footerButtonsRow}>
-              {/* دکمه انصراف */}
               <TouchableOpacity
                 onPress={handleClose}
                 style={[
@@ -310,7 +305,6 @@ export default function MapPicker({
                 </Text>
               </TouchableOpacity>
 
-              {/* دکمه تایید */}
               <TouchableOpacity
                 onPress={handleConfirm}
                 disabled={!hasValidLocation || loading}
@@ -340,8 +334,6 @@ export default function MapPicker({
 
 const s = StyleSheet.create({
   wrapper: { width: '100%' },
-
-  // ═══════ Trigger Button ═══════
   triggerBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -370,8 +362,6 @@ const s = StyleSheet.create({
     borderRadius: 10,
   },
   triggerEditText: { color: '#fff', fontSize: 11, fontFamily: 'Vazir-Bold' },
-
-  // ═══════ Modal ═══════
   modalContainer: { flex: 1 },
   modalHeader: {
     flexDirection: 'row',
@@ -393,9 +383,11 @@ const s = StyleSheet.create({
   headerCenter: { flex: 1, alignItems: 'center', gap: 2 },
   headerTitle: { fontSize: 16, fontFamily: 'Vazir-Bold' },
   headerSubtitle: { fontSize: 11, fontFamily: 'Vazir' },
-
-  // ═══════ Map ═══════
-  mapWrapper: { flex: 1, position: 'relative' },
+  mapWrapper: { 
+    flex: 1, // ✅ تغییر از حالت قبلی
+    position: 'relative',
+    minHeight: 260, // ✅ حداقل ارتفاع
+  },
   map: { flex: 1 },
   pinWrapper: {
     position: 'absolute',
@@ -406,15 +398,13 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // 🎯 مارکر قرمز مشابه فایل قبلی + شیفت به بالا (translateY) برای مرکز شدن دقیق
-  markerContainer: { 
+  markerContainer: {
     width: 52,
     height: 58,
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 2,
-    // به اندازه نصف ارتفاع کانتینر (29 پیکسل) شیفت می‌دهیم تا نوک پین در مرکز قرار گیرد
-    transform: [{ translateY: -29 }], 
+    transform: [{ translateY: -29 }],
   },
   markerIcon: {
     includeFontPadding: false,
@@ -426,8 +416,6 @@ const s = StyleSheet.create({
     borderRadius: 7,
     marginTop: -4,
   },
-
-  // ═══════ Address Box ═══════
   addressBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -440,8 +428,6 @@ const s = StyleSheet.create({
   loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   addressLabel: { fontSize: 12, fontFamily: 'Vazir-Bold', textAlign: 'left' },
   addressText: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18, textAlign: 'left' },
-
-  // ═══════ Footer ═══════
   modalFooter: {
     paddingHorizontal: 16,
     paddingTop: 14,
@@ -451,8 +437,6 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-
-  // ═══════ Cancel Button ═══════
   cancelBtn: {
     flex: 1,
     flexDirection: 'row',
@@ -467,8 +451,6 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Vazir-Bold',
   },
-
-  // ═══════ Confirm Button ═══════
   confirmBtn: {
     flex: 1.6,
     flexDirection: 'row',

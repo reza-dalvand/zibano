@@ -4,11 +4,12 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking, Alert } from 'react-
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Card from '../../common/Card';
+import InfoRow from '../../common/InfoRow';
+import StatusBadge from '../../common/StatusBadge';
 import { useTheme } from '../../../stores/useThemeStore';
 
 export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }) {
   const { colors } = useTheme();
-
   const hasInfo = bankInfo.isRegistered;
 
   const handleCopy = (value, label) => {
@@ -81,7 +82,6 @@ export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }
                 </Text>
               </View>
             </View>
-
             {bankInfo.isVerified ? (
               <View style={[s.statusPill, { backgroundColor: '#43A04715' }]}>
                 <Icon name="verified" size={13} color="#43A047" />
@@ -119,7 +119,6 @@ export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }
                 showDivider
               />
             </TouchableOpacity>
-
             <View style={[s.divider, { backgroundColor: colors.border }]} />
 
             {/* شماره کارت */}

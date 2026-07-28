@@ -1,9 +1,10 @@
-// src/components/manager/TodayAppointments.js
+// src/components/manageBusiness/TodayAppointments.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import AppointmentManagerCard from './AppointmentManagerCard';
+// ✅ مسیر اصلاح شده
+import AppointmentManagerCard from '../manager/AppointmentManagerCard';
 import EmptyState from '../common/EmptyState';
 import Button from '../common/Button';
 
@@ -13,7 +14,6 @@ export default function TodayAppointments({
   onSeeAll,
 }) {
   const { colors } = useTheme();
-
   return (
     <View style={[s.section, s.lastSection]}>
       <View style={s.sectionHeader}>
@@ -26,7 +26,6 @@ export default function TodayAppointments({
           </Text>
         </TouchableOpacity>
       </View>
-
       {appointments.length > 0 ? (
         <View style={s.appointmentsList}>
           {appointments.map((item) => (

@@ -147,15 +147,6 @@ export default function NotificationModal({ visible, onClose }) {
               </TouchableOpacity>
             </View>
             
-            {/* Actions Bar */}
-            {notifications.length > 0 && (
-              <EmptyStateVariants
-                variant="appointment"
-                title="اعلانی وجود ندارد"
-                description="در حال حاضر اعلان جدیدی برای نمایش وجود ندارد"
-              />
-            )}
-            
             {/* Notifications List */}
             <ScrollView
               showsVerticalScrollIndicator={false}

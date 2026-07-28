@@ -3,28 +3,30 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-const STEPS = [
-  { id: 1, label: 'کارمند', icon: 'person' },
+// ✅ STEPS پیش‌فرض (اگر prop پاس داده نشود)
+const DEFAULT_STEPS = [
+  { id: 1, label: 'بررسی', icon: 'info-outline' },
   { id: 2, label: 'تاریخ', icon: 'calendar-today' },
-  { id: 3, label: 'ساعت', icon: 'access-time' },
+  { id: 3, label: 'ساعت', icon: 'schedule' },
 ];
 
-export default function BookingStepIndicator({ currentStep }) {
+export default function BookingStepIndicator({ 
+  currentStep, 
+  steps = DEFAULT_STEPS  // ✅ prop جدید با مقدار پیش‌فرض
+}) {
   const { colors } = useTheme();
-
+  
   return (
     <View style={s.container}>
-      {STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const isCompleted = currentStep > step.id;
         const isActive = currentStep === step.id;
         const isPending = currentStep < step.id;
-
+        
         return (
           <React.Fragment key={step.id}>
             <View style={s.stepItem}>
-              {/* دایره مرحله */}
               <View
                 style={[
                   s.stepCircle,
@@ -50,8 +52,6 @@ export default function BookingStepIndicator({ currentStep }) {
                   />
                 )}
               </View>
-
-              {/* لیبل مرحله */}
               <Text
                 style={[
                   s.stepLabel,
@@ -64,9 +64,7 @@ export default function BookingStepIndicator({ currentStep }) {
                 {step.label}
               </Text>
             </View>
-
-            {/* خط اتصال بین مراحل */}
-            {index < STEPS.length - 1 && (
+            {index < steps.length - 1 && (
               <View
                 style={[
                   s.connector,

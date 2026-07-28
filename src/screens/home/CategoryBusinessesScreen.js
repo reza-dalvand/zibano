@@ -8,9 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
-import EmptyState from '../../components/common/EmptyState';
 import CategoryHeader from '../../components/home/CategoryHeader';
-import BusinessListCard from '../../components/home/BusinessListCard';
 import CategoryFilterModal from '../../components/home/CategoryFilterModal';
 import EmptyStateVariants from '../../components/common/EmptyStateVariants';
 

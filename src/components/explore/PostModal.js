@@ -18,7 +18,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import StarRating from '../common/StarRating';
 import GallerySlider from './GallerySlider';
-import { toPersianDigit } from '../../constants/exploreFilters';
+import { toPersianDigit } from '../../utils/numberUtils';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.92;
