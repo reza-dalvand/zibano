@@ -1,6 +1,5 @@
 // src/navigation/HomeStackNavigator.js
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // صفحات موجود
@@ -19,7 +18,7 @@ import ModelRequestDetailScreen from '../screens/home/ModelRequestDetailScreen';
 import AllLineRentalsScreen from '../screens/home/AllLineRentalsScreen';
 import LineRentalDetailScreen from '../screens/home/LineRentalDetailScreen';
 
-// 🆕 صفحه نقشه کسب‌وکار
+//  صفحه نقشه کسب‌وکار
 import BusinessMapScreen from '../screens/home/BusinessMapScreen';
 
 const Stack = createNativeStackNavigator();
@@ -79,20 +78,3 @@ export default function HomeStackNavigator() {
     </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 20,
-    fontFamily: 'Vazir-Bold',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  backBtn: {
-    marginTop: 24,
-    alignSelf: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderRadius: 12,
-  },
-});

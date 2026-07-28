@@ -250,9 +250,6 @@ export const MOCK_POSTS = [
   },
 ];
 
-// کمکی: تبدیل عدد به رقم فارسی
-export const toPersianDigit = (str) =>
-  String(str).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
 // کمکی: یافتن label بر اساس id
 export const findLabel = (arr, id) => arr.find((item) => item.id === id)?.label;
