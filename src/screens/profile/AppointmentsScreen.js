@@ -389,6 +389,7 @@ export default function AppointmentsScreen({ navigation }) {
     );
   };
 
+  // در renderTabButton، می‌توان از Chip یا Badge موجود استفاده کرد:
   const renderTabButton = (tabId, label, iconName) => {
     const isActive = activeTab === tabId;
     const count = tabId === 'upcoming' ? stats.upcoming : stats.past;

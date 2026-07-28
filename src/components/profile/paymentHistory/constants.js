@@ -1,4 +1,15 @@
-// src/screens/profile/paymentHistory/constants.js
+// src/components/profile/paymentHistory/constants.js
+import { 
+  STATUS_META, 
+  APPOINTMENT_STATUS_META, 
+  PAYMENT_METHOD_META, 
+  PAYMENT_TYPE_META 
+} from '../../../constants/meta';
+
+// Re-export از meta.js مرکزی
+export { STATUS_META, APPOINTMENT_STATUS_META, PAYMENT_METHOD_META, PAYMENT_TYPE_META };
+
+// داده‌های موقت پرداخت‌ها
 export const MOCK_PAYMENTS = [
   {
     id: 'pay_1',
@@ -30,7 +41,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک ملی',
     trackingCode: 'TRK-1234567890',
     refNumber: 'REF-2024-001',
-    verificationCode: '۵۸۹۲', // ✅ 4 رقم
+    verificationCode: '۵۸۹۲',
   },
   {
     id: 'pay_2',
@@ -62,7 +73,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-9876543210',
     refNumber: 'REF-2024-002',
-    verificationCode: '۲۵۷۱', // ✅ 4 رقم
+    verificationCode: '۲۵۷۱',
   },
   {
     id: 'pay_3',
@@ -94,7 +105,7 @@ export const MOCK_PAYMENTS = [
     cardBank: 'بانک سامان',
     trackingCode: 'TRK-5555555555',
     refNumber: 'REF-2024-003',
-    verificationCode: '۷۴۵۶', // ✅ 4 رقم
+    verificationCode: '۷۴۵۶',
   },
   {
     id: 'pay_4',
@@ -159,50 +170,24 @@ export const MOCK_PAYMENTS = [
   },
 ];
 
-export const STATUS_META = {
-  success:  { label: 'موفق',       color: '#43A047', icon: 'check-circle', bg: '#43A04715' },
-  failed:   { label: 'ناموفق',     color: '#E53935', icon: 'cancel',       bg: '#E5393515' },
-  pending:  { label: 'در انتظار',   color: '#FFA000', icon: 'schedule',     bg: '#FFA00015' },
-  refunded: { label: 'مسترد شده',   color: '#1E88E5', icon: 'undo',         bg: '#1E88E515' },
-};
-
-export const APPOINTMENT_STATUS_META = {
-  upcoming:  { label: 'نوبت آینده',  color: '#2196F3', icon: 'event-available' },
-  done:      { label: 'انجام شده',    color: '#43A047', icon: 'task-alt' },
-  cancelled: { label: 'لغو شده',      color: '#E53935', icon: 'cancel' },
-};
-
-export const PAYMENT_METHOD_META = {
-  online: { label: 'درگاه بانکی',     icon: 'credit-card',            color: '#2196F3' },
-  wallet: { label: 'کیف پول',         icon: 'account-balance-wallet', color: '#9C27B0' },
-  refund: { label: 'استرداد به کارت', icon: 'undo',                   color: '#1E88E5' },
-};
-
-export const PAYMENT_TYPE_META = {
-  deposit:          { label: 'بیعانه',        color: '#FF9800', icon: 'account-balance-wallet' },
-  full_payment:     { label: 'پرداخت کامل',    color: '#2196F3', icon: 'payments' },
-  service_purchase: { label: 'خرید سرویس',    color: '#9C27B0', icon: 'workspace-premium' },
-  refund:           { label: 'استرداد',        color: '#1E88E5', icon: 'undo' },
-};
-
 export const MONTHS = [
-  { id: 0,  label: 'همه ماه‌ها' },
-  { id: 1,  label: 'فروردین' },
-  { id: 2,  label: 'اردیبهشت' },
-  { id: 3,  label: 'خرداد' },
-  { id: 4,  label: 'تیر' },
-  { id: 5,  label: 'مرداد' },
-  { id: 6,  label: 'شهریور' },
-  { id: 7,  label: 'مهر' },
-  { id: 8,  label: 'آبان' },
-  { id: 9,  label: 'آذر' },
+  { id: 0, label: 'همه ماه‌ها' },
+  { id: 1, label: 'فروردین' },
+  { id: 2, label: 'اردیبهشت' },
+  { id: 3, label: 'خرداد' },
+  { id: 4, label: 'تیر' },
+  { id: 5, label: 'مرداد' },
+  { id: 6, label: 'شهریور' },
+  { id: 7, label: 'مهر' },
+  { id: 8, label: 'آبان' },
+  { id: 9, label: 'آذر' },
   { id: 10, label: 'دی' },
   { id: 11, label: 'بهمن' },
   { id: 12, label: 'اسفند' },
 ];
 
 export const YEARS = [
-  { id: 0,    label: 'همه سال‌ها' },
+  { id: 0, label: 'همه سال‌ها' },
   { id: 1403, label: '۱۴۰۳' },
   { id: 1402, label: '۱۴۰۲' },
   { id: 1401, label: '۱۴۰۱' },
