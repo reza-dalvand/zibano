@@ -4,12 +4,10 @@ import { StyleSheet, Alert } from 'react-native';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Header from '../../components/common/Header';
 import Toast from '../../components/common/Toast';
-import { useTheme } from '../../stores/useThemeStore';
 import { useBusinessStore } from '../../stores/useBusinessStore';
 import ModelRequestForm from '../../components/manageBusiness/modelRequest/ModelRequestForm';
 
 export default function CreateModelRequestScreen({ navigation, route }) {
-  const { colors } = useTheme();
   const businessData = useBusinessStore((s) => s.businessData);
   const existingRequest = route.params?.request || null;
   const isEditMode = !!existingRequest;

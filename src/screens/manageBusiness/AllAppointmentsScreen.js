@@ -123,21 +123,21 @@ export default function AllAppointmentsScreen({ navigation }) {
       );
     }
     if (dateFilter) {
-      const todayJalaali = todayJalaali();
+      const today = todayJalaali();
       result = result.filter(a => {
         const aptDate = a.date;
         if (dateFilter === 'today') {
           return (
-            aptDate.jy === todayJalaali.jy &&
-            aptDate.jm === todayJalaali.jm &&
-            aptDate.jd === todayJalaali.jd
+            aptDate.jy === today.jy &&
+            aptDate.jm === today.jm &&
+            aptDate.jd === today.jd
           );
         }
         if (dateFilter === 'week') {
-          return aptDate.jd >= todayJalaali.jd && aptDate.jd <= todayJalaali.jd + 7;
+          return aptDate.jd >= today.jd && aptDate.jd <= today.jd + 7;
         }
         if (dateFilter === 'month') {
-          return aptDate.jm === todayJalaali.jm;
+          return aptDate.jm === today.jm;
         }
         return true;
       });
