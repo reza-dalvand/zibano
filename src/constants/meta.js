@@ -1,13 +1,58 @@
 export const COST_TYPE_META = {
-  paid: { label: 'با هزینه', icon: 'attach-money', color: '#2196F3', bg: '#2196F318', border: '#2196F340' },
-  material_cost: { label: 'با هزینه مواد', icon: 'science', color: '#FF9800', bg: '#FF980018', border: '#FF980040' },
-  free: { label: 'کاملاً رایگان', icon: 'redeem', color: '#4CAF50', bg: '#4CAF5018', border: '#4CAF5040' },
+  paid: { 
+    label: 'با هزینه',
+    icon: 'attach-money', 
+    color: '#2196F3', 
+    bg: '#2196F318', 
+    border: '#2196F340',
+    description: 'مدل بخشی از هزینه خدمت را پرداخت می‌کند',
+  },
+  material_cost: { 
+    label: 'با هزینه مواد',
+    icon: 'science', 
+    color: '#FF9800', 
+    bg: '#FF980018', 
+    border: '#FF980040',
+    description: 'فقط هزینه مواد مصرفی دریافت می‌شود',
+  },
+  free: { 
+    label: 'کاملاً رایگان',
+    icon: 'redeem', 
+    color: '#4CAF50', 
+    bg: '#4CAF5018', 
+    border: '#4CAF5040',
+    description: 'هیچ هزینه‌ای از مدل دریافت نمی‌شود',
+  },
 };
 
 export const COLLAB_TYPE_META = {
-  percent: { label: 'درصدی', icon: 'pie-chart', color: '#9C27B0', bg: '#9C27B018' },
-  fixed: { label: 'اجاره ثابت', icon: 'attach-money', color: '#2196F3', bg: '#2196F318' },
-  hourly: { label: 'ساعتی', icon: 'schedule', color: '#FF9800', bg: '#FF980018' },
+  percent: { 
+    label: 'درصدی',
+    longLabel: 'همکاری درصدی',
+    icon: 'pie-chart', 
+    color: '#9C27B0', 
+    bg: '#9C27B018',
+    border: '#9C27B040',
+    description: 'تقسیم درآمد با درصد توافقی بین سالن و همکار',
+  },
+  fixed: { 
+    label: 'اجاره ثابت',
+    longLabel: 'اجاره ثابت',
+    icon: 'attach-money', 
+    color: '#2196F3', 
+    bg: '#2196F318',
+    border: '#2196F340',
+    description: 'مبلغ ثابت ماهانه + رهن (اختیاری)',
+  },
+  hourly: { 
+    label: 'ساعتی',
+    longLabel: 'همکاری ساعتی',
+    icon: 'schedule', 
+    color: '#FF9800', 
+    bg: '#FF980018',
+    border: '#FF980040',
+    description: 'به ازای هر ساعت استفاده از لاین',
+  },
 };
 
 export const STATUS_META = {

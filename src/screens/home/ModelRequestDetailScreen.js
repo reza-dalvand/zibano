@@ -20,33 +20,12 @@ import InfoRow from '../../components/common/InfoRow';
 import CostTypeBadge from '../../components/common/CostTypeBadge';
 import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
+import { COST_TYPE_META } from '../../constants/meta';
 
 export default function ModelRequestDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { request } = route.params;
   const [isSaved, setIsSaved] = useState(false);
-
-  // 🎯 متادیتای نوع هزینه
-  const COST_TYPE_META = {
-    paid: {
-      label: 'با هزینه',
-      icon: 'attach-money',
-      color: '#2196F3',
-      description: 'مدل بخشی از هزینه خدمت را پرداخت می‌کند',
-    },
-    material_cost: {
-      label: 'با هزینه مواد',
-      icon: 'science',
-      color: '#FF9800',
-      description: 'فقط هزینه مواد مصرفی دریافت می‌شود',
-    },
-    free: {
-      label: 'کاملاً رایگان',
-      icon: 'redeem',
-      color: '#4CAF50',
-      description: 'هیچ هزینه‌ای از مدل دریافت نمی‌شود',
-    },
-  };
 
   const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
   const shareUrl = `https://zibano.app/model-request/${request.id}`;

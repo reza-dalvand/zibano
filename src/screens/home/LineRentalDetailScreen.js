@@ -20,35 +20,14 @@ import InfoRow from '../../components/common/InfoRow';
 import CollabBadge from '../../components/common/CollabBadge';
 import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
+import { COLLAB_TYPE_META } from '../../constants/meta';
 
 export default function LineRentalDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { ad } = route.params;
   const [isSaved, setIsSaved] = useState(false);
 
-  // 🎯 متادیتای نوع همکاری
-  const COLLAB_META = {
-    percent: {
-      label: 'همکاری درصدی',
-      icon: 'pie-chart',
-      color: '#9C27B0',
-      description: 'تقسیم درآمد با درصد توافقی بین سالن و همکار',
-    },
-    fixed: {
-      label: 'اجاره ثابت',
-      icon: 'attach-money',
-      color: '#2196F3',
-      description: 'مبلغ ثابت ماهانه + رهن (اختیاری)',
-    },
-    hourly: {
-      label: 'همکاری ساعتی',
-      icon: 'schedule',
-      color: '#FF9800',
-      description: 'به ازای هر ساعت استفاده از لاین',
-    },
-  };
-
-  const meta = COLLAB_META[ad.collabType] || COLLAB_META.percent;
+  const meta = COLLAB_TYPE_META[ad.collabType] || COLLAB_TYPE_META.percent;
   const shareUrl = `https://zibano.app/line-rental/${ad.id}`;
 
   // 🎯 هندلرهای ActionButtons

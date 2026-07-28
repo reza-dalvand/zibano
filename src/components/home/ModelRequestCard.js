@@ -3,27 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-import Badge from '../common/Badge';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
-
-// 🎯 متادیتای ۳ نوع هزینه
-const COST_TYPE_META = {
-  paid: {
-    label: 'با هزینه',
-    icon: 'attach-money',
-    color: '#2196F3',
-  },
-  material_cost: {
-    label: 'با هزینه مواد',
-    icon: 'science',
-    color: '#FF9800',
-  },
-  free: {
-    label: 'رایگان',
-    icon: 'redeem',
-    color: '#4CAF50',
-  },
-};
+import { COST_TYPE_META } from '../../constants/meta';
 
 export default function ModelRequestCard({ request, onPress }) {
   const { colors } = useTheme();

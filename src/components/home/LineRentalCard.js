@@ -3,16 +3,11 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
-
-const COLLAB_META = {
-  percent: { label: 'درصدی', icon: 'pie-chart', color: '#9C27B0' },
-  fixed: { label: 'اجاره ثابت', icon: 'attach-money', color: '#2196F3' },
-  hourly: { label: 'ساعتی', icon: 'schedule', color: '#FF9800' },
-};
+import { COLLAB_TYPE_META } from '../../constants/meta';
 
 export default function LineRentalCard({ ad, onPress }) {
   const { colors } = useTheme();
-  const meta = COLLAB_META[ad.collabType] || COLLAB_META.percent;
+  const meta = COLLAB_TYPE_META[ad.collabType] || COLLAB_TYPE_META.percent;
 
   return (
     <TouchableOpacity

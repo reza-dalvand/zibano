@@ -2,38 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-/**
- * کامپوننت مشترک Badge نوع هزینه مدلینگ
- *
- * متادیتای داخلی:
- * - paid: با هزینه
- * - material_cost: با هزینه مواد
- * - free: رایگان
- */
-const COST_TYPE_META = {
-  paid: {
-    label: 'با هزینه',
-    icon: 'attach-money',
-    color: '#2196F3',
-    bg: '#2196F318',
-    border: '#2196F340',
-  },
-  material_cost: {
-    label: 'با هزینه مواد',
-    icon: 'science',
-    color: '#FF9800',
-    bg: '#FF980018',
-    border: '#FF980040',
-  },
-  free: {
-    label: 'کاملاً رایگان',
-    icon: 'redeem',
-    color: '#4CAF50',
-    bg: '#4CAF5018',
-    border: '#4CAF5040',
-  },
-};
+import { COST_TYPE_META } from '../../constants/meta';
 
 export default function CostTypeBadge({
   type,

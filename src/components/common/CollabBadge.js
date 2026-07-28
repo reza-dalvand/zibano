@@ -2,38 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-/**
- * کامپوننت مشترک Badge نوع همکاری (لاین اجاره‌ای)
- *
- * متادیتای داخلی:
- * - percent: همکاری درصدی
- * - fixed: اجاره ثابت
- * - hourly: ساعتی
- */
-const COLLAB_META = {
-  percent: {
-    label: 'درصدی',
-    icon: 'pie-chart',
-    color: '#9C27B0',
-    bg: '#9C27B018',
-    border: '#9C27B040',
-  },
-  fixed: {
-    label: 'اجاره ثابت',
-    icon: 'attach-money',
-    color: '#2196F3',
-    bg: '#2196F318',
-    border: '#2196F340',
-  },
-  hourly: {
-    label: 'ساعتی',
-    icon: 'schedule',
-    color: '#FF9800',
-    bg: '#FF980018',
-    border: '#FF980040',
-  },
-};
+import { COLLAB_TYPE_META } from '../../constants/meta';
 
 export default function CollabBadge({
   type,
@@ -41,7 +10,7 @@ export default function CollabBadge({
   size = 'md',
   variant = 'default', // 'default' | 'solid' | 'compact'
 }) {
-  const meta = COLLAB_META[type] || COLLAB_META.percent;
+  const meta = COLLAB_TYPE_META[type] || COLLAB_TYPE_META.percent;
 
   // حالت compact - فقط برچسب
   if (variant === 'compact') {
