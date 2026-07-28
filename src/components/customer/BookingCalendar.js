@@ -4,21 +4,13 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
-import { 
-  toJalaali, 
-  PERSIAN_MONTHS, 
-  PERSIAN_WEEKDAYS 
+import {
+  toJalaali,
+  PERSIAN_MONTHS,
+  PERSIAN_WEEKDAYS,
+  isLeapJalaaliYear,
+  jalaaliMonthLength
 } from '../../utils/dateUtils';
-
-function isLeapJalaaliYear(jy) {
-  return [1, 5, 9, 13, 17, 22, 26, 30].includes(jy % 33);
-}
-
-function jalaaliMonthLength(jy, jm) {
-  if (jm <= 6) return 31;
-  if (jm <= 11) return 30;
-  return isLeapJalaaliYear(jy) ? 30 : 29;
-}
 
 export default function BookingCalendar({
   selectedDate,

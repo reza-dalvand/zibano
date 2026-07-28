@@ -16,10 +16,14 @@ import Button from '../../common/Button';
 import Card from '../../common/Card';
 import ServiceTypeIcon from '../services/ServiceTypeIcon';
 import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
-import { 
-  toJalaali, 
-  PERSIAN_MONTHS, 
-  PERSIAN_WEEKDAYS 
+import {
+  toJalaali,
+  PERSIAN_MONTHS,
+  PERSIAN_WEEKDAYS,
+  isLeapJalaaliYear,
+  jalaaliMonthLength,
+  minutesToTime,
+  timeToMinutes
 } from '../../../utils/dateUtils';
 
 
@@ -38,31 +42,6 @@ const SLOT_DURATIONS = [
   { id: 120, label: '۱۲۰ دقیقه', hint: 'ویژه' },
 ];
 
-// تبدیل دقیقه به HH:MM
-const minutesToTime = (min) => {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-};
-
-// تبدیل HH:MM به دقیقه
-const timeToMinutes = (time) => {
-  if (!time) return 0;
-  const [h, m] = time.split(':').map(Number);
-  return h * 60 + m;
-};
-
-
-
-function isLeapJalaaliYear(jy) {
-  return [1, 5, 9, 13, 17, 22, 26, 30].includes(jy % 33);
-}
-
-function jalaaliMonthLength(jy, jm) {
-  if (jm <= 6) return 31;
-  if (jm <= 11) return 30;
-  return isLeapJalaaliYear(jy) ? 30 : 29;
-}
 
 // ══════════════════════════════════════════
 //    کامپوننت داخلی: TimePicker (ساعت)
