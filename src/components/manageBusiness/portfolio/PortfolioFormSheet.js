@@ -17,6 +17,7 @@ import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Dropdown from '../../common/Dropdown';
 import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import CharCounter from '../../common/CharCounter';
 
 
 const MAX_DESCRIPTION_LENGTH = 300;
@@ -133,49 +134,7 @@ export default function PortfolioFormSheet({ visible, onClose, onSave, editingPo
           />
           
           {/* 🎯 شمارنده کاراکترها */}
-          <View style={s.charCounterRow}>
-            <View style={s.charCounterLeft}>
-              <Icon name="text-fields" size={12} color={isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary} />
-              <Text style={[s.charCounterText, { 
-                color: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary 
-              }]}>
-                {toPersianDigit(description.length)} از {toPersianDigit(MAX_DESCRIPTION_LENGTH)} کاراکتر
-              </Text>
-            </View>
-            
-            {/* نوار پیشرفت */}
-            <View style={[s.charProgressBar, { backgroundColor: colors.border }]}>
-              <View
-                style={[
-                  s.charProgressFill,
-                  {
-                    width: `${(description.length / MAX_DESCRIPTION_LENGTH) * 100}%`,
-                    backgroundColor: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.primary,
-                  },
-                ]}
-              />
-            </View>
-          </View>
-
-          {/* 🎯 هشدار نزدیک به محدودیت */}
-          {isNearLimit && !isAtLimit && (
-            <View style={[s.charWarning, { backgroundColor: '#FF980010', borderColor: '#FF980030' }]}>
-              <Icon name="warning" size={12} color="#FF9800" />
-              <Text style={s.charWarningText}>
-                فقط {toPersianDigit(remainingChars)} کاراکتر باقی مانده است
-              </Text>
-            </View>
-          )}
-
-          {/* 🎯 پیام محدودیت کامل */}
-          {isAtLimit && (
-            <View style={[s.charWarning, { backgroundColor: '#E5393510', borderColor: '#E5393530' }]}>
-              <Icon name="error-outline" size={12} color="#E53935" />
-              <Text style={[s.charWarningText, { color: '#E53935' }]}>
-                به حداکثر تعداد کاراکتر رسیدید
-              </Text>
-            </View>
-          )}
+          <CharCounter current={description.length} max={MAX_DESCRIPTION_LENGTH} />
         </View>
 
         {serviceOptions.length > 0 && (

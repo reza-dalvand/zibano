@@ -15,7 +15,9 @@ import Card from '../../components/common/Card';
 import Avatar from '../../components/common/Avatar';
 import StarRating from '../../components/common/StarRating';
 import EmptyState from '../../components/common/EmptyState';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
+import StatsCard from '../../components/common/StatsCard';
+
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'همه' },
@@ -116,55 +118,14 @@ export default function ReviewsScreen({ navigation }) {
       >
         {/* کارت خلاصه امتیاز */}
         <Card variant="elevated" padding={20} radius={20} style={s.summaryCard}>
-          <View style={s.summaryRow}>
-            {/* عدد بزرگ امتیاز */}
-            <View style={s.bigScore}>
-              <Text style={[s.bigNumber, { color: colors.textMain }]}>
-                {toPersianDigit(stats.avg.toFixed(1))}
-              </Text>
-              <StarRating value={stats.avg} size="md" />
-              <Text style={[s.totalReviews, { color: colors.textSecondary }]}>
-                {toPersianDigit(stats.total)} نظر
-              </Text>
-            </View>
-
-            {/* توزیع امتیازها */}
-            <View style={s.distribution}>
-              {stats.dist.map(d => (
-                <View key={d.star} style={s.distRow}>
-                  <Text style={[s.distStar, { color: colors.textSecondary }]}>
-                    {toPersianDigit(d.star)}
-                  </Text>
-                  <Icon
-                    name="star"
-                    size={12}
-                    color={d.star >= 4 ? '#FFC107' : '#FFA000'}
-                  />
-                  <View
-                    style={[s.distBarBg, { backgroundColor: colors.border }]}
-                  >
-                    <View
-                      style={[
-                        s.distBarFill,
-                        {
-                          backgroundColor:
-                            d.star >= 4
-                              ? '#43A047'
-                              : d.star === 3
-                              ? '#FFA000'
-                              : '#E53935',
-                          width: `${(d.count / stats.total) * 100}%`,
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text style={[s.distCount, { color: colors.textSecondary }]}>
-                    {toPersianDigit(d.count)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          <StatsCard
+            icon="star"
+            label="امتیاز کلی"
+            value={toPersianDigit(stats.avg.toFixed(1))}
+            subtitle={`${toPersianDigit(stats.total)} نظر`}
+            color="#FFC107"
+            variant="default"
+          />
         </Card>
 
         {/* فیلتر امتیاز */}

@@ -21,6 +21,7 @@ import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
+import CharCounter from '../../components/common/CharCounter';
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
@@ -424,87 +425,7 @@ export default function EditServiceScreen({ navigation, route }) {
                 maxLength={MAX_DESCRIPTION_LENGTH}
               />
               {/* شمارنده کاراکتر */}
-              <View style={s.charCounterRow}>
-                <View style={s.charCounterLeft}>
-                  <Icon
-                    name="text-fields"
-                    size={12}
-                    color={
-                      isAtLimit
-                        ? '#E53935'
-                        : isNearLimit
-                        ? '#FF9800'
-                        : colors.textSecondary
-                    }
-                  />
-                  <Text
-                    style={[
-                      s.charCounterText,
-                      {
-                        color: isAtLimit
-                          ? '#E53935'
-                          : isNearLimit
-                          ? '#FF9800'
-                          : colors.textSecondary,
-                      },
-                    ]}
-                  >
-                    {toPersianDigit(descLength)} از{' '}
-                    {toPersianDigit(MAX_DESCRIPTION_LENGTH)} کاراکتر
-                  </Text>
-                </View>
-                {/* نوار پیشرفت */}
-                <View
-                  style={[
-                    s.charProgressBar,
-                    { backgroundColor: colors.border },
-                  ]}
-                >
-                  <View
-                    style={[
-                      s.charProgressFill,
-                      {
-                        width: `${
-                          (descLength / MAX_DESCRIPTION_LENGTH) * 100
-                        }%`,
-                        backgroundColor: isAtLimit
-                          ? '#E53935'
-                          : isNearLimit
-                          ? '#FF9800'
-                          : colors.primary,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-              {/* هشدار نزدیک به محدودیت */}
-              {isNearLimit && !isAtLimit && (
-                <View
-                  style={[
-                    s.charWarning,
-                    { backgroundColor: '#FF980010', borderColor: '#FF980030' },
-                  ]}
-                >
-                  <Icon name="warning" size={12} color="#FF9800" />
-                  <Text style={s.charWarningText}>
-                    فقط {toPersianDigit(remainingChars)} کاراکتر باقی مانده است
-                  </Text>
-                </View>
-              )}
-              {/* پیام محدودیت کامل */}
-              {isAtLimit && (
-                <View
-                  style={[
-                    s.charWarning,
-                    { backgroundColor: '#E5393510', borderColor: '#E5393530' },
-                  ]}
-                >
-                  <Icon name="error-outline" size={12} color="#E53935" />
-                  <Text style={[s.charWarningText, { color: '#E53935' }]}>
-                    به حداکثر تعداد کاراکتر رسیدید
-                  </Text>
-                </View>
-              )}
+              <CharCounter current={descLength} max={MAX_DESCRIPTION_LENGTH} />
             </View>
           </Card>
         </View>
@@ -618,48 +539,6 @@ const s = StyleSheet.create({
   // ═══════════ شمارنده کاراکتر توضیحات ═══════════
   descriptionWrapper: {
     marginBottom: 4,
-  },
-  charCounterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: -10,
-    marginBottom: 6,
-    paddingHorizontal: 4,
-  },
-  charCounterLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  charCounterText: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Medium',
-  },
-  charProgressBar: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  charProgressFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  charWarning: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    marginTop: -2,
-    marginBottom: 4,
-  },
-  charWarningText: {
-    fontSize: 11,
-    fontFamily: 'Vazir-Medium',
   },
   saveContainer: {
     marginTop: 24,

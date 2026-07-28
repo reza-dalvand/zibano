@@ -1,10 +1,10 @@
-// نمایش کارت‌های آماری بالای صفحه
+// src/components/manageBusiness/financial/FinancialStatsCards.js
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import Card from '../../common/Card';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../../../stores/useThemeStore';
-import { toPersianDigit, formatPrice } from './constants';
+import Card from '../../common/Card';
+import StatsCard from '../../common/StatsCard';
+import { formatPrice } from './constants';
 
 const STAT_CARDS = [
   {
@@ -13,8 +13,7 @@ const STAT_CARDS = [
     icon: 'hourglass-top',
     label: 'بیعانه بلوکه',
     hint: 'در انتظار انجام خدمت',
-    iconBg: '#FF980020',
-    iconColor: '#FF9800',
+    color: '#FF9800',
   },
   {
     id: 'settling',
@@ -22,8 +21,7 @@ const STAT_CARDS = [
     icon: 'sync',
     label: 'در حال تسویه',
     hint: 'واریز تا ۴۸ ساعت',
-    iconBg: '#2196F320',
-    iconColor: '#2196F3',
+    color: '#2196F3',
   },
   {
     id: 'settled',
@@ -31,8 +29,7 @@ const STAT_CARDS = [
     icon: 'account-balance',
     label: 'کل درآمد تسویه‌شده',
     hint: 'به حساب شما واریز شده',
-    iconBg: '#43A04720',
-    iconColor: '#43A047',
+    color: '#43A047',
   },
   {
     id: 'total',
@@ -40,39 +37,24 @@ const STAT_CARDS = [
     icon: 'trending-up',
     label: 'کل تراکنش‌ها',
     hint: 'از ابتدا تا امروز',
-    iconBg: '#9C27B020',
-    iconColor: '#9C27B0',
+    color: '#9C27B0',
   },
 ];
 
 export default function FinancialStatsCards({ stats }) {
   const { colors } = useTheme();
-
   return (
     <View style={s.grid}>
-      {STAT_CARDS.map((card, idx) => (
-        <Card
+      {STAT_CARDS.map((card) => (
+        <StatsCard
           key={card.id}
-          variant="elevated"
-          padding={12}
-          radius={14}
-          style={s.statCard}
-        >
-          <View style={s.cardInner}>
-            <View style={[s.iconBox, { backgroundColor: card.iconBg }]}>
-              <Icon name={card.icon} size={20} color={card.iconColor} />
-            </View>
-            <Text style={[s.value, { color: colors.textMain }]}>
-              {formatPrice(stats[card.key]).replace(' تومان', '')}
-            </Text>
-            <Text style={[s.label, { color: colors.textMain }]}>
-              {card.label}
-            </Text>
-            <Text style={[s.hint, { color: colors.textSecondary }]}>
-              {card.hint}
-            </Text>
-          </View>
-        </Card>
+          icon={card.icon}
+          label={card.label}
+          value={formatPrice(stats[card.key]).replace(' تومان', '')}
+          subtitle={card.hint}
+          color={card.color}
+          variant="horizontal"
+        />
       ))}
     </View>
   );
@@ -84,35 +66,5 @@ const s = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
     marginBottom: 20,
-  },
-  statCard: {
-    width: '48.3%',
-  },
-  cardInner: {
-    alignItems: 'flex-start',
-    gap: 4,
-  },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 15,
-    fontFamily: 'Vazir-Bold',
-    marginTop: 2,
-  },
-  label: {
-    fontSize: 11.5,
-    fontFamily: 'Vazir-Bold',
-    marginTop: 2,
-  },
-  hint: {
-    fontSize: 9.5,
-    fontFamily: 'Vazir',
-    marginTop: 1,
   },
 });

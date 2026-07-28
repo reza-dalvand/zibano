@@ -5,9 +5,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Card from '../common/Card';
 import Avatar from '../common/Avatar';
+import StatusBadge from '../common/StatusBadge';
+import InfoRow from '../common/InfoRow';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 import { APPOINTMENT_STATUS_META } from '../../constants/meta';
-
 
 export default function AppointmentCard({
   appointment,
@@ -16,19 +17,17 @@ export default function AppointmentCard({
   onCancel,
 }) {
   const { colors } = useTheme();
-  const meta = APPOINTMENT_STATUS_META[appointment.status] || APPOINTMENT_STATUS_META.reserved;  const isReserved = appointment.status === 'reserved';
+  const meta = APPOINTMENT_STATUS_META[appointment.status] || APPOINTMENT_STATUS_META.reserved;
+  const isReserved = appointment.status === 'reserved';
   const isCancelledBySalon = appointment.status === 'cancelled_by_salon';
   const isDone = appointment.status === 'done';
-
   const dateStr = appointment.date
-    ? `${toPersianDigit(appointment.date.jy)}/${toPersianDigit(
-        appointment.date.jm
-      )}/${toPersianDigit(appointment.date.jd)}`
+    ? `${toPersianDigit(appointment.date.jy)}/${toPersianDigit(appointment.date.jm)}/${toPersianDigit(appointment.date.jd)}`
     : '—';
 
   return (
     <Card variant="elevated" padding={0} radius={18} style={s.card}>
-      {/* 🔝 هدر (کلیک برای جزئیات) */}
+      {/* 🔝 هدر */}
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={() => onDetails?.(appointment)}
@@ -40,18 +39,14 @@ export default function AppointmentCard({
             <Text style={[s.customerName, { color: colors.textMain }]}>
               {appointment.customerName}
             </Text>
-            <View style={s.phoneRow}>
-              <Icon name="phone" size={12} color={colors.textSecondary} />
-              <Text style={[s.customerPhone, { color: colors.textSecondary }]}>
-                {toPersianDigit(appointment.customerPhone || '—')}
-              </Text>
-            </View>
+            <InfoRow 
+              icon="phone"
+              value={toPersianDigit(appointment.customerPhone || '—')}
+              label=""
+            />
           </View>
         </View>
-        <View style={[s.statusBadge, { backgroundColor: meta.bg }]}>
-          <Icon name={meta.icon} size={12} color={meta.color} />
-          <Text style={[s.statusText, { color: meta.color }]}>{meta.label}</Text>
-        </View>
+        <StatusBadge meta={meta} size="md" />
       </TouchableOpacity>
 
       {/* 📋 خدمت */}
@@ -60,18 +55,8 @@ export default function AppointmentCard({
         onPress={() => onDetails?.(appointment)}
         style={[s.serviceBox, { paddingHorizontal: 14, paddingVertical: 10 }]}
       >
-        <View style={s.serviceRow}>
-          <Icon name="spa" size={14} color={colors.primary} />
-          <Text style={[s.serviceName, { color: colors.textMain }]} numberOfLines={1}>
-            {appointment.serviceName}
-          </Text>
-        </View>
-        <View style={s.serviceRow}>
-          <Icon name="person" size={14} color={colors.textSecondary} />
-          <Text style={[s.employeeName, { color: colors.textSecondary }]} numberOfLines={1}>
-            {appointment.employeeName}
-          </Text>
-        </View>
+        <InfoRow icon="spa" label="خدمت:" value={appointment.serviceName} />
+        <InfoRow icon="person" label="کارمند:" value={appointment.employeeName} />
       </TouchableOpacity>
 
       {/* 🕐 تاریخ و مبلغ */}
@@ -106,7 +91,7 @@ export default function AppointmentCard({
         </View>
       </TouchableOpacity>
 
-      {/* پیام لغو */}
+      {/* پیام‌ها */}
       {isCancelledBySalon && appointment.cancellationReason && (
         <View style={[s.hintBox, { backgroundColor: '#E5393510', borderTopColor: colors.border }]}>
           <Icon name="info-outline" size={14} color="#E53935" />
@@ -115,32 +100,25 @@ export default function AppointmentCard({
           </Text>
         </View>
       )}
-
-      {/* پیام انجام شده */}
       {isDone && (
         <View style={[s.hintBox, { backgroundColor: '#43A04710', borderTopColor: colors.border }]}>
           <Icon name="verified-user" size={14} color="#43A047" />
           <Text style={[s.hintText, { color: '#43A047' }]}>خدمت انجام شد • بیعانه آزاد شد</Text>
         </View>
       )}
-
-      {/* 🎯 نمایش کد تایید وارد شده (فقط برای نوبت‌های انجام شده) */}
       {isDone && appointment.verificationCode && (
         <View style={[s.verifiedCodeBox, { borderTopColor: colors.border, backgroundColor: '#43A04708' }]}>
           <Icon name="key" size={14} color="#43A047" />
-          <Text style={[s.verifiedCodeLabel, { color: colors.textSecondary }]}>
-            کد تایید وارد شده:
-          </Text>
+          <Text style={[s.verifiedCodeLabel, { color: colors.textSecondary }]}>کد تایید وارد شده:</Text>
           <Text style={[s.verifiedCodeValue, { color: '#43A047' }]}>
             {toPersianDigit(appointment.verificationCode)}
           </Text>
         </View>
       )}
 
-      {/* 🎯 دکمه‌های اکشن (فقط برای نوبت‌های رزرو شده) */}
+      {/* 🎯 دکمه‌های اکشن */}
       {isReserved && (
         <View style={[s.actionsContainer, { borderTopColor: colors.border, backgroundColor: colors.background + '60' }]}>
-          {/* ردیف بالا: لغو + جزئیات */}
           <View style={s.topActionsRow}>
             <TouchableOpacity
               activeOpacity={0.75}
@@ -150,7 +128,6 @@ export default function AppointmentCard({
               <Icon name="cancel" size={16} color="#E53935" />
               <Text style={[s.actionBtnText, { color: '#E53935' }]}>لغو نوبت</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               activeOpacity={0.75}
               onPress={() => onDetails?.(appointment)}
@@ -160,8 +137,6 @@ export default function AppointmentCard({
               <Text style={[s.actionBtnText, { color: colors.primary }]}>جزئیات نوبت</Text>
             </TouchableOpacity>
           </View>
-
-          {/* ردیف پایین: تایید خدمت (تمام عرض) */}
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => onVerify?.(appointment)}
@@ -170,9 +145,7 @@ export default function AppointmentCard({
             <Icon name="verified-user" size={18} color="#fff" />
             <View style={s.verifyTextCol}>
               <Text style={[s.verifyBtnTitle, { color: '#fff' }]}>تایید انجام خدمت</Text>
-              <Text style={[s.verifyBtnSubtitle, { color: '#ffffffcc' }]}>
-                وارد کردن کد ۴ رقمی مشتری
-              </Text>
+              <Text style={[s.verifyBtnSubtitle, { color: '#ffffffcc' }]}>وارد کردن کد ۴ رقمی مشتری</Text>
             </View>
             <Icon name="chevron-left" size={20} color="#fff" />
           </TouchableOpacity>
@@ -188,14 +161,7 @@ const s = StyleSheet.create({
   customerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   customerInfo: { flex: 1, gap: 3 },
   customerName: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  customerPhone: { fontSize: 12, fontFamily: 'Vazir' },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
-  statusText: { fontSize: 11, fontFamily: 'Vazir-Bold' },
   serviceBox: { gap: 6, paddingHorizontal: 14, paddingVertical: 10 },
-  serviceRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  serviceName: { fontSize: 13, fontFamily: 'Vazir-Bold', flex: 1 },
-  employeeName: { fontSize: 12, fontFamily: 'Vazir', flex: 1 },
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, paddingHorizontal: 14, paddingVertical: 12 },
   timeBox: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   timeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -208,13 +174,9 @@ const s = StyleSheet.create({
   totalPrice: { fontSize: 13, fontFamily: 'Vazir-Bold' },
   hintBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderTopWidth: 1 },
   hintText: { fontSize: 11, fontFamily: 'Vazir', flex: 1, lineHeight: 17 },
-  
-  // 🎯 نمایش کد تایید
   verifiedCodeBox: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderTopWidth: 1 },
   verifiedCodeLabel: { fontSize: 11, fontFamily: 'Vazir', flex: 1 },
   verifiedCodeValue: { fontSize: 13, fontFamily: 'Vazir-Bold', letterSpacing: 2 },
-
-  // 🎯 دکمه‌های اکشن
   actionsContainer: { paddingHorizontal: 10, paddingVertical: 10, borderTopWidth: 1, gap: 8 },
   topActionsRow: { flexDirection: 'row', gap: 8 },
   actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },

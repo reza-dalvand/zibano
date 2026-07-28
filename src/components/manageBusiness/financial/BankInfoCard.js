@@ -111,16 +111,13 @@ export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }
               onPress={() => handleCopy(bankInfo.sheba, 'شماره شبا')}
               activeOpacity={0.65}
             >
-              <View style={s.infoLabelRow}>
-                <Icon name="tag" size={15} color={colors.primary} />
-                <Text style={[s.infoLabel, { color: colors.textSecondary }]}>شماره شبا</Text>
-              </View>
-              <View style={s.infoValueRow}>
-                <Text style={[s.infoValue, { color: colors.textMain }]} numberOfLines={1}>
-                  {bankInfo.sheba}
-                </Text>
-                <Icon name="content-copy" size={15} color={colors.textSecondary} />
-              </View>
+              <InfoRow
+                icon="tag"
+                label="شماره شبا"
+                value={bankInfo.sheba}
+                rightIcon={<Icon name="content-copy" size={15} color={colors.textSecondary} />}
+                showDivider
+              />
             </TouchableOpacity>
 
             <View style={[s.divider, { backgroundColor: colors.border }]} />
@@ -167,38 +164,10 @@ export default function BankInfoCard({ bankInfo, onEdit, hasActiveAppointments }
           </View>
 
           {/* وضعیت تایید */}
-          {!bankInfo.isVerified && (
-            <View
-              style={[
-                s.verifyHint,
-                {
-                  backgroundColor: '#FF980010',
-                  borderColor: '#FF980035',
-                },
-              ]}
-            >
-              <Icon name="info-outline" size={15} color="#FF9800" />
-              <Text style={[s.verifyHintText, { color: '#FF9800' }]}>
-                اطلاعات بانکی شما توسط کارشناسان در حال بررسی است. تا تایید نهایی، تسویه حساب انجام نخواهد شد.
-              </Text>
-            </View>
-          )}
-
-          {bankInfo.isVerified && (
-            <View
-              style={[
-                s.verifyHint,
-                {
-                  backgroundColor: '#43A04710',
-                  borderColor: '#43A04735',
-                },
-              ]}
-            >
-              <Icon name="check-circle" size={15} color="#43A047" />
-              <Text style={[s.verifyHintText, { color: '#43A047' }]}>
-                حساب تایید شده است • تسویه‌های شما از امروز انجام خواهند شد
-              </Text>
-            </View>
+          {bankInfo.isVerified ? (
+            <StatusBadge meta={{ label: 'تایید شده', color: '#43A047', icon: 'verified', bg: '#43A04715' }} size="md" />
+          ) : (
+            <StatusBadge meta={{ label: 'در حال تایید', color: '#FF9800', icon: 'hourglass-empty', bg: '#FF980015' }} size="md" />
           )}
 
           {/* دکمه‌های اقدام */}

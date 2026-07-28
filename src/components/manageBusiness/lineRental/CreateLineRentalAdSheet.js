@@ -19,6 +19,7 @@ import Card from '../../common/Card';
 import { toPersianDigit } from '../../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../../constants';
 import { COLLAB_TYPES, LIMITS } from '../../../constants/collabTypes';
+import CharCounter from '../../common/CharCounter';
 
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
@@ -1030,79 +1031,7 @@ export default function CreateLineRentalAdSheet({
               <Icon name="notes" size={20} color={colors.textSecondary} />
             }
           />
-          <View style={s.charCounterRow}>
-            <Icon
-              name="text-fields"
-              size={12}
-              color={
-                isAtLimit
-                  ? '#E53935'
-                  : isNearLimit
-                  ? '#FF9800'
-                  : colors.textSecondary
-              }
-            />
-            <Text
-              style={[
-                s.charCounterText,
-                {
-                  color: isAtLimit
-                    ? '#E53935'
-                    : isNearLimit
-                    ? '#FF9800'
-                    : colors.textSecondary,
-                },
-              ]}
-            >
-              {toPersianDigit(String(descLength))} از{' '}
-              {toPersianDigit(String(MAX_DESC_LENGTH))} کاراکتر
-            </Text>
-            <View style={{ flex: 1 }} />
-            <View
-              style={[s.charProgressBar, { backgroundColor: colors.border }]}
-            >
-              <View
-                style={[
-                  s.charProgressFill,
-                  {
-                    width: `${(descLength / MAX_DESC_LENGTH) * 100}%`,
-                    backgroundColor: isAtLimit
-                      ? '#E53935'
-                      : isNearLimit
-                      ? '#FF9800'
-                      : colors.primary,
-                  },
-                ]}
-              />
-            </View>
-          </View>
-          {isNearLimit && !isAtLimit ? (
-            <View
-              style={[
-                s.charWarning,
-                { backgroundColor: '#FF980010', borderColor: '#FF980030' },
-              ]}
-            >
-              <Icon name="warning" size={12} color="#FF9800" />
-              <Text style={s.charWarningText}>
-                فقط {toPersianDigit(String(remainingChars))} کاراکتر باقی مانده
-                است
-              </Text>
-            </View>
-          ) : null}
-          {isAtLimit ? (
-            <View
-              style={[
-                s.charWarning,
-                { backgroundColor: '#E5393510', borderColor: '#E5393530' },
-              ]}
-            >
-              <Icon name="error-outline" size={12} color="#E53935" />
-              <Text style={[s.charWarningText, { color: '#E53935' }]}>
-                به حداکثر تعداد کاراکتر رسیدید
-              </Text>
-            </View>
-          ) : null}
+          <CharCounter current={descLength} max={MAX_DESC_LENGTH} />
         </View>
 
         {/* کارت راهنما */}

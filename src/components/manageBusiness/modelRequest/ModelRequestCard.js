@@ -8,6 +8,7 @@ import Badge from '../../common/Badge';
 import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 import { truncateText } from '../../../utils/stringUtils';
 import { LIMITS } from '../../../constants/collabTypes';
+import CostTypeBadge from '../../common/CostTypeBadge';
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
 
@@ -113,20 +114,7 @@ export default function ModelRequestCard({ request, onEdit, onDelete }) {
 
       {/* 🎯 Badge نوع هزینه */}
       <View style={s.costTypeRow}>
-        <View
-          style={[
-            s.costTypeBadge,
-            {
-              backgroundColor: costMeta.bg,
-              borderColor: costMeta.border,
-            },
-          ]}
-        >
-          <Icon name={costMeta.icon} size={14} color={costMeta.color} />
-          <Text style={[s.costTypeText, { color: costMeta.color }]}>
-            {costMeta.label}
-          </Text>
-        </View>
+        <CostTypeBadge type={request.costType} variant="default" />
       </View>
 
       {/* شماره تماس */}

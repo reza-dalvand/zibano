@@ -10,6 +10,7 @@ import Button from '../../common/Button';
 import Card from '../../common/Card';
 import { toPersianDigit } from '../../../utils/numberUtils';
 import { LIMITS } from '../../../constants/collabTypes';
+import CharCounter from '../../common/CharCounter';
 
 const toEnglishDigits = (str) =>
   String(str || '')
@@ -229,44 +230,7 @@ export default function ModelRequestForm({
         />
 
         {/* شمارنده کاراکتر */}
-        <View style={s.charCounterRow}>
-          <Icon
-            name="text-fields"
-            size={12}
-            color={isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary}
-          />
-          <Text
-            style={[
-              s.charCounterText,
-              {
-                color: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.textSecondary,
-              },
-            ]}
-          >
-            {toPersianDigit(descLength)} از {toPersianDigit(MAX_DESC_LENGTH)} کاراکتر
-          </Text>
-          <View style={{ flex: 1 }} />
-          <View style={[s.charProgressBar, { backgroundColor: colors.border }]}>
-            <View
-              style={[
-                s.charProgressFill,
-                {
-                  width: `${(descLength / MAX_DESC_LENGTH) * 100}%`,
-                  backgroundColor: isAtLimit ? '#E53935' : isNearLimit ? '#FF9800' : colors.primary,
-                },
-              ]}
-            />
-          </View>
-        </View>
-
-        {isNearLimit && !isAtLimit && (
-          <View style={[s.charWarning, { backgroundColor: '#FF980010', borderColor: '#FF980030' }]}>
-            <Icon name="warning" size={12} color="#FF9800" />
-            <Text style={s.charWarningText}>
-              فقط {toPersianDigit(remainingChars)} کاراکتر باقی مانده است
-            </Text>
-          </View>
-        )}
+        <CharCounter current={descLength} max={MAX_DESCRIPTION_LENGTH} />
       </Card>
 
       {/* ═══════ بخش ۴: وضعیت هزینه (۳ گزینه) ═══════ */}

@@ -6,14 +6,10 @@ import { useTheme } from '../../../stores/useThemeStore';
 import Card from '../../common/Card';
 import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
 import { LIMITS } from '../../../constants/collabTypes';
+import CollabBadge from '../../common/CollabBadge';
+import { COLLAB_TYPE_META } from '../../../constants/meta';
 
 const MAX_DESC_LENGTH = LIMITS.MAX_DESCRIPTION_LENGTH;
-
-const COLLAB_TYPE_META = {
-  percent: { label: 'درصدی', color: '#9C27B0', bg: '#9C27B018', icon: 'pie-chart' },
-  fixed: { label: 'اجاره ثابت', color: '#2196F3', bg: '#2196F318', icon: 'attach-money' },
-  hourly: { label: 'ساعتی', color: '#FF9800', bg: '#FF980018', icon: 'schedule' },
-};
 
 const truncateDesc = (text) => {
   if (!text) return '';
@@ -132,19 +128,12 @@ export default function LineRentalAdCard({ ad, onEdit, onDelete }) {
       </View>
 
       {/* تگ نوع همکاری */}
-      <View style={[s.collabTag, { backgroundColor: collabMeta.bg, borderColor: collabMeta.color + '40' }]}>
-        <Icon name={collabMeta.icon} size={14} color={collabMeta.color} />
-        <Text style={[s.collabLabel, { color: collabMeta.color }]}>
-          همکاری {collabMeta.label}
-        </Text>
-        {hasPriceDisplay ? (
-          <View style={s.priceSection}>
-            <View style={[s.tagDot, { backgroundColor: collabMeta.color + '60' }]} />
-            <Text style={[s.priceText, { color: collabMeta.color }]}>
-              {ad.priceDisplay}
-            </Text>
-          </View>
-        ) : null}
+      <View style={s.collabTag}>
+        <CollabBadge
+          type={ad.collabType}
+          priceDisplay={ad.priceDisplay}
+          variant="default"
+        />
       </View>
 
       {/* نمایش اطلاعات بیشتر برای حالت‌های خاص */}

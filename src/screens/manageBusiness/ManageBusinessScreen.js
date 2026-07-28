@@ -17,6 +17,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { useBusinessStore } from '../../stores/useBusinessStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import SectionHeader from '../../components/common/SectionHeader';
 
 
 // ============ دیتای موقت کسب‌وکار ============
@@ -302,16 +303,11 @@ export default function ManageBusinessScreen({ navigation }) {
 
         {/* ═══════════ اقدامات سریع (۴ آیتم) ═══════════ */}
         <View style={[s.section, s.lastSection]}>
-          <View style={s.sectionHeaderRow}>
-            <View
-              style={[s.sectionIcon, { backgroundColor: colors.primary + '15' }]}
-            >
-              <Icon name="bolt" size={18} color={colors.primary} />
-            </View>
-            <Text style={[s.sectionTitle, { color: colors.textMain }]}>
-              اقدامات سریع
-            </Text>
-          </View>
+          <SectionHeader
+            icon="bolt"
+            title="اقدامات سریع"
+            iconColor={colors.primary}
+          />
 
           <View style={s.quickActionsGrid}>
             {QUICK_ACTIONS.map(item => (

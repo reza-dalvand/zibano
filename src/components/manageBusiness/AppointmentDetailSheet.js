@@ -6,12 +6,11 @@ import { useTheme } from '../../stores/useThemeStore';
 import BottomSheet from '../common/BottomSheet';
 import Avatar from '../common/Avatar';
 import Card from '../common/Card';
-import Divider from '../common/Divider';
+import StatusBadge from '../common/StatusBadge';
+import InfoRow from '../common/InfoRow';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 import { APPOINTMENT_STATUS_META } from '../../constants/meta';
 
-
-// 🎯 پروپ‌های اکشن حذف شدند
 export default function AppointmentDetailSheet({ visible, appointment, onClose }) {
   const { colors } = useTheme();
   if (!appointment) return null;
@@ -19,7 +18,6 @@ export default function AppointmentDetailSheet({ visible, appointment, onClose }
   const isCancelledBySalon = appointment.status === 'cancelled_by_salon';
   const isDone = appointment.status === 'done';
   const isReserved = appointment.status === 'reserved';
-
   const dateStr = appointment.date
     ? `${toPersianDigit(appointment.date.jy)}/${toPersianDigit(appointment.date.jm)}/${toPersianDigit(appointment.date.jd)}`
     : '—';
@@ -31,61 +29,41 @@ export default function AppointmentDetailSheet({ visible, appointment, onClose }
         <View style={s.customerSection}>
           <Avatar name={appointment.customerName} size="xl" />
           <Text style={[s.customerName, { color: colors.textMain }]}>{appointment.customerName}</Text>
-          <View style={[s.phoneBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Icon name="phone" size={16} color={colors.primary} />
-            <Text style={[s.phoneText, { color: colors.textMain }]}>
-              {toPersianDigit(appointment.customerPhone || '—')}
-            </Text>
-          </View>
-          <View style={[s.statusPill, { backgroundColor: meta.bg }]}>
-            <Icon name={meta.icon} size={14} color={meta.color} />
-            <Text style={[s.statusPillText, { color: meta.color }]}>{meta.label}</Text>
-          </View>
+          <StatusBadge meta={meta} size="lg" />
         </View>
 
         {/* جزئیات نوبت */}
         <Card variant="default" padding={14} radius={14} style={s.detailCard}>
           <Text style={[s.cardTitle, { color: colors.textMain }]}>جزئیات نوبت</Text>
-          <Divider spacing={10} />
-          {[
-            { icon: 'spa', label: 'خدمت', value: appointment.serviceName },
-            { icon: 'person', label: 'کارمند', value: appointment.employeeName },
-            { icon: 'event', label: 'تاریخ', value: dateStr },
-            { icon: 'schedule', label: 'ساعت', value: appointment.time },
-          ].map((item, i) => (
-            <View key={i} style={s.infoRow}>
-              <View style={s.infoLabel}>
-                <Icon name={item.icon} size={16} color={colors.primary} />
-                <Text style={[s.infoLabelText, { color: colors.textSecondary }]}>{item.label}</Text>
-              </View>
-              <Text style={[s.infoValue, { color: colors.textMain }]}>{item.value}</Text>
-            </View>
-          ))}
+          <InfoRow icon="spa" label="خدمت" value={appointment.serviceName} />
+          <InfoRow icon="person" label="کارمند" value={appointment.employeeName} />
+          <InfoRow icon="event" label="تاریخ" value={dateStr} />
+          <InfoRow icon="schedule" label="ساعت" value={appointment.time} />
+          <InfoRow icon="phone" label="شماره تماس" value={toPersianDigit(appointment.customerPhone || '—')} monospace />
         </Card>
 
         {/* مالی */}
         <Card variant="default" padding={14} radius={14} style={s.detailCard}>
           <Text style={[s.cardTitle, { color: colors.textMain }]}>جزئیات مالی</Text>
-          <Divider spacing={10} />
-          <View style={s.priceRow}>
-            <Text style={[s.priceLabel, { color: colors.textSecondary }]}>مبلغ کل خدمت</Text>
-            <Text style={[s.priceValue, { color: colors.textMain }]}>{formatPrice(appointment.price)}</Text>
-          </View>
+          <InfoRow icon="receipt-long" label="مبلغ کل خدمت" value={formatPrice(appointment.price)} />
           {appointment.depositPaid > 0 && (
-            <View style={[s.priceRow, s.highlightRow]}>
-              <View style={s.priceLabelRow}>
-                <Icon name="account-balance-wallet" size={14} color="#43A047" />
-                <Text style={[s.priceLabelBold, { color: colors.textMain }]}>بیعانه پرداخت شده</Text>
-              </View>
-              <Text style={[s.priceValueLarge, { color: '#43A047' }]}>{formatPrice(appointment.depositPaid)}</Text>
-            </View>
+            <InfoRow 
+              icon="account-balance-wallet"
+              iconColor="#43A047"
+              label="بیعانه پرداخت شده"
+              value={formatPrice(appointment.depositPaid)}
+              valueColor="#43A047"
+              valueBold
+              highlight
+            />
           )}
-          <View style={s.priceRow}>
-            <Text style={[s.priceLabel, { color: colors.textSecondary }]}>باقیمانده (پرداخت در سالن)</Text>
-            <Text style={[s.priceValue, { color: '#2196F3' }]}>
-              {formatPrice(appointment.price - (appointment.depositPaid || 0))}
-            </Text>
-          </View>
+          <InfoRow 
+            icon="store"
+            iconColor="#2196F3"
+            label="باقیمانده (پرداخت در سالن)"
+            value={formatPrice(appointment.price - (appointment.depositPaid || 0))}
+            valueColor="#2196F3"
+          />
           {isDone && appointment.depositPaid > 0 && (
             <View style={[s.settlementBox, { backgroundColor: '#43A04710', borderColor: '#43A04740' }]}>
               <Icon name="check-circle" size={18} color="#43A047" />
@@ -105,7 +83,7 @@ export default function AppointmentDetailSheet({ visible, appointment, onClose }
           </Card>
         )}
 
-        {/* راهنما برای رزرو شده */}
+        {/* راهنما */}
         {isReserved && (
           <Card variant="default" padding={14} radius={14} style={[s.detailCard, { borderColor: colors.primary + '40', backgroundColor: colors.primary + '08' }]}>
             <View style={s.helpHeader}>
@@ -113,7 +91,11 @@ export default function AppointmentDetailSheet({ visible, appointment, onClose }
               <Text style={[s.helpTitle, { color: colors.textMain }]}>راهنمای تکمیل خدمت</Text>
             </View>
             <View style={s.helpSteps}>
-              {['خدمت را برای مشتری انجام دهید', 'کد تایید ۴ رقمی مشتری را از او بپرسید', 'کد را وارد کرده و خدمت را تایید کنید تا بیعانه آزاد شود'].map((text, i) => (
+              {[
+                'خدمت را برای مشتری انجام دهید',
+                'کد تایید ۴ رقمی مشتری را از او بپرسید',
+                'کد را وارد کرده و خدمت را تایید کنید تا بیعانه آزاد شود',
+              ].map((text, i) => (
                 <View key={i} style={s.helpStep}>
                   <View style={[s.stepNumber, { backgroundColor: colors.primary }]}>
                     <Text style={s.stepNumberText}>{toPersianDigit(i + 1)}</Text>
@@ -135,23 +117,8 @@ const s = StyleSheet.create({
   scroll: { paddingBottom: 20 },
   customerSection: { alignItems: 'center', gap: 8, paddingVertical: 16 },
   customerName: { fontSize: 17, fontFamily: 'Vazir-Bold', marginTop: 4 },
-  phoneBox: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14, borderWidth: 1 },
-  phoneText: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  statusPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 14, marginTop: 4 },
-  statusPillText: { fontSize: 12, fontFamily: 'Vazir-Bold' },
   detailCard: { marginBottom: 12 },
-  cardTitle: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  infoLabel: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  infoLabelText: { fontSize: 13, fontFamily: 'Vazir' },
-  infoValue: { fontSize: 13, fontFamily: 'Vazir-Bold', flex: 1, textAlign: 'left' },
-  priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 4 },
-  highlightRow: { paddingVertical: 8, marginVertical: 4 },
-  priceLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  priceLabel: { fontSize: 13, fontFamily: 'Vazir' },
-  priceLabelBold: { fontSize: 13, fontFamily: 'Vazir-Bold' },
-  priceValue: { fontSize: 13, fontFamily: 'Vazir-Bold' },
-  priceValueLarge: { fontSize: 15, fontFamily: 'Vazir-Bold' },
+  cardTitle: { fontSize: 14, fontFamily: 'Vazir-Bold', marginBottom: 8 },
   settlementBox: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, padding: 10, borderRadius: 10, borderWidth: 1 },
   settlementText: { fontSize: 12, fontFamily: 'Vazir-Bold', flex: 1 },
   reasonHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
