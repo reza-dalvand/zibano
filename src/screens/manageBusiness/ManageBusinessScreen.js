@@ -335,7 +335,7 @@ export default function ManageBusinessScreen({ navigation }) {
                     size={28}
                     color={item.gradient[0]}
                   />
-                  {item.badge && item.badge > 0 && (
+                  {item.badge > 0 && (
                     <View style={s.actionBadge}>
                       <Text style={s.actionBadgeText}>
                         {item.badge > 9 ? '۹+' : toPersianDigit(item.badge)}

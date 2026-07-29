@@ -226,7 +226,7 @@ export default function ModelRequestForm({
         />
 
         {/* شمارنده کاراکتر */}
-        <CharCounter current={descLength} max={MAX_DESCRIPTION_LENGTH} />
+        <CharCounter current={descLength} max={MAX_DESC_LENGTH} />
       </Card>
 
       {/* ═══════ بخش ۴: وضعیت هزینه (۳ گزینه) ═══════ */}

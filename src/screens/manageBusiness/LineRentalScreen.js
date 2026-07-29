@@ -203,9 +203,9 @@ export default function LineRentalScreen({ navigation }) {
             لاین‌های خالی سالن خود را به متخصصان اجاره دهید و درآمد خود را افزایش دهید
           </Text>
         </View>
-
-        {myAds.length > 0 && <LineRentalStats ads={myAds} />}
-
+        <View style={s.lineState}>
+          {myAds.length > 0 && <LineRentalStats ads={myAds} />}
+        </View>
         {myAds.length > 0 && (
           <TouchableOpacity
             onPress={handleCreate}
@@ -308,6 +308,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     marginHorizontal: 16,
+    marginTop: 16,
     marginBottom: 16,
     padding: 14,
     borderRadius: 16,
@@ -317,6 +318,10 @@ const s = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
+  },
+  lineState: {
+    borderRadius: 14,
+    paddingHorizontal:16,
   },
   createBtnIconBox: {
     width: 44,
