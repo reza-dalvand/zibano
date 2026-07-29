@@ -1,65 +1,80 @@
 // src/stores/useThemeStore.js
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
-import { MMKV } from 'react-native-mmkv';
 import { lightColors, darkColors } from '../theme/colors';
 
-const THEME_KEY = 'app_theme';
-
-// ✅ lazy — فقط وقتی اول فراخوانی بشه میسازه
-let _storage = null;
-const getStorage = () => {
-  if (!_storage) _storage = new MMKV();
-  return _storage;
-};
-
-const getInitialTheme = () => {
-  try {
-    return getStorage().getString(THEME_KEY) ?? 'system';
-  } catch {
-    return 'system';
+const getResolvedTheme = (theme) => {
+  if (theme === 'system') {
+    return Appearance.getColorScheme() ?? 'light';
   }
+  return theme;
 };
 
-export const useThemeStore = create((set) => ({
-  theme: getInitialTheme(),
-  resolvedTheme:
-    getInitialTheme() === 'system'
-      ? Appearance.getColorScheme() ?? 'light'
-      : getInitialTheme(),
-  colors:
-    (getInitialTheme() === 'system'
-      ? Appearance.getColorScheme() ?? 'light'
-      : getInitialTheme()) === 'dark'
-      ? darkColors
-      : lightColors,
+const getColors = (resolved) => {
+  return resolved === 'dark' ? darkColors : lightColors;
+};
 
-  setTheme: (value) => {
-    try {
-      getStorage().set(THEME_KEY, value);
-    } catch {}
-    const resolved =
-      value === 'system' ? Appearance.getColorScheme() ?? 'light' : value;
-    set({
-      theme: value,
-      resolvedTheme: resolved,
-      colors: resolved === 'dark' ? darkColors : lightColors,
-    });
-  },
+// مقدار اولیه (قبل از hydrate شدن از AsyncStorage)
+const initialTheme = 'system';
+const initialResolved = getResolvedTheme(initialTheme);
+const initialColors = getColors(initialResolved);
 
-  initSystemListener: () => {
-    const sub = Appearance.addChangeListener(({ colorScheme }) => {
-      const current = useThemeStore.getState().theme;
-      if (current === 'system') {
-        const resolved = colorScheme ?? 'light';
+export const useThemeStore = create(
+  persist(
+    (set, get) => ({
+      theme: initialTheme,
+      resolvedTheme: initialResolved,
+      colors: initialColors,
+      _hydrated: false,
+
+      // 🎯 این تابع رو در App.js فراخوانی می‌کنیم
+      setHydrated: () => set({ _hydrated: true }),
+
+      setTheme: (value) => {
+        console.log('🎨 setTheme called:', value);
+        const resolved = getResolvedTheme(value);
         set({
+          theme: value,
           resolvedTheme: resolved,
-          colors: resolved === 'dark' ? darkColors : lightColors,
+          colors: getColors(resolved),
         });
-      }
-    });
-    return () => sub.remove();
-  },
-}));
+        console.log('✅ Theme saved to AsyncStorage:', value);
+      },
+
+      initSystemListener: () => {
+        const sub = Appearance.addChangeListener(({ colorScheme }) => {
+          const current = get().theme;
+          if (current === 'system') {
+            const resolved = colorScheme ?? 'light';
+            set({
+              resolvedTheme: resolved,
+              colors: getColors(resolved),
+            });
+          }
+        });
+        return () => sub.remove();
+      },
+    }),
+    {
+      name: 'app-theme-storage', // کلید ذخیره‌سازی
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        theme: state.theme,
+        resolvedTheme: state.resolvedTheme,
+        colors: state.colors,
+      }),
+      onRehydrateStorage: () => {
+        return (state) => {
+          console.log('✅ Theme rehydrated from AsyncStorage:', state?.theme);
+          if (state) {
+            state.setHydrated();
+          }
+        };
+      },
+    }
+  )
+);
 
 export const useTheme = useThemeStore;
