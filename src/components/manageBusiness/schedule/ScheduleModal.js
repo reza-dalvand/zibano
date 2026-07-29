@@ -591,7 +591,7 @@ function WorkingHoursStep({
             <Icon name="access-time" size={18} color="#2196F3" />
           </View>
           <Text style={[whS.sectionTitle, { color: colors.textMain }]}>
-            بازه کاری
+            بازه ساعت کاری
           </Text>
         </View>
         
@@ -686,10 +686,10 @@ function WorkingHoursStep({
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[whS.sectionTitle, { color: colors.textMain }]}>
-              بازه‌های استراحت
+             بازه‌های استراحت 
             </Text>
             <Text style={[whS.sectionSubtitle, { color: colors.textSecondary }]}>
-              زمان‌هایی که نوبت نمی‌دهید
+              در بازه تایم کاری چه ساعاتی را نوبت نمیدهید.
             </Text>
           </View>
           {breaks.length > 0 && (
@@ -1181,7 +1181,7 @@ export default function ScheduleModal({
           disabled={!canGoNext}
           style={currentStep === 1 ? modalS.fullBtn : modalS.halfBtn}
           icon={<Icon name="arrow-back" size={20} color="#fff" />}
-          iconPosition="left"
+          iconPosition="right"
         />
       </View>
     );
