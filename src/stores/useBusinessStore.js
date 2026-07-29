@@ -145,6 +145,26 @@ export const useBusinessStore = create((set, get) => ({
       return { businessData: updated };
     }),
 
+  deleteScheduleDay: (employeeId, serviceId, dayKey) =>
+    set((state) => {
+      const currentEmployeeSchedules = state.businessData.schedules[employeeId] || {};
+      const currentServiceSchedules = currentEmployeeSchedules[serviceId] || {};
+      const { [dayKey]: removed, ...remainingDays } = currentServiceSchedules;
+
+      const updated = {
+        ...state.businessData,
+        schedules: {
+          ...state.businessData.schedules,
+          [employeeId]: {
+            ...currentEmployeeSchedules,
+            [serviceId]: remainingDays,
+          },
+        },
+      };
+      saveToStorage(updated);
+      return { businessData: updated };
+  }),
+
   updateAppointmentStatus: (appointmentId, newStatus) =>
     set((state) => {
       const updated = {

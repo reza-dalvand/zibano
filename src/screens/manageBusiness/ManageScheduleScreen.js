@@ -18,19 +18,6 @@ import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTyp
 import ScheduleModal from '../../components/manageBusiness/schedule/ScheduleModal';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
-// ═══════════ تبدیل ساعت به متن خوانا ═══════════
-const formatTime = (time) => toPersianDigit(time || '—');
-
-// ═══════════ تبدیل مدت (دقیقه) به متن فارسی ═══════════
-const formatDuration = (minutes) => {
-  if (!minutes) return '—';
-  if (minutes < 60) return `${toPersianDigit(minutes)} دقیقه`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (m === 0) return `${toPersianDigit(h)} ساعت`;
-  return `${toPersianDigit(h)} ساعت و ${toPersianDigit(m)} دقیقه`;
-};
-
 export default function ManageScheduleScreen({ navigation }) {
   const { colors } = useTheme();
   const businessData = useBusinessStore((s) => s.businessData);
@@ -39,43 +26,38 @@ export default function ManageScheduleScreen({ navigation }) {
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
-  // ═══════════ خدمات فعال ═══════════
   const services = useMemo(
     () => (businessData.services || []).filter((s) => s.isActive !== false),
     [businessData.services]
   );
 
-  // ═══════════ شناسه مالک (چون تیم نداریم) ═══════════
   const ownerId = businessData.team?.[0]?.id || 'owner';
 
   // ═══════════ محاسبه آمار هر خدمت ═══════════
   const getServiceStats = (serviceId) => {
     const schedule = businessData.schedules?.[ownerId]?.[serviceId] || {};
     const allDays = Object.values(schedule);
-    
-    // روزهای تنظیم‌شده (فعال)
     const activeDays = allDays.filter((d) => d.active);
+    const totalSlots = activeDays.reduce((sum, d) => sum + (d.slotCount || 0), 0);
+    const totalBreaks = activeDays.reduce((sum, d) => sum + (d.breaks?.length || 0), 0);
     
-    // مجموع slot های قابل رزرو
-    const totalSlots = activeDays.reduce((sum, d) => {
-      return sum + (d.slotCount || 0);
-    }, 0);
-    
-    // مجموع استراحت‌ها
-    const totalBreaks = activeDays.reduce((sum, d) => {
-      return sum + (d.breaks?.length || 0);
-    }, 0);
-    
-    // آخرین تاریخ تنظیم‌شده
-    const lastDate = activeDays.length > 0 
-      ? activeDays[activeDays.length - 1]?.dateKey 
-      : null;
+    // 🆕 جمع‌آوری روزهای تنظیم‌شده برای ویرایش
+    const existingDates = activeDays
+      .filter((d) => d.dateKey)
+      .map((d) => {
+        const parts = d.dateKey.split('/').map(Number);
+        if (parts.length === 3 && !parts.some(isNaN)) {
+          return { jy: parts[0], jm: parts[1], jd: parts[2] };
+        }
+        return null;
+      })
+      .filter(Boolean);
 
-    return { 
-      daysCount: activeDays.length, 
+    return {
+      daysCount: activeDays.length,
       totalSlots,
       totalBreaks,
-      lastDate,
+      existingDates,
     };
   };
 
@@ -85,10 +67,9 @@ export default function ManageScheduleScreen({ navigation }) {
     setModalVisible(true);
   };
 
-  // ═══════════ ذخیره تنظیمات (ساختار جدید) ═══════════
+  // ═══════════ ذخیره تنظیمات ═══════════
   const handleSave = ({ serviceId, date, workStart, workEnd, slotDuration, breaks, slotCount }) => {
     const dateKey = `${date.jy}/${String(date.jm).padStart(2, '0')}/${String(date.jd).padStart(2, '0')}`;
-    
     const scheduleData = {
       active: true,
       workStart,
@@ -99,9 +80,7 @@ export default function ManageScheduleScreen({ navigation }) {
       dateKey,
       updatedAt: new Date().toISOString(),
     };
-    
     updateSchedule(ownerId, serviceId, `d_${date.jy}_${date.jm}_${date.jd}`, scheduleData);
-
     setToast({
       visible: true,
       message: `✓ ${toPersianDigit(slotCount)} نوبت کاری با موفقیت تنظیم شد`,
@@ -137,7 +116,7 @@ export default function ManageScheduleScreen({ navigation }) {
         >
           <Icon name="lightbulb" size={18} color={colors.primary} />
           <Text style={[s.hintText, { color: colors.textSecondary }]}>
-            روی آیکون تقویم هر خدمت ضربه بزنید تا ساعات کاری آن را برای یک روز مشخص تنظیم کنید
+            با ضربه روی دکمه زیر هر خدمت، می‌توانید نوبت‌ها را تنظیم یا ویرایش کنید. امکان انتخاب چند روز همزمان وجود دارد.
           </Text>
         </Card>
 
@@ -146,6 +125,8 @@ export default function ManageScheduleScreen({ navigation }) {
           <View style={s.servicesList}>
             {services.map((service) => {
               const stats = getServiceStats(service.id);
+              const hasSchedule = stats.daysCount > 0;
+
               return (
                 <Card
                   key={service.id}
@@ -171,17 +152,10 @@ export default function ManageScheduleScreen({ navigation }) {
                         </Text>
                       </View>
                     </View>
-                    <TouchableOpacity
-                      onPress={() => openModal(service.id)}
-                      style={[s.scheduleBtn, { backgroundColor: colors.primary }]}
-                    >
-                      <Icon name="edit-calendar" size={16} color="#fff" />
-                    </TouchableOpacity>
                   </View>
 
                   {/* ═══════════ آمار تنظیمات ═══════════ */}
                   <View style={[s.statsRow, { borderTopColor: colors.border }]}>
-                    {/* روزهای تنظیم‌شده */}
                     <View style={s.statItem}>
                       <View style={[s.statIconCircle, { backgroundColor: '#43A04718' }]}>
                         <Icon name="event-available" size={12} color="#43A047" />
@@ -190,10 +164,7 @@ export default function ManageScheduleScreen({ navigation }) {
                         {toPersianDigit(stats.daysCount)} روز
                       </Text>
                     </View>
-
                     <View style={[s.statDivider, { backgroundColor: colors.border }]} />
-
-                    {/* نوبت‌های فعال */}
                     <View style={s.statItem}>
                       <View style={[s.statIconCircle, { backgroundColor: '#2196F318' }]}>
                         <Icon name="access-time" size={12} color="#2196F3" />
@@ -202,10 +173,7 @@ export default function ManageScheduleScreen({ navigation }) {
                         {toPersianDigit(stats.totalSlots)} نوبت
                       </Text>
                     </View>
-
                     <View style={[s.statDivider, { backgroundColor: colors.border }]} />
-
-                    {/* استراحت‌ها */}
                     <View style={s.statItem}>
                       <View style={[s.statIconCircle, { backgroundColor: '#9C27B018' }]}>
                         <Icon name="coffee" size={12} color="#9C27B0" />
@@ -215,6 +183,32 @@ export default function ManageScheduleScreen({ navigation }) {
                       </Text>
                     </View>
                   </View>
+
+                  {/* ═══════════ 🆕 دکمه تمام‌عرض تنظیم/تغییر نوبت‌ها ═══════════ */}
+                  <TouchableOpacity
+                    onPress={() => openModal(service.id)}
+                    activeOpacity={0.85}
+                    style={s.fullScheduleBtn}
+                  >
+                    <View style={s.fullScheduleBtnIconBox}>
+                      <Icon
+                        name={hasSchedule ? 'edit-calendar' : 'add-circle'}
+                        size={20}
+                        color="#fff"
+                      />
+                    </View>
+                    <View style={s.fullScheduleBtnTextCol}>
+                      <Text style={s.fullScheduleBtnTitle}>
+                        {hasSchedule ? 'تغییر زمان نوبت‌ها' : 'تنظیم نوبت‌ها'}
+                      </Text>
+                      {/* <Text style={s.fullScheduleBtnSubtitle}>
+                        {hasSchedule
+                          ? `${toPersianDigit(stats.daysCount)} روز تنظیم‌شده — برای ویرایش یا افزودن روز جدید ضربه بزنید`
+                          : 'هنوز روزی تنظیم نشده — برای شروع ضربه بزنید'}
+                      </Text> */}
+                    </View>
+                    <Icon name="chevron-left" size={24} color="#fff" />
+                  </TouchableOpacity>
                 </Card>
               );
             })}
@@ -228,17 +222,17 @@ export default function ManageScheduleScreen({ navigation }) {
             onAction={() => navigation.navigate('ManageServices')}
           />
         )}
-
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* ═══════════ مدال زمان‌بندی (۳ مرحله‌ای) ═══════════ */}
+      {/* ═══════════ مدال زمان‌بندی ═══════════ */}
       <ScheduleModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         services={services}
         initialServiceId={selectedServiceId}
         existingSchedule={businessData.schedules?.[ownerId] || {}}
+        existingDates={selectedServiceId ? getServiceStats(selectedServiceId).existingDates : []}
         onSave={handleSave}
       />
 
@@ -259,7 +253,6 @@ const s = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 40,
   },
-  // ═══════════ Hero Section ═══════════
   heroSection: {
     alignItems: 'center',
     gap: 8,
@@ -283,7 +276,6 @@ const s = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
   },
-  // ═══════════ Hint Card ═══════════
   hintCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -296,7 +288,6 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     flex: 1,
   },
-  // ═══════════ Services List ═══════════
   servicesList: {
     gap: 12,
   },
@@ -331,19 +322,6 @@ const s = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Vazir',
   },
-  scheduleBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  // ═══════════ Stats Row ═══════════
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -371,5 +349,41 @@ const s = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 24,
+  },
+  // ═══════════ 🆕 دکمه تمام‌عرض سبز ═══════════
+  fullScheduleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
+    backgroundColor: '#43A047',
+    shadowColor: '#43A047',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  fullScheduleBtnIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullScheduleBtnTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  fullScheduleBtnTitle: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: 'Vazir-Bold',
+  },
+  fullScheduleBtnSubtitle: {
+    color: 'rgba(255,255,255,0.88)',
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    lineHeight: 16,
   },
 });

@@ -8,7 +8,6 @@ import Button from '../../common/Button';
 import { toPersianDigit } from '../../../utils/numberUtils';
 import { timeToMinutes } from '../../../utils/dateUtils';
 
-// Import کامپوننت‌های شکسته شده
 import StepIndicator from './StepIndicator';
 import ServiceSelectionStep from './ServiceSelectionStep';
 import CalendarStep from './CalendarStep';
@@ -20,13 +19,13 @@ export default function ScheduleModal({
   services,
   initialServiceId,
   existingSchedule,
+  existingDates = [], // 🆕 روزهای قبلاً تنظیم‌شده
   onSave,
 }) {
   const { colors } = useTheme();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedServiceId, setSelectedServiceId] = useState(initialServiceId);
 
-  // 🆕 ref برای کنترل scroll
   const scrollRef = useRef(null);
   const scrollContentKey = useRef(0);
 
@@ -40,27 +39,38 @@ export default function ScheduleModal({
     if (visible) {
       setCurrentStep(initialServiceId ? 2 : 1);
       setSelectedServiceId(initialServiceId || null);
-      setSelectedDates([]);
+      
+      // 🆕 مقداردهی اولیه selectedDates با existingDates
+      if (existingDates && existingDates.length > 0) {
+        setSelectedDates([...existingDates]);
+      } else {
+        setSelectedDates([]);
+      }
+      
       setWorkStart('09:00');
       setWorkEnd('21:00');
       setSlotDuration(0);
       setBreaks([]);
     }
-  }, [visible, initialServiceId]);
+  }, [visible, initialServiceId, existingDates]);
 
-  // 🎯 رفع مشکل scroll: هر بار که مرحله تغییر می‌کند، به بالا scroll کن
+  // 🆕 وقتی initialServiceId تغییر می‌کند، existingDates را هم به‌روز کن
   useEffect(() => {
-    // استفاده از setTimeout برای اطمینان از اینکه رندر کامل شده
+    if (visible && initialServiceId && existingDates && existingDates.length > 0) {
+      setSelectedDates([...existingDates]);
+    }
+  }, [initialServiceId, existingDates, visible]);
+
+  // رفع مشکل scroll
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({ x: 0, y: 0, animated: false });
       }
     }, 50);
-
     return () => clearTimeout(timer);
   }, [currentStep]);
 
-  // محاسبه تعداد slot ها
   const computedSlotCount = useMemo(() => {
     const startMin = timeToMinutes(workStart);
     const endMin = timeToMinutes(workEnd);
@@ -106,7 +116,6 @@ export default function ScheduleModal({
   const handleNext = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
-      // force re-render محتوا با تغییر key
       scrollContentKey.current += 1;
     }
   };
@@ -135,6 +144,8 @@ export default function ScheduleModal({
     onClose();
   };
 
+  const isEditMode = existingDates && existingDates.length > 0;
+
   const getFooterContent = () => {
     if (currentStep === 3) {
       return (
@@ -147,7 +158,11 @@ export default function ScheduleModal({
             style={modalS.halfBtn}
           />
           <Button
-            title={`ذخیره (${toPersianDigit(selectedDates.length)} روز)`}
+            title={
+              isEditMode
+                ? `ذخیره تغییرات`
+                : `ذخیره`
+            }
             onPress={handleSave}
             variant="primary"
             size="lg"
@@ -188,19 +203,17 @@ export default function ScheduleModal({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      title="تنظیم زمان‌بندی خدمت"
+      title={isEditMode ? 'ویرایش زمان‌بندی خدمت' : 'تنظیم زمان‌بندی خدمت'}
       snapPoint={0.95}
       footer={getFooterContent()}
     >
       <StepIndicator currentStep={currentStep} />
       <ScrollView
         ref={scrollRef}
-        // 🎯 کلید داینامیک: هر بار که مرحله عوض می‌شود، ScrollView از اول رندر می‌شود
         key={`scroll-${currentStep}-${scrollContentKey.current}`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={modalS.scrollContent}
         keyboardShouldPersistTaps="handled"
-        // 🎯 تنظیمات اضافی برای اطمینان از scroll به بالا
         automaticallyAdjustContentInsets={false}
         scrollEventThrottle={16}
         maintainVisibleContentPosition={null}
@@ -228,6 +241,7 @@ export default function ScheduleModal({
           <CalendarStep
             selectedDates={selectedDates}
             onDatesChange={setSelectedDates}
+            existingDates={existingDates}
           />
         )}
         <View style={{ height: 200 }} />
