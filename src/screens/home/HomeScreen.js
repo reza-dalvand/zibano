@@ -4,6 +4,7 @@ import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { getSubServicesForCategory } from '../../constants/categorySubServices';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,9 +18,10 @@ import HomeFilterModal from '../../components/home/HomeFilterModal';
 import ModelRequestsSection from '../../components/home/ModelRequestsSection';
 import LineRentalSection from '../../components/home/LineRentalSection';
 import SeeAllButton from '../../components/home/SeeAllButton';
-import ReviewModal from '../../components/customer/ReviewModal'; // 🆕
+import ReviewModal from '../../components/customer/ReviewModal';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useReviewStore } from '../../stores/useReviewStore';
+import { useAuth } from '../../hooks/useAuth';
 import SectionHeader from '../../components/common/SectionHeader';
 
 // 🎯 داده‌های آگهی‌ها با businessId
@@ -122,32 +124,21 @@ const MOCK_DONE_APPOINTMENTS = [
     time: '۱۰:۳۰',
     status: 'done',
   },
-  // می‌توانید نوبت‌های بیشتری اضافه کنید:
-  // {
-  //   id: 'apt_done_2',
-  //   businessName: 'ناخن گالری پریا',
-  //   businessLogo: 'https://picsum.photos/100/100?random=26',
-  //   serviceName: 'کاشت ناخن ژلیش',
-  //   employeeName: 'مریم',
-  //   date: '۱۴۰۳/۰۴/۱۵',
-  //   time: '۱۴:۰۰',
-  //   status: 'done',
-  // },
 ];
-
-
 
 export default function HomeScreen({ navigation }) {
   const { colors } = useTheme();
   const user = useAuthStore((s) => s.user);
   const pendingReviews = useReviewStore((s) => s.pendingReviews);
   const addPendingReview = useReviewStore((s) => s.addPendingReview);
+  const { isAuthenticated, requireAuth } = useAuth();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filters, setFilters] = useState({});
-
+  
   // 🆕 state های مدال نظردهی
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
   const [currentReviewAppointment, setCurrentReviewAppointment] = useState(null);
@@ -155,10 +146,10 @@ export default function HomeScreen({ navigation }) {
   const hasActiveFilter = Object.values(filters).some(
     (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0),
   );
+
   const notificationCount = 3;
 
   // 🆕 اضافه کردن نوبت‌های انجام‌شده به لیست pendingReviews (شبیه‌سازی)
-  // در اپ واقعی، این داده‌ها از API می‌آیند
   useEffect(() => {
     MOCK_DONE_APPOINTMENTS.forEach((apt) => {
       addPendingReview(apt);
@@ -169,10 +160,9 @@ export default function HomeScreen({ navigation }) {
   // 🆕 نمایش خودکار مدال نظردهی وقتی نوبت در انتظار وجود دارد
   useEffect(() => {
     if (pendingReviews.length > 0 && !reviewModalVisible) {
-      // تاخیر کوتاه برای اینکه کاربر اول صفحه را ببیند
       const timer = setTimeout(() => {
         setCurrentReviewAppointment(pendingReviews[0]);
-        setReviewModalVisible(false); // اینجا رو فعال کن تا مدال نظر سنجی باز بشه 
+        setReviewModalVisible(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -182,7 +172,6 @@ export default function HomeScreen({ navigation }) {
   const handleReviewClose = () => {
     setReviewModalVisible(false);
     setCurrentReviewAppointment(null);
-    // اگر نوبت دیگری در صف هست، بعداً نمایش داده می‌شود
   };
 
   // 🎯 هندلر کلیک روی آگهی اسلایدر
@@ -207,6 +196,45 @@ export default function HomeScreen({ navigation }) {
         onFilterPress={() => setFilterModalVisible(true)}
         hasActiveFilter={hasActiveFilter}
       />
+
+      {/* 🆕 بنر دعوت به ثبت‌نام - فقط برای کاربران لاگین نشده */}
+      {!isAuthenticated && (
+        <View style={[s.authBanner, {
+          backgroundColor: colors.cardBackground,
+          borderColor: colors.border,
+        }]}>
+          {/* نقطه‌های تزئینی */}
+          <View style={[s.authBannerDot1, { backgroundColor: colors.primary + '18' }]} />
+          <View style={[s.authBannerDot2, { backgroundColor: '#FFC10720' }]} />
+          
+          <View style={s.authBannerContent}>
+            <View style={s.authBannerLeft}>
+              <View style={[s.authBannerIconBox, { 
+                backgroundColor: colors.primary + '15',
+                borderColor: colors.primary + '30',
+              }]}>
+                <Icon name="auto-awesome" size={22} color={colors.primary} />
+              </View>
+              <View style={s.authBannerTextCol}>
+                <Text style={[s.authBannerTitle, { color: colors.textMain }]}>
+                  امکانات بیشتری می‌خوای؟ ✨
+                </Text>
+                <Text style={[s.authBannerSubtitle, { color: colors.textSecondary }]}>
+                  رزرو آنلاین، ساخت آگهی، ذخیره و اشتراک پست‌ها و ... 
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              onPress={() => requireAuth()} 
+              activeOpacity={0.85}
+              style={[s.authBannerBtn, { backgroundColor: colors.primary }]}
+            >
+              <Text style={s.authBannerBtnText}>ورود</Text>
+              <Icon name="arrow-back" size={14} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <View style={s.bodyContainer}>
         {/* ۱. اسلایدر تبلیغات */}
@@ -275,27 +303,88 @@ const s = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionHeader: {
+  // 🆕 استایل‌های بنر دعوت به ثبت‌نام
+  authBanner: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  authBannerDot1: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  authBannerDot2: {
+    position: 'absolute',
+    bottom: -15,
+    right: -15,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  authBannerContent: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-    gap: 8,
+    gap: 12,
   },
-  titleRow: {
+  authBannerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    flex: 1,
   },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+  authBannerIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
   },
-  sectionTitle: {
-    fontSize: 16,
+  authBannerTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  authBannerTitle: {
+    fontSize: 13.5,
+    fontFamily: 'Vazir-Bold',
+    lineHeight: 19,
+  },
+  authBannerSubtitle: {
+    fontSize: 11,
+    fontFamily: 'Vazir',
+    lineHeight: 16,
+  },
+  authBannerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  authBannerBtnText: {
+    color: '#fff',
+    fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
 });
