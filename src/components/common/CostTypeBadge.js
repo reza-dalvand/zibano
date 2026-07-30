@@ -51,7 +51,7 @@ export default function CostTypeBadge({
         { backgroundColor: meta.bg, borderColor: meta.border },
       ]}
     >
-      <Icon name={meta.icon} size={14} color={meta.color} />
+      {/* <Icon name={meta.icon} size={14} color={meta.color} /> */}
       <Text style={[s.defaultText, { color: meta.color }]}>{meta.label}</Text>
     </View>
   );

@@ -77,7 +77,7 @@ export default function LineRentalCard({ ad, onPress }) {
             activeOpacity={0.85}
           >
             <Icon name="description" size={15} color="#fff" />
-            <Text style={s.fullWidthBtnText}>توضیحات بیشتر و تماس</Text>
+            <Text style={s.fullWidthBtnText}>توضیحات و تماس</Text>
             <Icon name="call" size={15} color="#fff" />
           </TouchableOpacity>
         </View>

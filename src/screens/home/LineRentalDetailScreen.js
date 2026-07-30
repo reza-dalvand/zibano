@@ -196,34 +196,12 @@ export default function LineRentalDetailScreen({ navigation, route }) {
             <ActionButtons
               phone={cleanPhone(ad.contactPhone)}
               shareMessage={`${ad.title}
-${ad.description || ''}
-🏪 ${ad.businessName}
-📍 ${ad.city}`}
+              ${ad.description || ''}
+              🏪 ${ad.businessName}
+              📍 ${ad.city}`}
               shareUrl={shareUrl}
             />
           </View>
-
-          {/* ═══════ 🎯 اطلاعات زمانی با SectionHeader و InfoRow ═══════ */}
-          <Card variant="elevated" padding={16} radius={16}>
-            <SectionHeader
-              icon="schedule"
-              iconColor="#FF9800"
-              title="اطلاعات زمانی"
-            />
-            <InfoRow
-              icon="event-note"
-              iconColor="#43A047"
-              label="تاریخ ایجاد:"
-              value={ad.createdAt}
-              showDivider
-            />
-            <InfoRow
-              icon="event-busy"
-              iconColor="#E53935"
-              label="تاریخ انقضا:"
-              value={ad.expiresAt}
-            />
-          </Card>
 
           {/* ═══════ نکات مهم ═══════ */}
           <Card variant="default" padding={14} radius={14} style={s.hintCard}>

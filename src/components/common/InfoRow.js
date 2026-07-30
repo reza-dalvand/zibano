@@ -84,7 +84,7 @@ const s = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 14,
+    gap: 10,
     paddingVertical: 10,
   },
   content: {

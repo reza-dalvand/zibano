@@ -157,11 +157,11 @@ ${request.description}
             <SectionHeader
               icon="handshake"
               iconColor="#4CAF50"
-              title="ارتباط و رزرو"
+              title="ارتباط با صاحب کسب‌ و‌ کار"
             />
 
             {/* نمایش شماره تلفن */}
-            <View
+            {/* <View
               style={[
                 s.phoneDisplayBox,
                 { backgroundColor: colors.background, borderColor: colors.border },
@@ -180,15 +180,15 @@ ${request.description}
                     : 'ثبت نشده'}
                 </Text>
               </View>
-            </View>
+            </View> */}
 
             {/* 🎯 استفاده از ActionButtons مشترک */}
             <ActionButtons
               phone={cleanPhone(request.contactPhone)}
               shareMessage={`${request.title}
-${request.description}
-🏪 ${request.businessName}
-📍 ${request.city}`}
+              ${request.description}
+              🏪 ${request.businessName}
+              📍 ${request.city}`}
               shareUrl={shareUrl}
             />
           </View>
