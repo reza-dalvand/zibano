@@ -237,7 +237,7 @@ export default function BusinessDetailsScreen({ navigation }) {
   };
 
   return (
-    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']}>
+    <ScreenWrapper padding={0} edges={['top', 'bottom', 'left', 'right']}>
       {/* ═══ Main Scrollable Content ═══ */}
       <ScrollView
         showsVerticalScrollIndicator={false}
