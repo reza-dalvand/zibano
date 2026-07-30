@@ -8,140 +8,260 @@ import {
   TouchableOpacity,
   Share,
   Alert,
+  Image,
+  Linking,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
 import Card from '../../components/common/Card';
-import DetailHero from '../../components/common/DetailHero';
 import ActionButtons from '../../components/common/ActionButtons';
 import SectionHeader from '../../components/common/SectionHeader';
-import InfoRow from '../../components/common/InfoRow';
 import CostTypeBadge from '../../components/common/CostTypeBadge';
+import FavoriteButton from '../../components/common/FavoriteButton'; // 🆕
 import { toPersianDigit } from '../../utils/numberUtils';
 import { cleanPhone } from '../../utils/phoneUtils';
 import { COST_TYPE_META } from '../../constants/meta';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const HERO_HEIGHT = 320;
+
 export default function ModelRequestDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { request } = route.params;
   const [isSaved, setIsSaved] = useState(false);
 
-  const costMeta = COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
+  const costMeta =
+    COST_TYPE_META[request.costType] || COST_TYPE_META.material_cost;
   const shareUrl = `https://zibano.app/model-request/${request.id}`;
 
-  // 🎯 هندلرهای ActionButtons
-  const handleCall = () => {
-    if (!request.contactPhone) {
-      Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
-      return;
-    }
-    const cleanedPhone = cleanPhone(request.contactPhone);
-    if (!cleanedPhone) {
-      Alert.alert('خطا', 'شماره تماس معتبر نیست');
-      return;
-    }
-  };
-
-  const handleShare = async () => {
-    const shareMessage = `${request.title}
-${request.description}
-🏪 ${request.businessName}
-📍 ${request.city}
-🔗 ${shareUrl}`;
-    try {
-      await Share.share({ message: shareMessage, url: shareUrl, title: request.title });
-    } catch (error) {
-      Alert.alert('خطا در اشتراک‌گذاری', 'متاسفانه امکان اشتراک‌گذاری وجود ندارد.');
-    }
-  };
-
+  // ═══════════ هندلرها ═══════════
   const handleSaveToggle = () => setIsSaved(!isSaved);
 
   const handleBusinessPress = () => {
-    navigation.navigate('BusinessDetails', { businessId: request.businessId || '1' });
+    navigation.navigate('BusinessDetails', {
+      businessId: request.businessId || '1',
+    });
   };
 
-  // 🎯 Badges برای DetailHero
-  const heroBadges = [
-    {
-      container: [s.costBadgeHero, { backgroundColor: costMeta.color }],  // ✅ styles → s
-      icon: costMeta.icon,
-      iconSize: 12,
-      iconColor: '#fff',
-      text: costMeta.label,
-      textStyle: s.costBadgeHeroText,  // ✅ styles → s
-    },
-  ];
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `🌟 ${request.title}\n${request.description || ''}\n🏪 ${request.businessName} - ${request.city}\n🔗 ${shareUrl}`,
+        url: shareUrl,
+        title: request.title,
+      });
+    } catch {
+      Alert.alert('خطا', 'امکان اشتراک‌گذاری وجود ندارد');
+    }
+  };
+
+  // 🎯 تماس مستقیم
+  const handleDirectCall = async () => {
+    const phone = cleanPhone(request.contactPhone);
+    if (!phone) {
+      Alert.alert('خطا', 'شماره تماسی ثبت نشده است');
+      return;
+    }
+    try {
+      const canCall = await Linking.canOpenURL(`tel:${phone}`);
+      if (canCall) {
+        await Linking.openURL(`tel:${phone}`);
+      } else {
+        Alert.alert('خطا', 'امکان برقراری تماس وجود ندارد');
+      }
+    } catch {
+      Alert.alert('خطا', `شماره: ${toPersianDigit(phone)}`);
+    }
+  };
 
   return (
-    <ScreenWrapper padding={0} edges={['top', 'bottom', 'left', 'right']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ═══════ 🎯 DetailHero مشترک ═══════ */}
-        <DetailHero
-          imageUrl={request.serviceImage}
-          onBack={() => navigation.goBack()}
-          onSave={handleSaveToggle}
-          isSaved={isSaved}
-          badges={heroBadges}
-        />
+    <ScreenWrapper padding={0} edges={['top','bottom', 'left', 'right']}>
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+        {/* ═══════════════════════════════════════════ */}
+        {/*              HERO SECTION                  */}
+        {/* ═══════════════════════════════════════════ */}
+        <View style={[s.heroContainer, { height: HERO_HEIGHT + insets.top, marginTop: -insets.top }]}>
+          <Image
+            source={{ uri: request.serviceImage }}
+            style={s.heroImage}
+            resizeMode="cover"
+          />
+          <View style={s.heroGradient} />
+          <View style={s.heroTopGradient} />
 
-        {/* ═══════ محتوا ═══════ */}
+          {/* دکمه‌های بالا */}
+          <View style={[s.heroTopActions, { paddingTop: insets.top + 12 }]}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={s.heroActionBtn}
+              activeOpacity={0.7}
+            >
+              <Icon name="arrow-forward" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity
+              onPress={handleShare}
+              style={s.heroActionBtn}
+              activeOpacity={0.7}
+            >
+              <Icon name="share" size={20} color="#fff" />
+            </TouchableOpacity>
+            {/* 🎯 استفاده از FavoriteButton - فقط وقتی کاربر لاگین است نمایش داده می‌شود */}
+            <FavoriteButton
+              isFavorite={isSaved}
+              onPress={handleSaveToggle}
+              size={22}
+              color="#fff"
+              activeColor="#FFD700"
+              style={s.heroActionBtn}
+            />
+          </View>
+
+          {/* بج‌های پایین هیرو */}
+          <View style={s.heroBottomBadges}>
+            {/* 🎯 تگ تاریخ ثبت */}
+            <View style={s.heroDateBadge}>
+              <Icon name="event-note" size={12} color="#fff" />
+              <Text style={s.heroDateText}>
+                ثبت: {request.createdAt}
+              </Text>
+            </View>
+
+            <View style={s.heroRightBadges}>
+              {request.discount > 0 && (
+                <View style={s.heroDiscountBadge}>
+                  <Icon name="local-offer" size={11} color="#fff" />
+                  <Text style={s.heroDiscountText}>
+                    {toPersianDigit(request.discount)}٪
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/*              CONTENT                       */}
+        {/* ═══════════════════════════════════════════ */}
         <View style={s.content}>
-          <Text style={[s.title, { color: colors.textMain }]}>{request.title}</Text>
+          {/* عنوان */}
+          <Text style={[s.title, { color: colors.textMain }]}>
+            {request.title}
+          </Text>
 
-          {/* ═══════ کارت کسب و کار ═══════ */}
-          <TouchableOpacity onPress={handleBusinessPress} activeOpacity={0.85}>
-            <Card variant="elevated" padding={14} radius={16} style={s.businessCard}>
+          {/* نام خدمت */}
+          <View style={s.serviceChip}>
+            <Icon name="spa" size={14} color={colors.primary} />
+            <Text style={[s.serviceChipText, { color: colors.primary }]}>
+              {request.serviceName}
+            </Text>
+          </View>
+
+          {/* ═══════════ کارت کسب و کار ═══════════ */}
+          <TouchableOpacity
+            onPress={handleBusinessPress}
+            activeOpacity={0.85}
+          >
+            <Card
+              variant="elevated"
+              padding={14}
+              radius={16}
+              style={s.businessCard}
+            >
               <View style={s.businessRow}>
-                <View style={[s.businessIconBox, { backgroundColor: colors.primary + '15' }]}>
+                <View
+                  style={[
+                    s.businessIconBox,
+                    { backgroundColor: colors.primary + '15' },
+                  ]}
+                >
                   <Icon name="store" size={22} color={colors.primary} />
                 </View>
                 <View style={s.businessInfo}>
-                  <Text style={[s.businessName, { color: colors.textMain }]} numberOfLines={1}>
+                  <Text
+                    style={[s.businessName, { color: colors.textMain }]}
+                    numberOfLines={1}
+                  >
                     {request.businessName}
                   </Text>
                   <View style={s.businessMeta}>
-                    <Icon name="location-on" size={12} color={colors.textSecondary} />
-                    <Text style={[s.businessCity, { color: colors.textSecondary }]}>
+                    <Icon
+                      name="location-on"
+                      size={12}
+                      color={colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        s.businessCity,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       {request.city}
                     </Text>
                   </View>
                 </View>
-                <Icon name="chevron-left" size={24} color={colors.textSecondary} />
+                <Icon
+                  name="chevron-left"
+                  size={24}
+                  color={colors.textSecondary}
+                />
               </View>
             </Card>
           </TouchableOpacity>
 
-          {/* ═══════ 🎯 کارت نوع هزینه با CostTypeBadge ═══════ */}
+          {/* ═══════════ کارت وضعیت هزینه ═══════════ */}
           <Card
             variant="elevated"
             padding={16}
-            radius={16}
-            style={[s.costCard, { borderColor: costMeta.color + '40' }]}
+            radius={18}
+            style={[s.costCard, { borderColor: costMeta.color + '30' }]}
           >
-            <View style={s.costHeader}>
-              <View style={[s.costIconBox, { backgroundColor: costMeta.color + '15' }]}>
-                <Icon name={costMeta.icon} size={20} color={costMeta.color} />
-              </View>
-              <View style={s.costInfo}>
-                <Text style={[s.costLabel, { color: colors.textSecondary }]}>
-                  وضعیت هزینه
-                </Text>
-                {/* 🎯 استفاده از CostTypeBadge مشترک */}
-                <CostTypeBadge
-                  type={request.costType}
-                  variant="default"
-                />
-              </View>
+            <SectionHeader
+              icon={costMeta.icon}
+              iconColor={costMeta.color}
+              title="وضعیت هزینه"
+            />
+            <View style={s.costBadgeWrapper}>
+              <CostTypeBadge type={request.costType} variant="solid" />
             </View>
-            <Text style={[s.costDescription, { color: colors.textSecondary }]}>
-              {costMeta.description}
-            </Text>
+            <View
+              style={[
+                s.costDescBox,
+                {
+                  backgroundColor: costMeta.color + '08',
+                  borderColor: costMeta.color + '25',
+                },
+              ]}
+            >
+              <Icon name="info-outline" size={14} color={costMeta.color} />
+              <Text
+                style={[s.costDescText, { color: colors.textSecondary }]}
+              >
+                {costMeta.description}
+              </Text>
+            </View>
+
+            {request.discount > 0 && (
+              <View
+                style={[
+                  s.discountBox,
+                  { backgroundColor: '#E5393510', borderColor: '#E5393530' },
+                ]}
+              >
+                <Icon name="local-offer" size={16} color="#E53935" />
+                <Text style={[s.discountText, { color: '#E53935' }]}>
+                  {toPersianDigit(request.discount)}٪ تخفیف ویژه برای مدل
+                </Text>
+              </View>
+            )}
           </Card>
 
-          {/* ═══════ 🎯 توضیحات با SectionHeader ═══════ */}
-          <Card variant="elevated" padding={16} radius={16}>
+          {/* ═══════════ کارت توضیحات ═══════════ */}
+          <Card variant="elevated" padding={16} radius={18}>
             <SectionHeader
               icon="description"
               iconColor="#2196F3"
@@ -152,63 +272,53 @@ ${request.description}
             </Text>
           </Card>
 
-          {/* ═══════ 🎯 دکمه‌های اکشن با ActionButtons مشترک ═══════ */}
-          <View style={s.actionButtonsSection}>
+          {/* ═══════════ 🎯 کارت ارتباط و همکاری (جایگزین اطلاعات زمانی) ═══════════ */}
+          <View style={s.contactSection}>
             <SectionHeader
               icon="handshake"
               iconColor="#4CAF50"
-              title="ارتباط با صاحب کسب‌ و‌ کار"
+              title="ارتباط با صاحب کسب‌وکار"
             />
 
-            {/* نمایش شماره تلفن */}
-            {/* <View
-              style={[
-                s.phoneDisplayBox,
-                { backgroundColor: colors.background, borderColor: colors.border },
-              ]}
-            >
-              <View style={[s.phoneIconCircle, { backgroundColor: '#4CAF5020' }]}>
-                <Icon name="phone" size={20} color="#4CAF50" />
-              </View>
-              <View style={s.phoneInfo}>
-                <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>
-                  شماره تماس صاحب آگهی
-                </Text>
-                <Text style={[s.phoneValue, { color: colors.textMain }]} selectable>
-                  {request.contactPhone
-                    ? toPersianDigit(request.contactPhone)
-                    : 'ثبت نشده'}
-                </Text>
-              </View>
-            </View> */}
-
-            {/* 🎯 استفاده از ActionButtons مشترک */}
+            {/* دکمه‌های اشتراک‌گذاری */}
             <ActionButtons
               phone={cleanPhone(request.contactPhone)}
-              shareMessage={`${request.title}
-              ${request.description}
-              🏪 ${request.businessName}
-              📍 ${request.city}`}
+              shareMessage={`${request.title}\n${request.description || ''}\n🏪 ${request.businessName}\n📍 ${request.city}`}
               shareUrl={shareUrl}
             />
           </View>
 
-          {/* ═══════ نکات مهم ═══════ */}
-          <Card variant="default" padding={14} radius={14} style={s.hintCard}>
+          {/* ═══════════ کارت نکات مهم ═══════════ */}
+          <Card
+            variant="default"
+            padding={16}
+            radius={18}
+            style={[s.tipsCard, { borderColor: colors.border }]}
+          >
             <SectionHeader
               icon="lightbulb"
               iconColor="#FFC107"
               title="نکات مهم"
             />
-            <View style={s.hintList}>
+            <View style={s.tipsList}>
               {[
                 'قبل از تماس، شرایط آگهی را به دقت مطالعه کنید',
                 'برای رزرو نوبت با سالن تماس بگیرید',
                 'مدل‌ها اجازه استفاده از تصاویر را به سالن می‌دهند',
+                'شرایط همکاری را قبل از شروع کار مشخص کنید',
               ].map((text, i) => (
-                <View key={i} style={s.hintItem}>
-                  <Icon name="check-circle" size={14} color="#4CAF50" />
-                  <Text style={[s.hintText, { color: colors.textSecondary }]}>
+                <View key={i} style={s.tipItem}>
+                  <View
+                    style={[
+                      s.tipIconBox,
+                      { backgroundColor: '#4CAF5018' },
+                    ]}
+                  >
+                    <Icon name="check-circle" size={14} color="#4CAF50" />
+                  </View>
+                  <Text
+                    style={[s.tipText, { color: colors.textSecondary }]}
+                  >
                     {text}
                   </Text>
                 </View>
@@ -216,7 +326,7 @@ ${request.description}
             </View>
           </Card>
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: 60 }} />
         </View>
       </ScrollView>
     </ScreenWrapper>
@@ -224,15 +334,155 @@ ${request.description}
 }
 
 const s = StyleSheet.create({
+  // ═══════════ HERO ═══════════
+  heroContainer: {
+    width: SCREEN_WIDTH,
+    position: 'relative',
+    backgroundColor: '#000',
+  },
+  heroImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  heroGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '17%',
+    backgroundColor: 'rgba(0,0,0,0.20)',
+  },
+  heroTopGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  heroTopActions: {
+    position: 'absolute',
+    top: 0,
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroActionBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  heroBottomBadges: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  heroRightBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  heroDateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(233,30,99,0.85)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  heroDateText: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: 'Vazir-Bold',
+  },
+  heroUrgentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255,152,0,0.9)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  heroUrgentText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'Vazir-Bold',
+  },
+  heroDiscountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(229,57,53,0.9)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  heroDiscountText: {
+    color: '#fff',
+    fontSize: 10,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  // ═══════════ CONTENT ═══════════
   content: {
     padding: 20,
     gap: 16,
+    marginTop: -5,
   },
   title: {
     fontSize: 22,
     fontFamily: 'Vazir-Bold',
-    lineHeight: 32,
+    lineHeight: 34,
   },
+  serviceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#A88B7D15',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginTop: -4,
+  },
+  serviceChipText: {
+    fontSize: 12,
+    fontFamily: 'Vazir-Bold',
+  },
+
+  // ═══════════ BUSINESS CARD ═══════════
   businessCard: {
     marginBottom: 0,
   },
@@ -266,48 +516,61 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
   },
 
-  // ═══════ کارت نوع هزینه ═══════
+  // ═══════════ COST CARD ═══════════
   costCard: {
     borderWidth: 1.5,
-    gap: 10,
+    gap: 12,
   },
-  costHeader: {
+  costBadgeWrapper: {
+    alignSelf: 'flex-start',
+  },
+  costDescBox: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  costIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  costInfo: {
+  costDescText: {
+    fontSize: 12,
+    fontFamily: 'Vazir',
     flex: 1,
-    gap: 4,
-  },
-  costLabel: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
-  costDescription: {
-    fontSize: 12,
-    fontFamily: 'Vazir',
     lineHeight: 20,
   },
+  discountBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  discountText: {
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
+    flex: 1,
+  },
 
-  // ═══════ دکمه‌های اکشن ═══════
-  actionButtonsSection: {
+  // ═══════════ DESCRIPTION ═══════════
+  descriptionText: {
+    fontSize: 14,
+    fontFamily: 'Vazir',
+    lineHeight: 26,
+    textAlign: 'justify',
+  },
+
+  // ═══════════ 🎯 CONTACT SECTION ═══════════
+  contactSection: {
     gap: 12,
   },
-  phoneDisplayBox: {
+  phoneCard: {
+    marginBottom: 0,
+  },
+  phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
   },
   phoneIconCircle: {
     width: 48,
@@ -330,50 +593,69 @@ const s = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // ═══════ توضیحات ═══════
-  descriptionText: {
-    fontSize: 14,
+  // 🎯 دکمه تماس مستقیم - سبز و بزرگ
+  directCallBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    backgroundColor: '#4CAF50',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  directCallIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  directCallTextCol: {
+    flex: 1,
+    gap: 2,
+  },
+  directCallTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Vazir-Bold',
+  },
+  directCallSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
     fontFamily: 'Vazir',
-    lineHeight: 26,
-    textAlign: 'justify',
   },
 
-  // ═══════ نکات مهم ═══════
-  hintCard: {
+  // ═══════════ TIPS ═══════════
+  tipsCard: {
     borderWidth: 1,
+    gap: 10,
   },
-  hintList: {
-    gap: 8,
+  tipsList: {
+    gap: 10,
   },
-  hintItem: {
+  tipItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: 10,
   },
-  hintText: {
+  tipIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  tipText: {
     fontSize: 12,
     fontFamily: 'Vazir',
     flex: 1,
     lineHeight: 20,
-  },
-
-  // ═══════ Badges برای DetailHero ═══════
-  costBadgeHero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  costBadgeHeroText: {
-    color: '#fff',
-    fontSize: 12,
-    fontFamily: 'Vazir-Bold',
   },
 });
