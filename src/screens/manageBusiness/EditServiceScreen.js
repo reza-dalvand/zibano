@@ -7,6 +7,7 @@ import {
   ScrollView,
   Switch,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
@@ -19,7 +20,15 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
-import { toPersianDigit, formatPrice, toEnglishDigits, parseNumber, formatPriceInput } from '../../utils/numberUtils';
+import PriceGuideModal from '../../components/common/PriceGuideModal'; // 🆕
+import {
+  toPersianDigit,
+  formatPrice,
+  toEnglishDigits,
+  parseNumber,
+  formatPriceInput,
+  calculateAppFee, // 🆕
+} from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 import CharCounter from '../../components/common/CharCounter';
 
@@ -27,13 +36,13 @@ const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
 const MAX_DESCRIPTION_LENGTH = 300;
 
-
 export default function EditServiceScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const addService = useBusinessStore(s => s.addService);
-  const updateService = useBusinessStore(s => s.updateService);
+  const addService = useBusinessStore((s) => s.addService);
+  const updateService = useBusinessStore((s) => s.updateService);
   const existingService = route.params?.service || null;
   const isEditMode = !!existingService;
+  const [priceGuideVisible, setPriceGuideVisible] = useState(false); // 🆕
 
   const [name, setName] = useState(existingService?.name || '');
   const [typeId, setTypeId] = useState(existingService?.typeId || null);
@@ -59,13 +68,14 @@ export default function EditServiceScreen({ navigation, route }) {
   const [description, setDescription] = useState(
     existingService?.description || '',
   );
-
   const [errors, setErrors] = useState({});
 
   const originalNum = parseNumber(originalPrice);
   const discountNum = Math.min(parseNumber(discountPercent), 100);
   const discountAmount = Math.round((originalNum * discountNum) / 100);
   const finalPrice = Math.max(0, originalNum - discountAmount);
+  // 🆕 محاسبه کارمزد اپلیکیشن
+  const appFee = calculateAppFee(finalPrice);
 
   const handleSave = () => {
     const newErrors = {};
@@ -92,11 +102,10 @@ export default function EditServiceScreen({ navigation, route }) {
       newErrors.depositAmount =
         'مبلغ بیعانه نمی‌تواند بیشتر از قیمت نهایی باشد';
     }
-
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    const serviceType = SERVICE_TYPES.find(t => t.id === typeId);
+    const serviceType = SERVICE_TYPES.find((t) => t.id === typeId);
     const serviceData = {
       name: name.trim(),
       typeId,
@@ -108,6 +117,8 @@ export default function EditServiceScreen({ navigation, route }) {
       finalPrice,
       hasDeposit: depositNum > 0,
       depositAmount: depositNum,
+      // 🆕 ذخیره کارمزد اپلیکیشن
+      appFee,
       isActive,
       description: description.trim(),
       duration: 60,
@@ -129,15 +140,9 @@ export default function EditServiceScreen({ navigation, route }) {
   // محاسبه تعداد کاراکترهای باقی‌مانده
   const descLength = (description || '').length;
   const remainingChars = MAX_DESCRIPTION_LENGTH - descLength;
-  const isNearLimit = remainingChars <= 50 && remainingChars > 0;
-  const isAtLimit = remainingChars === 0;
 
   return (
-    <ScreenWrapper
-      padding={0}
-      edges={['bottom', 'left', 'right']}
-      keyboardAware
-    >
+    <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <Header
         title={isEditMode ? 'ویرایش خدمت' : 'افزودن خدمت جدید'}
         onBackPress={() => navigation.goBack()}
@@ -164,10 +169,7 @@ export default function EditServiceScreen({ navigation, route }) {
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <View
-              style={[
-                s.sectionIconBox,
-                { backgroundColor: colors.primary + '15' },
-              ]}
+              style={[s.sectionIconBox, { backgroundColor: colors.primary + '15' }]}
             >
               <Icon name="info-outline" size={18} color={colors.primary} />
             </View>
@@ -180,21 +182,19 @@ export default function EditServiceScreen({ navigation, route }) {
               label="نام خدمت *"
               placeholder="مثال: فیشیال VIP پوست صورت"
               value={name}
-              onChangeText={t => {
+              onChangeText={(t) => {
                 setName(t);
                 if (errors.name) setErrors({ ...errors, name: '' });
               }}
               error={errors.name}
-              rightIcon={
-                <Icon name="label" size={22} color={colors.textSecondary} />
-              }
+              rightIcon={<Icon name="label" size={22} color={colors.textSecondary} />}
             />
             <Dropdown
               label="نوع خدمت *"
               placeholder="نوع خدمت را انتخاب کنید"
               value={typeId}
               options={SERVICE_TYPES}
-              onSelect={val => {
+              onSelect={(val) => {
                 setTypeId(val);
                 if (errors.typeId) setErrors({ ...errors, typeId: '' });
               }}
@@ -204,7 +204,7 @@ export default function EditServiceScreen({ navigation, route }) {
                 label="نام نوع خدمت *"
                 placeholder="نام نوع خدمت خود را وارد کنید"
                 value={customTypeName}
-                onChangeText={t => {
+                onChangeText={(t) => {
                   setCustomTypeName(t);
                   if (errors.customTypeName)
                     setErrors({ ...errors, customTypeName: '' });
@@ -225,12 +225,37 @@ export default function EditServiceScreen({ navigation, route }) {
               قیمت‌گذاری
             </Text>
           </View>
+
+          {/* 🆕 دکمه راهنمای قیمت‌گذاری */}
+          <TouchableOpacity
+            onPress={() => setPriceGuideVisible(true)}
+            activeOpacity={0.8}
+            style={[
+              s.priceGuideBtn,
+              {
+                backgroundColor: '#4CAF5010',
+                borderColor: '#4CAF5040',
+              },
+            ]}
+          >
+            <Icon name="calculate" size={18} color="#4CAF50" />
+            <View style={{ flex: 1 }}>
+              <Text style={[s.priceGuideBtnTitle, { color: '#4CAF50' }]}>
+                راهنمای قیمت‌گذاری
+              </Text>
+              <Text style={[s.priceGuideBtnSubtitle, { color: colors.textSecondary }]}>
+                مشاهده هزینه خدمات‌رسانی زیبانو
+              </Text>
+            </View>
+            <Icon name="chevron-left" size={20} color="#4CAF50" />
+          </TouchableOpacity>
+
           <Card variant="elevated" padding={16} radius={18}>
             <Input
               label="قیمت اصلی (تومان) *"
               placeholder="مثال: ۷۵۰,۰۰۰"
               value={originalPrice}
-              onChangeText={t => {
+              onChangeText={(t) => {
                 setOriginalPrice(formatPriceInput(t));
                 if (errors.originalPrice)
                   setErrors({ ...errors, originalPrice: '' });
@@ -247,7 +272,7 @@ export default function EditServiceScreen({ navigation, route }) {
               label="درصد تخفیف (اختیاری)"
               placeholder="مثال: ۲۰"
               value={discountPercent}
-              onChangeText={t => {
+              onChangeText={(t) => {
                 const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '');
                 if (parseNumber(cleaned) <= 100 || cleaned === '') {
                   setDiscountPercent(cleaned);
@@ -280,9 +305,7 @@ export default function EditServiceScreen({ navigation, route }) {
                 ]}
               >
                 <View style={s.summaryRow}>
-                  <Text
-                    style={[s.summaryLabel, { color: colors.textSecondary }]}
-                  >
+                  <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>
                     قیمت اصلی
                   </Text>
                   <Text style={[s.summaryValue, { color: colors.textMain }]}>
@@ -291,9 +314,7 @@ export default function EditServiceScreen({ navigation, route }) {
                 </View>
                 {discountNum > 0 && (
                   <View style={s.summaryRow}>
-                    <Text
-                      style={[s.summaryLabel, { color: colors.textSecondary }]}
-                    >
+                    <Text style={[s.summaryLabel, { color: colors.textSecondary }]}>
                       تخفیف ({toPersianDigit(discountNum)}٪)
                     </Text>
                     <Text style={[s.summaryValue, { color: '#E53935' }]}>
@@ -330,6 +351,58 @@ export default function EditServiceScreen({ navigation, route }) {
               </Card>
             )}
           </Card>
+
+          {/* 🆕 کارت کارمزد زیبانو */}
+          {originalNum > 0 && finalPrice >= MIN_FINAL_PRICE && (
+            <Card
+              variant="default"
+              padding={14}
+              radius={14}
+              style={[
+                s.appFeeCard,
+                {
+                  backgroundColor: '#2196F310',
+                  borderColor: '#2196F340',
+                },
+              ]}
+            >
+              <View style={s.appFeeHeader}>
+                <View style={[s.appFeeIconBox, { backgroundColor: '#2196F3' }]}>
+                  <Icon name="info" size={14} color="#fff" />
+                </View>
+                <Text style={[s.appFeeTitle, { color: '#2196F3' }]}>
+                  هزینه خدمات‌رسانی زیبانو
+                </Text>
+              </View>
+              <View style={s.appFeeRow}>
+                <Text style={[s.appFeeLabel, { color: colors.textSecondary }]}>
+                  این مبلغ به قیمت خدمت شما اضافه و از مشتری دریافت می‌شود
+                </Text>
+              </View>
+              <View style={s.appFeeAmountRow}>
+                <Text style={[s.appFeeAmountLabel, { color: colors.textMain }]}>
+                  مبلغ هزینه زیبانو:
+                </Text>
+                <Text style={[s.appFeeAmountValue, { color: '#2196F3' }]}>
+                  {formatPrice(appFee)}
+                </Text>
+              </View>
+              <View style={s.appFeeTotalRow}>
+                <Text style={[s.appFeeTotalLabel, { color: colors.textSecondary }]}>
+                  مشتری پرداخت می‌کند:
+                </Text>
+                <Text style={[s.appFeeTotalValue, { color: colors.textMain }]}>
+                  {formatPrice(finalPrice + appFee)}
+                </Text>
+              </View>
+              <View style={s.appFeeHintRow}>
+                <Icon name="lightbulb" size={12} color="#FFC107" />
+                <Text style={[s.appFeeHintText, { color: colors.textSecondary }]}>
+                  شما مبلغ {formatPrice(finalPrice)} را دریافت خواهید کرد
+                </Text>
+              </View>
+            </Card>
+          )}
         </View>
 
         {/* بخش بیعانه */}
@@ -347,7 +420,7 @@ export default function EditServiceScreen({ navigation, route }) {
               label="مبلغ بیعانه (تومان)"
               placeholder="مثال: ۲۰۰,۰۰۰"
               value={depositAmount}
-              onChangeText={t => {
+              onChangeText={(t) => {
                 setDepositAmount(formatPriceInput(t));
                 if (errors.depositAmount)
                   setErrors({ ...errors, depositAmount: '' });
@@ -359,7 +432,7 @@ export default function EditServiceScreen({ navigation, route }) {
                   تومان
                 </Text>
               }
-              hint={`حداقل: ${formatPrice(MIN_DEPOSIT)} تومان`}
+              hint={`حداقل: ${formatPrice(MIN_DEPOSIT)}`}
             />
           </Card>
         </View>
@@ -392,14 +465,13 @@ export default function EditServiceScreen({ navigation, route }) {
               />
             </View>
             <Divider spacing={12} />
-
             {/* فیلد توضیحات با محدودیت ۳۰۰ کاراکتر */}
             <View style={s.descriptionWrapper}>
               <Input
                 label="توضیحات (اختیاری)"
                 placeholder="توضیحاتی درباره این خدمت... (حداکثر ۳۰۰ کاراکتر)"
                 value={description}
-                onChangeText={t => {
+                onChangeText={(t) => {
                   if (t.length <= MAX_DESCRIPTION_LENGTH) {
                     setDescription(t);
                   }
@@ -430,6 +502,13 @@ export default function EditServiceScreen({ navigation, route }) {
         {/* فضای خالی برای جلوگیری از overlap با Navbar */}
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* 🆕 مدال راهنمای قیمت‌گذاری */}
+      <PriceGuideModal
+        visible={priceGuideVisible}
+        onClose={() => setPriceGuideVisible(false)}
+        currentPrice={finalPrice}
+      />
     </ScreenWrapper>
   );
 }
@@ -520,11 +599,73 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 17,
   },
-  // ═══════════ شمارنده کاراکتر توضیحات ═══════════
   descriptionWrapper: {
     marginBottom: 4,
   },
   saveContainer: {
     marginTop: 24,
   },
+  // 🆕 استایل‌های دکمه راهنمای قیمت‌گذاری
+  priceGuideBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  priceGuideBtnTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
+  priceGuideBtnSubtitle: { fontSize: 11, fontFamily: 'Vazir', marginTop: 2 },
+  // 🆕 استایل‌های کارت کارمزد اپ
+  appFeeCard: {
+    borderWidth: 1,
+    marginTop: 10,
+    gap: 8,
+  },
+  appFeeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  appFeeIconBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appFeeTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
+  appFeeRow: { marginBottom: 4 },
+  appFeeLabel: { fontSize: 11, fontFamily: 'Vazir', lineHeight: 17 },
+  appFeeAmountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(33,150,243,0.08)',
+    borderRadius: 8,
+  },
+  appFeeAmountLabel: { fontSize: 12, fontFamily: 'Vazir' },
+  appFeeAmountValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
+  appFeeTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  appFeeTotalLabel: { fontSize: 12, fontFamily: 'Vazir' },
+  appFeeTotalValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
+  appFeeHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  appFeeHintText: { fontSize: 11, fontFamily: 'Vazir', flex: 1 },
 });

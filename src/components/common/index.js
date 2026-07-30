@@ -38,3 +38,4 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as SuccessModal } from './SuccessModal';
 export { default as AuthBottomSheet } from './AuthBottomSheet';
 export { default as FavoriteButton } from './FavoriteButton';
+export { default as PriceGuideModal } from './PriceGuideModal';

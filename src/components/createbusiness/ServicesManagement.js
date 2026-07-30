@@ -1,6 +1,6 @@
 // src/components/createbusiness/ServicesManagement.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Alert, Switch, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
@@ -14,29 +14,31 @@ import SectionHeader from '../common/SectionHeader';
 import CharCounter from '../common/CharCounter';
 import PriceBreakdown from '../common/PriceBreakdown';
 import BottomSheet from '../common/BottomSheet';
-import { toPersianDigit, formatPrice, toEnglishDigits, parseNumber, formatPriceInput } from '../../utils/numberUtils';
+import PriceGuideModal from '../common/PriceGuideModal'; // 🆕 مدال راهنمای قیمت‌گذاری
+import {
+  toPersianDigit,
+  formatPrice,
+  toEnglishDigits,
+  parseNumber,
+  formatPriceInput,
+  calculateAppFee, // 🆕 تابع محاسبه کارمزد
+} from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 
 const MIN_FINAL_PRICE = 100000;
 const MIN_DEPOSIT = 100000;
 const MAX_DESCRIPTION_LENGTH = 300;
 
-const parseNumber = (str) => {
+const parseNumberLocal = (str) => {
   const cleaned = toEnglishDigits(str).replace(/[^0-9]/g, '');
   return parseInt(cleaned, 10) || 0;
-};
-
-const formatPriceInput = (text) => {
-  const cleaned = toEnglishDigits(text).replace(/[^0-9]/g, '');
-  if (!cleaned) return '';
-  const num = parseInt(cleaned, 10);
-  return toPersianDigit(num.toLocaleString('en-US'));
 };
 
 export default function ServicesManagement({ services = [], onChange }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
+  const [priceGuideVisible, setPriceGuideVisible] = useState(false); // 🆕
   const [editingId, setEditingId] = useState(null);
   const [name, setName] = useState('');
   const [typeId, setTypeId] = useState(null);
@@ -48,10 +50,12 @@ export default function ServicesManagement({ services = [], onChange }) {
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState({});
 
-  const originalNum = parseNumber(originalPrice);
-  const discountNum = Math.min(parseNumber(discountPercent), 100);
+  const originalNum = parseNumberLocal(originalPrice);
+  const discountNum = Math.min(parseNumberLocal(discountPercent), 100);
   const discountAmount = Math.round((originalNum * discountNum) / 100);
   const finalPrice = Math.max(0, originalNum - discountAmount);
+  // 🆕 محاسبه کارمزد اپلیکیشن
+  const appFee = calculateAppFee(finalPrice);
 
   const resetForm = () => {
     setName('');
@@ -100,7 +104,7 @@ export default function ServicesManagement({ services = [], onChange }) {
     if (finalPrice > 0 && finalPrice < MIN_FINAL_PRICE) {
       newErrors.originalPrice = `قیمت نهایی خدمت باید حداقل ${formatPrice(MIN_FINAL_PRICE)} تومان باشد`;
     }
-    const depositNum = parseNumber(depositAmount);
+    const depositNum = parseNumberLocal(depositAmount);
     if (!depositNum || depositNum < MIN_DEPOSIT) {
       newErrors.depositAmount = `حداقل مبلغ بیعانه ${formatPrice(MIN_DEPOSIT)} تومان است`;
     }
@@ -123,6 +127,8 @@ export default function ServicesManagement({ services = [], onChange }) {
       finalPrice,
       hasDeposit: true,
       depositAmount: depositNum,
+      // 🆕 ذخیره کارمزد اپلیکیشن (مخفی از مشتری)
+      appFee,
       isActive,
       description: description.trim(),
     };
@@ -138,7 +144,11 @@ export default function ServicesManagement({ services = [], onChange }) {
   const handleDelete = (service) => {
     Alert.alert('حذف خدمت', `آیا از حذف "${service.name}" مطمئن هستید؟`, [
       { text: 'انصراف', style: 'cancel' },
-      { text: 'حذف', style: 'destructive', onPress: () => onChange?.(services.filter((s) => s.id !== service.id)) },
+      {
+        text: 'حذف',
+        style: 'destructive',
+        onPress: () => onChange?.(services.filter((s) => s.id !== service.id)),
+      },
     ]);
   };
 
@@ -210,10 +220,7 @@ export default function ServicesManagement({ services = [], onChange }) {
           </View>
         ) : (
           <Card variant="default" padding={0} radius={16} style={s.emptyCard}>
-            <EmptyStateVariants
-              variant="service"
-              onAction={openAddModal}
-            />
+            <EmptyStateVariants variant="service" onAction={openAddModal} />
           </Card>
         )}
 
@@ -257,7 +264,10 @@ export default function ServicesManagement({ services = [], onChange }) {
             label="نام خدمت *"
             placeholder="مثال: فیشیال VIP پوست صورت"
             value={name}
-            onChangeText={(t) => { setName(t); if (errors.name) setErrors({ ...errors, name: '' }); }}
+            onChangeText={(t) => {
+              setName(t);
+              if (errors.name) setErrors({ ...errors, name: '' });
+            }}
             error={errors.name}
             rightIcon={<Icon name="label" size={22} color={colors.textSecondary} />}
           />
@@ -267,7 +277,10 @@ export default function ServicesManagement({ services = [], onChange }) {
             placeholder="نوع خدمت را انتخاب کنید"
             value={typeId}
             options={SERVICE_TYPES}
-            onSelect={(val) => { setTypeId(val); if (errors.typeId) setErrors({ ...errors, typeId: '' }); }}
+            onSelect={(val) => {
+              setTypeId(val);
+              if (errors.typeId) setErrors({ ...errors, typeId: '' });
+            }}
           />
 
           {typeId === 'other' && (
@@ -275,12 +288,39 @@ export default function ServicesManagement({ services = [], onChange }) {
               label="نام نوع خدمت *"
               placeholder="نام نوع خدمت خود را وارد کنید"
               value={customTypeName}
-              onChangeText={(t) => { setCustomTypeName(t); if (errors.customTypeName) setErrors({ ...errors, customTypeName: '' }); }}
+              onChangeText={(t) => {
+                setCustomTypeName(t);
+                if (errors.customTypeName) setErrors({ ...errors, customTypeName: '' });
+              }}
               error={errors.customTypeName}
             />
           )}
 
           <Divider label="قیمت‌گذاری" spacing={16} />
+
+          {/* 🆕 دکمه راهنمای قیمت‌گذاری */}
+          <TouchableOpacity
+            onPress={() => setPriceGuideVisible(true)}
+            activeOpacity={0.8}
+            style={[
+              s.priceGuideBtn,
+              {
+                backgroundColor: '#4CAF5010',
+                borderColor: '#4CAF5040',
+              },
+            ]}
+          >
+            <Icon name="calculate" size={18} color="#4CAF50" />
+            <View style={{ flex: 1 }}>
+              <Text style={[s.priceGuideBtnTitle, { color: '#4CAF50' }]}>
+                راهنمای قیمت‌گذاری
+              </Text>
+              <Text style={[s.priceGuideBtnSubtitle, { color: colors.textSecondary }]}>
+                مشاهده هزینه خدمات‌رسانی زیبانو
+              </Text>
+            </View>
+            <Icon name="chevron-left" size={20} color="#4CAF50" />
+          </TouchableOpacity>
 
           <Input
             label="قیمت اصلی (تومان) *"
@@ -300,8 +340,14 @@ export default function ServicesManagement({ services = [], onChange }) {
                   قیمت نهایی پس از تخفیف باید حداقل {formatPrice(MIN_FINAL_PRICE)} تومان باشد
                 </Text>
                 {discountNum > 0 && originalNum > 0 && (
-                  <Text style={[s.hintCalcText, { color: finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373' }]}>
-                    قیمت نهایی: {formatPrice(finalPrice)} تومان {finalPrice < MIN_FINAL_PRICE && '⚠️'}
+                  <Text
+                    style={[
+                      s.hintCalcText,
+                      { color: finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373' },
+                    ]}
+                  >
+                    قیمت نهایی: {formatPrice(finalPrice)} تومان{' '}
+                    {finalPrice < MIN_FINAL_PRICE && '⚠️'}
                   </Text>
                 )}
               </View>
@@ -314,7 +360,7 @@ export default function ServicesManagement({ services = [], onChange }) {
             value={discountPercent}
             onChangeText={(t) => {
               const cleaned = toEnglishDigits(t).replace(/[^0-9]/g, '');
-              if (parseNumber(cleaned) <= 100 || cleaned === '') {
+              if (parseNumberLocal(cleaned) <= 100 || cleaned === '') {
                 setDiscountPercent(cleaned);
                 if (errors.discountPercent) setErrors({ ...errors, discountPercent: '' });
               }
@@ -327,38 +373,101 @@ export default function ServicesManagement({ services = [], onChange }) {
           />
 
           {originalNum > 0 && (
-            <Card
-              variant="default"
-              padding={14}
-              radius={12}
-              style={[
-                s.priceSummaryCard,
-                {
-                  backgroundColor: finalPrice >= MIN_FINAL_PRICE ? '#4CAF5010' : '#E5737315',
-                  borderColor: finalPrice >= MIN_FINAL_PRICE ? '#4CAF5040' : '#E5737350',
-                },
-              ]}
-            >
-              <View style={s.priceSummaryHeader}>
-                <Icon name={finalPrice >= MIN_FINAL_PRICE ? 'check-circle' : 'warning'} size={18} color={finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373'} />
-                <Text style={[s.priceSummaryTitle, { color: finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373' }]}>
-                  {finalPrice >= MIN_FINAL_PRICE ? 'قیمت معتبر ✓' : 'قیمت نهایی کمتر از حد مجاز'}
-                </Text>
-              </View>
-              <PriceBreakdown
-                originalPrice={originalNum}
-                discountPercent={discountNum}
-                finalPrice={finalPrice}
-                hasDeposit={false}
-                showRemaining={false}
-                variant="detailed"
-              />
-              {finalPrice < MIN_FINAL_PRICE && (
-                <Text style={[s.priceSummaryWarning, { color: '#E57373' }]}>
-                  ⚠️ قیمت نهایی باید حداقل {formatPrice(MIN_FINAL_PRICE)} تومان باشد. لطفاً قیمت اصلی را افزایش دهید یا تخفیف را کاهش دهید.
-                </Text>
+            <>
+              <Card
+                variant="default"
+                padding={14}
+                radius={12}
+                style={[
+                  s.priceSummaryCard,
+                  {
+                    backgroundColor: finalPrice >= MIN_FINAL_PRICE ? '#4CAF5010' : '#E5737315',
+                    borderColor: finalPrice >= MIN_FINAL_PRICE ? '#4CAF5040' : '#E5737350',
+                  },
+                ]}
+              >
+                <View style={s.priceSummaryHeader}>
+                  <Icon
+                    name={finalPrice >= MIN_FINAL_PRICE ? 'check-circle' : 'warning'}
+                    size={18}
+                    color={finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373'}
+                  />
+                  <Text
+                    style={[
+                      s.priceSummaryTitle,
+                      { color: finalPrice >= MIN_FINAL_PRICE ? '#4CAF50' : '#E57373' },
+                    ]}
+                  >
+                    {finalPrice >= MIN_FINAL_PRICE ? 'قیمت معتبر ✓' : 'قیمت نهایی کمتر از حد مجاز'}
+                  </Text>
+                </View>
+                <PriceBreakdown
+                  originalPrice={originalNum}
+                  discountPercent={discountNum}
+                  finalPrice={finalPrice}
+                  hasDeposit={false}
+                  showRemaining={false}
+                  variant="detailed"
+                />
+                {finalPrice < MIN_FINAL_PRICE && (
+                  <Text style={[s.priceSummaryWarning, { color: '#E57373' }]}>
+                    ⚠️ قیمت نهایی باید حداقل {formatPrice(MIN_FINAL_PRICE)} تومان باشد. لطفاً قیمت اصلی را افزایش دهید یا تخفیف را کاهش دهید.
+                  </Text>
+                )}
+              </Card>
+
+              {/* 🆕 نمایش کارمزد زیبانو به صاحب کسب‌وکار */}
+              {finalPrice >= MIN_FINAL_PRICE && (
+                <Card
+                  variant="default"
+                  padding={14}
+                  radius={12}
+                  style={[
+                    s.appFeeCard,
+                    {
+                      backgroundColor: '#2196F310',
+                      borderColor: '#2196F340',
+                    },
+                  ]}
+                >
+                  <View style={s.appFeeHeader}>
+                    <View style={[s.appFeeIconBox, { backgroundColor: '#2196F3' }]}>
+                      <Icon name="info" size={14} color="#fff" />
+                    </View>
+                    <Text style={[s.appFeeTitle, { color: '#2196F3' }]}>
+                      هزینه خدمات‌رسانی زیبانو
+                    </Text>
+                  </View>
+                  <View style={s.appFeeRow}>
+                    <Text style={[s.appFeeLabel, { color: colors.textSecondary }]}>
+                      این مبلغ به قیمت خدمت شما اضافه و از مشتری دریافت می‌شود
+                    </Text>
+                  </View>
+                  <View style={s.appFeeAmountRow}>
+                    <Text style={[s.appFeeAmountLabel, { color: colors.textMain }]}>
+                      مبلغ هزینه زیبانو:
+                    </Text>
+                    <Text style={[s.appFeeAmountValue, { color: '#2196F3' }]}>
+                      {formatPrice(appFee)}
+                    </Text>
+                  </View>
+                  <View style={s.appFeeTotalRow}>
+                    <Text style={[s.appFeeTotalLabel, { color: colors.textSecondary }]}>
+                      مشتری پرداخت می‌کند:
+                    </Text>
+                    <Text style={[s.appFeeTotalValue, { color: colors.textMain }]}>
+                      {formatPrice(finalPrice + appFee)}
+                    </Text>
+                  </View>
+                  <View style={s.appFeeHintRow}>
+                    <Icon name="lightbulb" size={12} color="#FFC107" />
+                    <Text style={[s.appFeeHintText, { color: colors.textSecondary }]}>
+                      شما مبلغ {formatPrice(finalPrice)} را دریافت خواهید کرد
+                    </Text>
+                  </View>
+                </Card>
               )}
-            </Card>
+            </>
           )}
 
           <Divider label="بیعانه رزرو" spacing={16} />
@@ -377,8 +486,14 @@ export default function ServicesManagement({ services = [], onChange }) {
             rightIcon={<Text style={[s.currencyIcon, { color: colors.textSecondary }]}>تومان</Text>}
             hint={
               <View style={s.hintColumn}>
-                <Text style={[s.hintBaseText, { color: colors.textSecondary }]}>حداقل: {formatPrice(MIN_DEPOSIT)} تومان</Text>
-                {finalPrice > 0 && <Text style={[s.hintCalcText, { color: colors.textSecondary }]}>حداکثر: {formatPrice(finalPrice)} تومان</Text>}
+                <Text style={[s.hintBaseText, { color: colors.textSecondary }]}>
+                  حداقل: {formatPrice(MIN_DEPOSIT)} تومان
+                </Text>
+                {finalPrice > 0 && (
+                  <Text style={[s.hintCalcText, { color: colors.textSecondary }]}>
+                    حداکثر: {formatPrice(finalPrice)} تومان
+                  </Text>
+                )}
               </View>
             }
           />
@@ -392,7 +507,12 @@ export default function ServicesManagement({ services = [], onChange }) {
                 در صورت غیرفعال بودن، مشتریان نمی‌توانند این خدمت را رزرو کنند
               </Text>
             </View>
-            <Switch value={isActive} onValueChange={setIsActive} thumbColor={isActive ? colors.primary : '#ccc'} trackColor={{ true: colors.primary + '55', false: '#ddd' }} />
+            <Switch
+              value={isActive}
+              onValueChange={setIsActive}
+              thumbColor={isActive ? colors.primary : '#ccc'}
+              trackColor={{ true: colors.primary + '55', false: '#ddd' }}
+            />
           </View>
 
           <Input
@@ -408,12 +528,18 @@ export default function ServicesManagement({ services = [], onChange }) {
             numberOfLines={3}
             maxLength={MAX_DESCRIPTION_LENGTH}
           />
-          
           <CharCounter current={description.length} max={MAX_DESCRIPTION_LENGTH} />
 
           <View style={{ height: 20 }} />
         </ScrollView>
       </BottomSheet>
+
+      {/* 🆕 مدال راهنمای قیمت‌گذاری */}
+      <PriceGuideModal
+        visible={priceGuideVisible}
+        onClose={() => setPriceGuideVisible(false)}
+        currentPrice={finalPrice}
+      />
     </View>
   );
 }
@@ -425,7 +551,12 @@ const s = StyleSheet.create({
   countText: { fontSize: 12, fontFamily: 'Vazir-Bold' },
   servicesList: { gap: 12, marginBottom: 16 },
   serviceCard: { marginBottom: 0 },
-  cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
   cardInfo: { flex: 1, alignItems: 'flex-start', gap: 2 },
   serviceName: { fontSize: 15, fontFamily: 'Vazir-Bold' },
   serviceType: { fontSize: 12, fontFamily: 'Vazir' },
@@ -442,7 +573,14 @@ const s = StyleSheet.create({
   },
   addButton: { marginTop: 4 },
   currencyIcon: { fontSize: 13, fontFamily: 'Vazir-Medium' },
-  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, gap: 12, marginBottom: 8 },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: 12,
+    marginBottom: 8,
+  },
   switchInfo: { flex: 1, alignItems: 'flex-start', gap: 2 },
   switchLabel: { fontSize: 14, fontFamily: 'Vazir-Bold' },
   switchHint: { fontSize: 12, fontFamily: 'Vazir' },
@@ -450,7 +588,75 @@ const s = StyleSheet.create({
   hintBaseText: { fontSize: 12, fontFamily: 'Vazir', lineHeight: 18 },
   hintCalcText: { fontSize: 13, fontFamily: 'Vazir-Bold', lineHeight: 20 },
   priceSummaryCard: { borderWidth: 1.5, marginBottom: 8 },
-  priceSummaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  priceSummaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
   priceSummaryTitle: { fontSize: 14, fontFamily: 'Vazir-Bold' },
   priceSummaryWarning: { fontSize: 11, fontFamily: 'Vazir', lineHeight: 18, marginTop: 8 },
+  // 🆕 استایل‌های دکمه راهنمای قیمت‌گذاری
+  priceGuideBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  priceGuideBtnTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
+  priceGuideBtnSubtitle: { fontSize: 11, fontFamily: 'Vazir', marginTop: 2 },
+  // 🆕 استایل‌های کارت کارمزد اپ
+  appFeeCard: {
+    borderWidth: 1,
+    marginTop: 8,
+    gap: 8,
+  },
+  appFeeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  appFeeIconBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appFeeTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
+  appFeeRow: { marginBottom: 4 },
+  appFeeLabel: { fontSize: 11, fontFamily: 'Vazir', lineHeight: 17 },
+  appFeeAmountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(33,150,243,0.08)',
+    borderRadius: 8,
+  },
+  appFeeAmountLabel: { fontSize: 12, fontFamily: 'Vazir' },
+  appFeeAmountValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
+  appFeeTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  appFeeTotalLabel: { fontSize: 12, fontFamily: 'Vazir' },
+  appFeeTotalValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
+  appFeeHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  appFeeHintText: { fontSize: 11, fontFamily: 'Vazir', flex: 1 },
 });

@@ -31,3 +31,44 @@ export const formatPercentInput = (text) => {
   if (!cleaned) return '';
   return toPersianDigit(String(Math.min(parseInt(cleaned, 10), 100)));
 };
+
+// ═══════════════════════════════════════════════════════
+//    محاسبه کارمزد اپلیکیشن
+// ═══════════════════════════════════════════════════════
+/**
+ * محاسبه کارمزد اپلیکیشن بر اساس قیمت اصلی خدمت
+ *
+ * @param {number} basePrice - قیمت پایه خدمت (تومان)
+ * @returns {number} - مبلغ کارمزد (تومان)
+ */
+export const calculateAppFee = (basePrice) => {
+  if (!basePrice || basePrice <= 0) return 10000;
+  if (basePrice <= 1000000) return 10000;
+  if (basePrice <= 1500000) return 20000;
+  if (basePrice <= 2000000) return 30000;
+  // هر ۵۰۰ هزار تومان ۱۰ هزار تومان اضافه می‌شود
+  const extra = Math.ceil((basePrice - 2000000) / 500000) * 10000;
+  return 30000 + extra;
+};
+
+/**
+ * 🆕 لیست بازه‌های کارمزد برای نمایش در مدال راهنما
+ */
+export const APP_FEE_TIERS = [
+  { min: 1000, max: 500000, fee: 10000 },
+  { min: 500000, max: 1000000, fee: 20000 },
+  { min: 1000000, max: 1499000, fee: 30000 },
+];
+
+/**
+ * پیدا کردن ردیف فعلی کارمزد برای هایلایت کردن
+ */
+export const getCurrentFeeTier = (basePrice) => {
+  if (!basePrice || basePrice <= 0) return APP_FEE_TIERS[0];
+  // پیدا کردن ردیف مناسب
+  const tier = APP_FEE_TIERS.find(t => basePrice >= t.min && basePrice <= t.max);
+  if (tier) return tier;
+  // اگر بالاتر از جدول باشد، آخرین ردیف
+  if (basePrice > 1999000) return APP_FEE_TIERS[APP_FEE_TIERS.length - 1];
+  return APP_FEE_TIERS[0];
+};
