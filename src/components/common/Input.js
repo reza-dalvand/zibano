@@ -174,7 +174,7 @@ const s = StyleSheet.create({
     fontFamily: 'Vazir',
     fontSize: 12,
     marginTop: 4,
-    textAlign: 'right',
+    textAlign: 'left',
   },
   hint: {
     fontFamily: 'Vazir',
