@@ -1,8 +1,9 @@
-//src/components/common/DetailHero.js
+// src/components/common/DetailHero.js
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import FavoriteButton from './FavoriteButton';
 
 export default function DetailHero({
   imageUrl,
@@ -13,44 +14,41 @@ export default function DetailHero({
 }) {
   const insets = useSafeAreaInsets();
   const heroHeight = 320 + insets.top;
-  
+
   return (
     <View style={[s.container, { height: heroHeight, marginTop: -insets.top }]}>
       <Image source={{ uri: imageUrl }} style={s.image} />
       <View style={s.gradient} />
-      
+
       <View style={[s.topActions, { top: insets.top + 12 }]}>
         <TouchableOpacity style={s.actionBtn} onPress={onBack}>
           <Icon name="arrow-forward" size={22} color="#fff" />
         </TouchableOpacity>
-        
+
         <View style={{ flex: 1 }} />
-        
-        {onSave && (
-          <TouchableOpacity style={s.actionBtn} onPress={onSave}>
-            <Icon
-              name={isSaved ? 'bookmark' : 'bookmark-border'}
-              size={22}
-              color={isSaved ? '#FFD700' : '#fff'}
-            />
-          </TouchableOpacity>
-        )}
+
+        <FavoriteButton
+          isFavorite={isSaved}
+          onPress={onSave}
+          size={22}
+          color="#fff"
+          activeColor="#FFD700"
+          style={s.actionBtn}
+        />
       </View>
-      
-      {/* ✅ بهبود: اعتبارسنجی ساختار badges */}
+
+      {/* ✅ بهبود: اعتبارسنجی ساختار badges
       {badges.length > 0 && (
         <View style={s.badgesContainer}>
           {badges.map((badge, i) => {
-            // اعتبارسنجی - اگر badge ساختار صحیح نداشت، نادیده بگیر
             if (!badge || !badge.container) return null;
-            
             return (
               <View key={i} style={badge.container}>
                 {badge.icon && (
-                  <Icon 
-                    name={badge.icon} 
-                    size={badge.iconSize || 12} 
-                    color={badge.iconColor || '#fff'} 
+                  <Icon
+                    name={badge.icon}
+                    size={badge.iconSize || 12}
+                    color={badge.iconColor || '#fff'}
                   />
                 )}
                 {badge.text && (
@@ -62,7 +60,7 @@ export default function DetailHero({
             );
           })}
         </View>
-      )}
+      )} */}
     </View>
   );
 }
@@ -106,7 +104,6 @@ const s = StyleSheet.create({
     gap: 8,
     flexWrap: 'wrap',
   },
-  // ✅ اضافه شد - استایل پیش‌فرض برای متن badge
   defaultBadgeText: {
     color: '#fff',
     fontSize: 11,

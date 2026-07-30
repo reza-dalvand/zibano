@@ -2,23 +2,26 @@ import React from 'react';
 import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import FavoriteButton from '../common/FavoriteButton';
 
 const ExplorePostCard = ({post, onPress, onSave}) => {
   const {colors} = useTheme();
-
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => onPress?.(post)}
       style={[styles.card, {backgroundColor: colors.cardBackground}]}>
       <Image source={{uri: post.imageUrl}} style={styles.image} />
-      <TouchableOpacity style={styles.saveBtn} onPress={() => onSave?.(post)}>
-        <Icon
-          name={post.saved ? 'bookmark' : 'bookmark-border'}
-          size={22}
-          color={post.saved ? colors.primary : '#fff'}
-        />
-      </TouchableOpacity>
+      
+      <FavoriteButton
+        isFavorite={post.saved}
+        onPress={() => onSave?.(post)}
+        size={22}
+        color="#fff"
+        activeColor={colors.primary}
+        style={styles.saveBtn}
+      />
+
       <View style={styles.info}>
         <Text style={[styles.title, {color: colors.textMain, fontFamily: 'Vazir-Medium'}]}numberOfLines={1}>
           {post.businessName}
@@ -37,7 +40,17 @@ const ExplorePostCard = ({post, onPress, onSave}) => {
 const styles = StyleSheet.create({
   card: {borderRadius: 12, overflow: 'hidden', marginBottom: 12},
   image: {width: '100%', height: 180, resizeMode: 'cover'},
-  saveBtn: {position: 'absolute', top: 8, left: 8},
+  saveBtn: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   info: {padding: 10},
   title: {fontSize: 14, marginBottom: 4},
   row: {flexDirection: 'row', alignItems: 'center', gap: 4},

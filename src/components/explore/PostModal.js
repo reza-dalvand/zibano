@@ -20,6 +20,7 @@ import { useTheme } from '../../stores/useThemeStore';
 import StarRating from '../common/StarRating';
 import GallerySlider from './GallerySlider';
 import { toPersianDigit } from '../../utils/numberUtils';
+import FavoriteButton from '../common/FavoriteButton';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.92;
@@ -180,7 +181,9 @@ export default function PostModal({
           >
             <Icon name="close" size={22} color={colors.textMain} />
           </TouchableOpacity>
+
           <View style={{ flex: 1 }} />
+
           <TouchableOpacity
             onPress={handleShare}
             style={[
@@ -191,8 +194,13 @@ export default function PostModal({
           >
             <Icon name="share" size={20} color={colors.textMain} />
           </TouchableOpacity>
-          <TouchableOpacity
+
+          <FavoriteButton
+            isFavorite={isSaved}
             onPress={handleSave}
+            size={22}
+            color={colors.textMain}
+            activeColor={colors.primary}
             style={[
               styles.headerActionBtn,
               {
@@ -200,14 +208,7 @@ export default function PostModal({
                 borderColor: isSaved ? colors.primary : colors.border,
               },
             ]}
-            activeOpacity={0.7}
-          >
-            <Icon
-              name={isSaved ? 'bookmark' : 'bookmark-border'}
-              size={22}
-              color={isSaved ? colors.primary : colors.textMain}
-            />
-          </TouchableOpacity>
+          />
         </View>
         
         {/* 🎯 استفاده از GallerySlider برای گالری تصاویر */}

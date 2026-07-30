@@ -46,7 +46,6 @@ export default function BusinessHero({
         icon: 'collections',
         iconSize: 12,
         iconColor: '#fff',
-        text: `${gallery.length} تصویر`,
         textStyle: { color: '#fff', fontSize: 12, fontFamily: 'Vazir-Bold' },
       }] : []}
     />
