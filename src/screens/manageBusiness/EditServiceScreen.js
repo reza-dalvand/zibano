@@ -20,14 +20,13 @@ import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Divider from '../../components/common/Divider';
 import ServiceTypeIcon from '../../components/manageBusiness/services/ServiceTypeIcon';
-import PriceGuideModal from '../../components/common/PriceGuideModal'; // 🆕
+import PriceGuideModal from '../../components/common/PriceGuideModal';
 import {
   toPersianDigit,
   formatPrice,
   toEnglishDigits,
   parseNumber,
   formatPriceInput,
-  calculateAppFee, // 🆕
 } from '../../utils/numberUtils';
 import { SERVICE_TYPES } from '../../constants';
 import CharCounter from '../../components/common/CharCounter';
@@ -42,7 +41,7 @@ export default function EditServiceScreen({ navigation, route }) {
   const updateService = useBusinessStore((s) => s.updateService);
   const existingService = route.params?.service || null;
   const isEditMode = !!existingService;
-  const [priceGuideVisible, setPriceGuideVisible] = useState(false); // 🆕
+  const [priceGuideVisible, setPriceGuideVisible] = useState(false);
 
   const [name, setName] = useState(existingService?.name || '');
   const [typeId, setTypeId] = useState(existingService?.typeId || null);
@@ -74,8 +73,6 @@ export default function EditServiceScreen({ navigation, route }) {
   const discountNum = Math.min(parseNumber(discountPercent), 100);
   const discountAmount = Math.round((originalNum * discountNum) / 100);
   const finalPrice = Math.max(0, originalNum - discountAmount);
-  // 🆕 محاسبه کارمزد اپلیکیشن
-  const appFee = calculateAppFee(finalPrice);
 
   const handleSave = () => {
     const newErrors = {};
@@ -117,8 +114,6 @@ export default function EditServiceScreen({ navigation, route }) {
       finalPrice,
       hasDeposit: depositNum > 0,
       depositAmount: depositNum,
-      // 🆕 ذخیره کارمزد اپلیکیشن
-      appFee,
       isActive,
       description: description.trim(),
       duration: 60,
@@ -137,9 +132,7 @@ export default function EditServiceScreen({ navigation, route }) {
     }
   };
 
-  // محاسبه تعداد کاراکترهای باقی‌مانده
   const descLength = (description || '').length;
-  const remainingChars = MAX_DESCRIPTION_LENGTH - descLength;
 
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
@@ -226,7 +219,7 @@ export default function EditServiceScreen({ navigation, route }) {
             </Text>
           </View>
 
-          {/* 🆕 دکمه راهنمای قیمت‌گذاری */}
+          {/* ✅ دکمه راهنمای قیمت‌گذاری - باقی می‌ماند */}
           <TouchableOpacity
             onPress={() => setPriceGuideVisible(true)}
             activeOpacity={0.8}
@@ -352,57 +345,7 @@ export default function EditServiceScreen({ navigation, route }) {
             )}
           </Card>
 
-          {/* 🆕 کارت کارمزد زیبانو */}
-          {originalNum > 0 && finalPrice >= MIN_FINAL_PRICE && (
-            <Card
-              variant="default"
-              padding={14}
-              radius={14}
-              style={[
-                s.appFeeCard,
-                {
-                  backgroundColor: '#2196F310',
-                  borderColor: '#2196F340',
-                },
-              ]}
-            >
-              <View style={s.appFeeHeader}>
-                <View style={[s.appFeeIconBox, { backgroundColor: '#2196F3' }]}>
-                  <Icon name="info" size={14} color="#fff" />
-                </View>
-                <Text style={[s.appFeeTitle, { color: '#2196F3' }]}>
-                  هزینه خدمات‌رسانی زیبانو
-                </Text>
-              </View>
-              <View style={s.appFeeRow}>
-                <Text style={[s.appFeeLabel, { color: colors.textSecondary }]}>
-                  این مبلغ به قیمت خدمت شما اضافه و از مشتری دریافت می‌شود
-                </Text>
-              </View>
-              <View style={s.appFeeAmountRow}>
-                <Text style={[s.appFeeAmountLabel, { color: colors.textMain }]}>
-                  مبلغ هزینه زیبانو:
-                </Text>
-                <Text style={[s.appFeeAmountValue, { color: '#2196F3' }]}>
-                  {formatPrice(appFee)}
-                </Text>
-              </View>
-              <View style={s.appFeeTotalRow}>
-                <Text style={[s.appFeeTotalLabel, { color: colors.textSecondary }]}>
-                  مشتری پرداخت می‌کند:
-                </Text>
-                <Text style={[s.appFeeTotalValue, { color: colors.textMain }]}>
-                  {formatPrice(finalPrice + appFee)}
-                </Text>
-              </View>
-              <View style={s.appFeeHintRow}>
-                <Icon name="lightbulb" size={12} color="#FFC107" />
-                <Text style={[s.appFeeHintText, { color: colors.textSecondary }]}>
-                  شما مبلغ {formatPrice(finalPrice)} را دریافت خواهید کرد
-                </Text>
-              </View>
-            </Card>
-          )}
+          {/* ❌ کارت کارمزد زیبانو حذف شد */}
         </View>
 
         {/* بخش بیعانه */}
@@ -465,7 +408,6 @@ export default function EditServiceScreen({ navigation, route }) {
               />
             </View>
             <Divider spacing={12} />
-            {/* فیلد توضیحات با محدودیت ۳۰۰ کاراکتر */}
             <View style={s.descriptionWrapper}>
               <Input
                 label="توضیحات (اختیاری)"
@@ -480,13 +422,11 @@ export default function EditServiceScreen({ navigation, route }) {
                 numberOfLines={3}
                 maxLength={MAX_DESCRIPTION_LENGTH}
               />
-              {/* شمارنده کاراکتر */}
               <CharCounter current={descLength} max={MAX_DESCRIPTION_LENGTH} />
             </View>
           </Card>
         </View>
 
-        {/* دکمه ذخیره در انتهای فرم (غیر شناور) */}
         <View style={s.saveContainer}>
           <Button
             title={isEditMode ? 'ذخیره تغییرات' : 'افزودن خدمت'}
@@ -499,11 +439,10 @@ export default function EditServiceScreen({ navigation, route }) {
           />
         </View>
 
-        {/* فضای خالی برای جلوگیری از overlap با Navbar */}
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* 🆕 مدال راهنمای قیمت‌گذاری */}
+      {/* ✅ مدال راهنمای قیمت‌گذاری - باقی می‌ماند */}
       <PriceGuideModal
         visible={priceGuideVisible}
         onClose={() => setPriceGuideVisible(false)}
@@ -605,7 +544,7 @@ const s = StyleSheet.create({
   saveContainer: {
     marginTop: 24,
   },
-  // 🆕 استایل‌های دکمه راهنمای قیمت‌گذاری
+  // ✅ استایل‌های دکمه راهنمای قیمت‌گذاری - باقی می‌ماند
   priceGuideBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -618,54 +557,4 @@ const s = StyleSheet.create({
   },
   priceGuideBtnTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
   priceGuideBtnSubtitle: { fontSize: 11, fontFamily: 'Vazir', marginTop: 2 },
-  // 🆕 استایل‌های کارت کارمزد اپ
-  appFeeCard: {
-    borderWidth: 1,
-    marginTop: 10,
-    gap: 8,
-  },
-  appFeeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  appFeeIconBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  appFeeTitle: { fontSize: 13, fontFamily: 'Vazir-Bold' },
-  appFeeRow: { marginBottom: 4 },
-  appFeeLabel: { fontSize: 11, fontFamily: 'Vazir', lineHeight: 17 },
-  appFeeAmountRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(33,150,243,0.08)',
-    borderRadius: 8,
-  },
-  appFeeAmountLabel: { fontSize: 12, fontFamily: 'Vazir' },
-  appFeeAmountValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  appFeeTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-  },
-  appFeeTotalLabel: { fontSize: 12, fontFamily: 'Vazir' },
-  appFeeTotalValue: { fontSize: 14, fontFamily: 'Vazir-Bold' },
-  appFeeHintRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  appFeeHintText: { fontSize: 11, fontFamily: 'Vazir', flex: 1 },
 });

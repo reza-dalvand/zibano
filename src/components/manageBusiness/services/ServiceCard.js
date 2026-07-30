@@ -155,8 +155,8 @@ export default function ServiceCard({ service, onEdit, onToggle, onDelete }) {
           <Text style={[s.depositLabel, { color: colors.textSecondary }]}>
             بیعانه رزرو:
           </Text>
-          <Text style={[s.depositValue, { color: '#FF9800' }]}>
-            {formatPrice(service.depositAmount)} تومان
+          <Text style={[s.depositValue, { color: '#1ba609' }]}>
+            {formatPrice(service.depositAmount)}
           </Text>
         </View>
       )}

@@ -55,7 +55,7 @@ export const calculateAppFee = (basePrice) => {
  * 🆕 لیست بازه‌های کارمزد برای نمایش در مدال راهنما
  */
 export const APP_FEE_TIERS = [
-  { min: 1000, max: 500000, fee: 10000 },
+  { min: 100000, max: 500000, fee: 10000 },
   { min: 500000, max: 1000000, fee: 20000 },
   { min: 1000000, max: 1499000, fee: 30000 },
 ];
