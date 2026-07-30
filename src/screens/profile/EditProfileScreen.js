@@ -7,10 +7,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { useTheme } from '../../stores/useThemeStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -18,18 +16,31 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Toast from '../../components/common/Toast';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { toPersianDigit } from '../../utils/numberUtils';
 import { maskPhone } from '../../utils/phoneUtils';
 
 export default function EditProfileScreen({ navigation }) {
   const { colors } = useTheme();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const updateUser = useAuthStore((s) => s.updateUser);
+
+  // 🎯 جدا کردن نام و نام خانوادگی از user.name
+  const parseName = (fullName) => {
+    if (!fullName) return { firstName: '', lastName: '' };
+    const parts = fullName.trim().split(' ');
+    if (parts.length === 1) return { firstName: parts[0], lastName: '' };
+    return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+  };
+
+  const parsedUser = parseName(user?.name || 'مریم حسینی');
+
   const [formData, setFormData] = useState({
-    name: user?.name || 'مریم حسینی',
-    avatarUrl: user?.avatar || 'https://i.pravatar.cc/150?img=5',
+    firstName: parsedUser.firstName,
+    lastName: parsedUser.lastName,
   });
-  const [nameError, setNameError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({
     visible: false,
@@ -39,58 +50,36 @@ export default function EditProfileScreen({ navigation }) {
 
   const updateField = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
-    if (key === 'name' && nameError) setNameError('');
-  };
-
-  const pickAvatar = async () => {
-    const result = await launchImageLibrary({
-      mediaType: 'photo',
-      quality: 0.8,
-      selectionLimit: 1,
-    });
-    if (!result.didCancel && result.assets?.[0]) {
-      updateField('avatarUrl', result.assets[0].uri);
-      setToast({
-        visible: true,
-        message: 'عکس پروفایل با موفقیت تغییر یافت',
-        type: 'success',
-      });
-    }
-  };
-
-  const removeAvatar = () => {
-    Alert.alert(
-      'حذف عکس پروفایل',
-      'آیا از حذف عکس پروفایل خود مطمئن هستید؟',
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: () => {
-            updateField('avatarUrl', null);
-            setToast({
-              visible: true,
-              message: 'عکس پروفایل حذف شد',
-              type: 'info',
-            });
-          },
-        },
-      ],
-    );
+    if (key === 'firstName' && firstNameError) setFirstNameError('');
+    if (key === 'lastName' && lastNameError) setLastNameError('');
   };
 
   const handleSave = () => {
-    if (!formData.name.trim()) {
-      setNameError('نام و نام خانوادگی الزامی است');
-      return;
+    let hasError = false;
+
+    if (!formData.firstName.trim()) {
+      setFirstNameError('نام الزامی است');
+      hasError = true;
+    } else if (formData.firstName.trim().length < 2) {
+      setFirstNameError('نام باید حداقل ۲ کاراکتر باشد');
+      hasError = true;
     }
-    if (formData.name.trim().length < 3) {
-      setNameError('نام باید حداقل ۳ کاراکتر باشد');
-      return;
+
+    if (!formData.lastName.trim()) {
+      setLastNameError('نام خانوادگی الزامی است');
+      hasError = true;
+    } else if (formData.lastName.trim().length < 2) {
+      setLastNameError('نام خانوادگی باید حداقل ۲ کاراکتر باشد');
+      hasError = true;
     }
+
+    if (hasError) return;
+
     setLoading(true);
     setTimeout(() => {
+      const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
+      updateUser({ name: fullName });
+
       setLoading(false);
       setToast({
         visible: true,
@@ -101,7 +90,7 @@ export default function EditProfileScreen({ navigation }) {
     }, 1000);
   };
 
-  // 🎯 هندلر حذف حساب کاربری - با logout واقعی
+  // 🎯 هندلر حذف حساب کاربری
   const handleDeleteAccount = () => {
     Alert.alert(
       '⚠️ حذف حساب کاربری',
@@ -112,19 +101,14 @@ export default function EditProfileScreen({ navigation }) {
           text: 'حذف دائمی حساب',
           style: 'destructive',
           onPress: () => {
-            // 🎯 شبیه‌سازی حذف از سرور
             setTimeout(() => {
-              // 🎯 Toast نمایش بده
               setToast({
                 visible: true,
                 message: 'حساب کاربری با موفقیت حذف شد',
                 type: 'success',
               });
-              
-              // 🎯 بعد از ۱.۵ ثانیه، logout کن → خودکار به صفحه لاگین می‌ره
               setTimeout(() => {
-                logout(); // ✅ این کار isAuthenticated رو false می‌کنه
-                          // RootNavigator در App.js تشخیص میده و AuthNavigator رو نشون میده
+                logout();
               }, 1500);
             }, 800);
           },
@@ -133,6 +117,9 @@ export default function EditProfileScreen({ navigation }) {
     );
   };
 
+  // 🎯 نام کامل برای نمایش زیر لوگو
+  const displayName = `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'کاربر زیبانو';
+
   return (
     <ScreenWrapper padding={0} edges={['bottom', 'left', 'right']} keyboardAware>
       <ScrollView
@@ -140,70 +127,16 @@ export default function EditProfileScreen({ navigation }) {
         contentContainerStyle={s.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ═══════════════ بخش آواتار ═══════════════ */}
-        <View style={s.avatarSection}>
-          <View style={s.avatarWrapper}>
-            <TouchableOpacity onPress={pickAvatar} activeOpacity={0.9}>
-              <View
-                style={[
-                  s.avatarCircle,
-                  {
-                    borderColor: colors.primary,
-                    backgroundColor: colors.cardBackground,
-                  },
-                ]}
-              >
-                {formData.avatarUrl ? (
-                  <Image
-                    source={{ uri: formData.avatarUrl }}
-                    style={s.avatarImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={s.avatarPlaceholder}>
-                    <Icon name="person" size={40} color={colors.textSecondary} />
-                  </View>
-                )}
-              </View>
-              <View
-                style={[
-                  s.cameraBtn,
-                  {
-                    backgroundColor: colors.primary,
-                    borderColor: colors.background,
-                  },
-                ]}
-              >
-                <Icon name="photo-camera" size={16} color="#fff" />
-              </View>
-            </TouchableOpacity>
-            {formData.avatarUrl && (
-              <TouchableOpacity
-                onPress={removeAvatar}
-                style={[
-                  s.removeBtn,
-                  {
-                    backgroundColor: '#E53935',
-                    borderColor: colors.background,
-                  },
-                ]}
-                activeOpacity={0.85}
-              >
-                <Icon name="delete" size={14} color="#fff" />
-              </TouchableOpacity>
-            )}
+        {/* ═══════════════ 🌸 لوگوی زیبانو ═══════════════ */}
+        <View style={s.logoSection}>
+          <View style={[s.logoCircle, { borderColor: colors.primary }]}>
+            <View style={[s.logoInner, { backgroundColor: colors.primary + '20' }]}>
+              <Icon name="spa" size={44} color={colors.primary} />
+            </View>
           </View>
-          <Text style={[s.avatarName, { color: colors.textMain }]} numberOfLines={1}>
-            {formData.name || 'کاربر زیبانو'}
+          <Text style={[s.logoName, { color: colors.textMain }]} numberOfLines={1}>
+            {displayName}
           </Text>
-          <View style={s.avatarHintRow}>
-            <Icon name="info-outline" size={12} color={colors.textSecondary} />
-            <Text style={[s.avatarHint, { color: colors.textSecondary }]}>
-              {formData.avatarUrl
-                ? 'برای تغییر عکس، روی آن ضربه بزنید'
-                : 'عکس پروفایلی انتخاب نشده'}
-            </Text>
-          </View>
         </View>
 
         {/* ═══════════════ کارت اطلاعات شخصی ═══════════════ */}
@@ -217,15 +150,27 @@ export default function EditProfileScreen({ navigation }) {
             </Text>
           </View>
           <Card variant="elevated" padding={16} radius={18}>
+            {/* 🎯 فیلد نام */}
             <Input
-              label="نام و نام خانوادگی *"
-              placeholder="مثال: مریم حسینی"
-              value={formData.name}
-              onChangeText={(t) => updateField('name', t)}
-              error={nameError}
+              label="نام *"
+              placeholder="مثال: مریم"
+              value={formData.firstName}
+              onChangeText={(t) => updateField('firstName', t)}
+              error={firstNameError}
+              rightIcon={<Icon name="person" size={20} color={colors.textSecondary} />}
+            />
+
+            {/* 🎯 فیلد نام خانوادگی */}
+            <Input
+              label="نام خانوادگی *"
+              placeholder="مثال: حسینی"
+              value={formData.lastName}
+              onChangeText={(t) => updateField('lastName', t)}
+              error={lastNameError}
               rightIcon={<Icon name="badge" size={20} color={colors.textSecondary} />}
             />
 
+            {/* شماره موبایل - فقط نمایشی */}
             <Text style={[s.phoneLabel, { color: colors.textSecondary }]}>
               شماره موبایل
             </Text>
@@ -242,7 +187,6 @@ export default function EditProfileScreen({ navigation }) {
                 <View style={[s.phoneIconCircle, { backgroundColor: '#2196F320' }]}>
                   <Icon name="smartphone" size={16} color="#2196F3" />
                 </View>
-                {/* 🎯 شماره با LTR marks - مشکل برعکس شدن حل شد */}
                 <Text style={[s.phoneValue, { color: colors.textMain }]}>
                   {toPersianDigit(maskPhone(user?.phone))}
                 </Text>
@@ -252,6 +196,8 @@ export default function EditProfileScreen({ navigation }) {
                 </View>
               </View>
             </View>
+
+            {/* دکمه تغییر شماره */}
             <TouchableOpacity
               style={[
                 s.changePhoneBtn,
@@ -269,6 +215,7 @@ export default function EditProfileScreen({ navigation }) {
               </Text>
               <Icon name="arrow-back" size={16} color={colors.primary} />
             </TouchableOpacity>
+
             <View style={s.phoneHintRow}>
               <Icon name="info-outline" size={14} color={colors.textSecondary} />
               <Text style={[s.phoneHintText, { color: colors.textSecondary }]}>
@@ -292,7 +239,7 @@ export default function EditProfileScreen({ navigation }) {
           style={s.saveBtn}
         />
 
-        {/* ═══════════════ 🆕 ناحیه خطرناک (حذف حساب) ═══════════════ */}
+        {/* ═══════════════ ناحیه خطرناک (حذف حساب) ═══════════════ */}
         <View style={s.dangerSection}>
           <Card
             variant="default"
@@ -351,82 +298,38 @@ const s = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 100,
   },
-  // ═══════════════ بخش آواتار ═══════════════
-  avatarSection: {
+  // ═══════════════ 🌸 لوگوی زیبانو ═══════════════
+  logoSection: {
     alignItems: 'center',
     marginBottom: 24,
     gap: 10,
   },
-  avatarWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+  logoCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 3,
-    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-  },
-  avatarPlaceholder: {
+  logoInner: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cameraBtn: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    zIndex: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  removeBtn: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    zIndex: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  avatarName: {
+  logoName: {
     fontSize: 17,
     fontFamily: 'Vazir-Bold',
     marginTop: 6,
   },
-  avatarHintRow: {
+  logoHintRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  avatarHint: {
+  logoHint: {
     fontSize: 12,
     fontFamily: 'Vazir',
   },
@@ -532,7 +435,7 @@ const s = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  // ═══════════════ 🆕 ناحیه خطرناک ═══════════════
+  // ═══════════════ ناحیه خطرناک ═══════════════
   dangerSection: {
     marginTop: 24,
   },

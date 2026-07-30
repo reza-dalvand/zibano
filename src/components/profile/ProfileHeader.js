@@ -2,29 +2,32 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🆕
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
-import Avatar from '../common/Avatar';
 
 export default function ProfileHeader({ user }) {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets(); // 🆕
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[s.headerContainer, {
-      backgroundColor: colors.primary,
-      paddingTop: insets.top + 8, // 🎯 insets.top
-    }]}>
+    <View
+      style={[
+        s.headerContainer,
+        {
+          backgroundColor: colors.primary,
+          paddingTop: insets.top + 8,
+        },
+      ]}
+    >
       <View style={s.headerContent}>
         <Text style={s.headerTitle}>پروفایل من</Text>
         <View style={s.userInfoRow}>
-          <Avatar
-            uri={user?.avatarUrl}
-            name={user?.name}
-            size="xl"
-            showBorder
-            style={s.avatar}
-          />
+          {/* 🌸 لوگوی گل زیبانو بجای آواتار */}
+          <View style={[s.logoCircle, { borderColor: 'rgba(255,255,255,0.3)' }]}>
+            <View style={[s.logoInner, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+              <Icon name="spa" size={40} color="#fff" />
+            </View>
+          </View>
           <View style={s.userInfo}>
             <Text style={s.userName}>{user?.name}</Text>
             <Text style={s.userPhone}>{user?.phone}</Text>
@@ -43,7 +46,6 @@ export default function ProfileHeader({ user }) {
 
 const s = StyleSheet.create({
   headerContainer: {
-    // paddingTop حذف شد
     paddingBottom: 30,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -63,9 +65,23 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  avatar: {
+  // 🌸 استایل‌های لوگوی گل
+  logoCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+  },
+  logoInner: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+
   },
   userInfo: {
     flex: 1,
