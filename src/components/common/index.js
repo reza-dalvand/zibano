@@ -36,3 +36,5 @@ export { default as UpdateModal } from './UpdateModal';
 export { default as OfflineBanner } from './OfflineBanner';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as SuccessModal } from './SuccessModal';
+export { default as AuthBottomSheet } from './AuthBottomSheet';
+export { default as FavoriteButton } from './FavoriteButton';

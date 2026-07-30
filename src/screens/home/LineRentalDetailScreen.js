@@ -45,12 +45,12 @@ export default function LineRentalDetailScreen({ navigation, route }) {
 
   const handleShare = async () => {
     const shareMessage = `${ad.title}
-${ad.description || ''}
-🏪 ${ad.businessName}
-📍 ${ad.city}
-🔗 ${shareUrl}`;
+       ${ad.description || ''}
+    🏪 ${ad.businessName}
+    📍 ${ad.city}
+    🔗 ${shareUrl}`;
     try {
-      await Share.share({ message: shareMessage, url: shareUrl, title: ad.title });
+        await Share.share({ message: shareMessage, url: shareUrl, title: ad.title });
     } catch (error) {
       Alert.alert('خطا در اشتراک‌گذاری', 'متاسفانه امکان اشتراک‌گذاری وجود ندارد.');
     }
