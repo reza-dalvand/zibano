@@ -54,6 +54,6 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   textCol: { flex: 1, gap: 2 },
-  title: { fontSize: 16, fontFamily: 'Vazir-Bold', textAlign:'left' },
-  subtitle: { fontSize: 12, fontFamily: 'Vazir', textAlign:'left' },
+  title: { fontSize: 16, fontFamily: 'Vazir-Bold', textAlign:'center' },
+  subtitle: { fontSize: 12, fontFamily: 'Vazir', textAlign:'center' },
 });

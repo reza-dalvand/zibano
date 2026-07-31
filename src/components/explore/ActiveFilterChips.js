@@ -3,16 +3,43 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../../stores/useThemeStore';
 import Chip from '../common/Chip';
-import { PROVINCES, CITIES, BUSINESS_TYPES } from '../../constants/exploreFilters';
+import { 
+  PROVINCES, 
+  CITIES, 
+  BUSINESS_TYPES,
+  MAIN_CATEGORIES,
+  SUB_CATEGORIES,
+  SOURCE_FILTERS,
+} from '../../constants/exploreFilters';
 
 export default function ActiveFilterChips({ filters, onChange }) {
   const { colors } = useTheme();
+  
   const hasActive =
     filters.province ||
     filters.city ||
-    filters.businessType;
+    filters.businessType ||
+    filters.mainCategory !== 'all' ||
+    filters.subCategory !== 'all' ||
+    filters.source !== 'all';
 
   if (!hasActive) return null;
+
+  // پیدا کردن label برای source
+  const getSourceLabel = (sourceId) => {
+    return SOURCE_FILTERS.find(s => s.id === sourceId)?.label;
+  };
+
+  // پیدا کردن label برای دسته اصلی
+  const getMainCategoryLabel = (categoryId) => {
+    return MAIN_CATEGORIES.find(c => c.id === categoryId)?.label;
+  };
+
+  // پیدا کردن label برای زیردسته
+  const getSubCategoryLabel = (mainCat, subCat) => {
+    const subs = SUB_CATEGORIES[mainCat] || [];
+    return subs.find(c => c.id === subCat)?.label;
+  };
 
   return (
     <View style={[styles.container, { borderBottomColor: colors.border }]}>
@@ -21,6 +48,42 @@ export default function ActiveFilterChips({ filters, onChange }) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* 🆕 فیلتر منبع */}
+        {filters.source !== 'all' && (
+          <Chip
+            label={getSourceLabel(filters.source)}
+            selected
+            onRemove={() =>
+              onChange({ ...filters, source: 'all' })
+            }
+          />
+        )}
+
+        {/* 🆕 فیلتر دسته‌بندی کلی */}
+        {filters.mainCategory !== 'all' && (
+          <Chip
+            label={getMainCategoryLabel(filters.mainCategory)}
+            selected
+            onRemove={() =>
+              onChange({ 
+                ...filters, 
+                mainCategory: 'all',
+                subCategory: 'all', // ریست زیردسته
+              })
+            }
+          />
+        )}
+
+        {/* 🆕 فیلتر زیردسته */}
+        {filters.subCategory !== 'all' && filters.mainCategory !== 'all' && (
+          <Chip
+            label={getSubCategoryLabel(filters.mainCategory, filters.subCategory)}
+            selected
+            onRemove={() => onChange({ ...filters, subCategory: 'all' })}
+          />
+        )}
+
+        {/* فیلتر استان */}
         {filters.province && (
           <Chip
             label={PROVINCES.find((p) => p.id === filters.province)?.label}
@@ -30,6 +93,8 @@ export default function ActiveFilterChips({ filters, onChange }) {
             }
           />
         )}
+
+        {/* فیلتر شهر */}
         {filters.city && (
           <Chip
             label={
@@ -40,6 +105,8 @@ export default function ActiveFilterChips({ filters, onChange }) {
             onRemove={() => onChange({ ...filters, city: null })}
           />
         )}
+
+        {/* فیلتر نوع کسب‌وکار */}
         {filters.businessType && (
           <Chip
             label={

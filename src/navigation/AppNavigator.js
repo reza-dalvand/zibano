@@ -42,6 +42,8 @@ export default function AppNavigator() {
             bottom: Math.max(insets.bottom, 30),
             left: 18,
             right: 18,
+            alignItems:'center',
+            justifyContent:'center',
             backgroundColor: colors.cardBackground,
             borderRadius: 20,
             height: 65,
@@ -62,7 +64,7 @@ export default function AppNavigator() {
             lineHeight: 14,
           },
           tabBarIconStyle: {
-            margin: 0,
+            margin: 3,
             padding: 0,
           },
           tabBarItemStyle: {

@@ -1,6 +1,6 @@
 // src/screens/explore/ExploreScreen.js
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import ScreenWrapper from '../../components/common/ScreenWrapper';
@@ -13,12 +13,14 @@ import {
   ActiveFilterChips,
 } from '../../components/explore';
 import { MOCK_POSTS } from '../../constants/exploreFilters';
-import { toPersianDigit } from '../../utils/numberUtils';
 
 const INITIAL_FILTERS = {
   province: null,
   city: null,
   businessType: null,
+  mainCategory: 'all',
+  subCategory: 'all',
+  source: 'all',
 };
 
 // ═══════════════════════════════════════════
@@ -69,8 +71,49 @@ export default function ExploreScreen({ navigation }) {
 
   const [activePost, setActivePost] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter(post => {
+      // فیلتر استان
+      if (filters.province && post.provinceId !== filters.province) return false;
+      
+      // فیلتر شهر
+      if (filters.city && post.cityId !== filters.city) return false;
+      
+      // فیلتر نوع کسب‌وکار
+      if (filters.businessType && post.businessTypeId !== filters.businessType) return false;
+      
+      // 🆕 فیلتر منبع (مجله یا کسب‌وکار)
+      if (filters.source !== 'all') {
+        if (filters.source === 'business' && post.source === 'magazine') return false;
+        if (filters.source === 'magazine' && post.source !== 'magazine') return false;
+      }
+      
+      // 🆕 فیلتر دسته‌بندی کلی
+      if (filters.mainCategory !== 'all') {
+        // بررسی اینکه پست با دسته‌بندی انتخاب شده مرتبط است یا نه
+        const postCategory = post.mainCategory; // باید در داده‌ها اضافه شود
+        if (postCategory && postCategory !== filters.mainCategory) return false;
+      }
+      
+      // 🆕 فیلتر زیردسته
+      if (filters.subCategory !== 'all' && filters.mainCategory !== 'all') {
+        const postSubCategory = post.subCategory; // باید در داده‌ها اضافه شود
+        if (postSubCategory && postSubCategory !== filters.subCategory) return false;
+      }
+      
+      return true;
+    });
+  }, [allPosts, filters]);
+
+  const hasActiveFilter =
+    filters.province || 
+    filters.city || 
+    filters.businessType ||
+    filters.mainCategory !== 'all' ||
+    filters.subCategory !== 'all' ||
+    filters.source !== 'all';
   // ═══════════════════════════════════════════
   //    🔄 تابع لود پست‌های بیشتر (فقط با اسکرول کاربر)
   // ═══════════════════════════════════════════
@@ -98,22 +141,6 @@ export default function ExploreScreen({ navigation }) {
 
     setIsLoadingMore(false);
   }, [isLoadingMore, hasMore, page]);
-
-  // ═══════════════════════════════════════════
-  //    🔍 فیلتر روی پست‌های لود شده
-  // ═══════════════════════════════════════════
-  const filteredPosts = useMemo(() => {
-    return allPosts.filter(post => {
-      if (filters.province && post.provinceId !== filters.province) return false;
-      if (filters.city && post.cityId !== filters.city) return false;
-      if (filters.businessType && post.businessTypeId !== filters.businessType)
-        return false;
-      return true;
-    });
-  }, [allPosts, filters]);
-
-  const hasActiveFilter =
-    filters.province || filters.city || filters.businessType;
 
   const handleSave = postId => {
     setAllPosts(prev =>
@@ -149,7 +176,7 @@ export default function ExploreScreen({ navigation }) {
         <SectionHeader
           icon="collections"
           title="ویترین"
-          subtitle='نمونه کار‌های خدمات در بانویار'
+          subtitle='نمونه کار‌ کسب‌ و‌ کار‌ها در بانویار'
           iconColor={colors.primary}
           rightElement={
             <TouchableOpacity

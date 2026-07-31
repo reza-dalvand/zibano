@@ -108,7 +108,7 @@ export default function BookingSummaryBar({
       <View style={s.trustRow}>
         <Icon name="verified-user" size={12} color={colors.textSecondary} />
         <Text style={[s.trustText, { color: colors.textSecondary }]}>
-          پرداخت امن · امکان لغو تا ۲ ساعت قبل از نوبت
+         پرداخت امن با درگاه بانکی
         </Text>
       </View>
     </View>

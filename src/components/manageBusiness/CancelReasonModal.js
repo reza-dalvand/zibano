@@ -80,7 +80,7 @@ export default function CancelReasonModal({ visible, appointment, onClose, onCon
                     بیعانه به مشتری مسترد می‌شود
                   </Text>
                   <Text style={[s.warningSubtitle, { color: colors.textSecondary }]}>
-                    با لغو نوبت، کل بیعانه پرداخت شده ظرف ۲۴ ساعت به حساب مشتری واریز می‌شود.
+                    با لغو نوبت، کل بیعانه پرداخت شده ظرف 48 ساعت به حساب مشتری واریز می‌شود.
                   </Text>
                 </View>
               </View>
