@@ -328,8 +328,7 @@ export default function AuthBottomSheet({ visible, onClose }) {
         <Text style={[s.stageSubtitle, { color: colors.textSecondary }]}>
           کد {OTP_LENGTH} رقمی پیامک‌شده به{' '}
           <Text style={{ color: colors.primary, fontFamily: 'Vazir-Bold' }}>
-            {toPersianDigit(phone.slice(0, 4) + '***' + phone.slice(-4))}
-          </Text>
+            {toPersianDigit(phone.slice(-4) + '***' + phone.slice(0, 4))}          </Text>
           {' '}را وارد کنید
         </Text>
       </View>
