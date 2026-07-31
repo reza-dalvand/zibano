@@ -127,12 +127,13 @@ const MOCK_DONE_APPOINTMENTS = [
 ];
 
 export default function HomeScreen({ navigation }) {
-  const { colors } = useTheme();
+  const { colors, resolvedTheme, setTheme } = useTheme();
   const user = useAuthStore((s) => s.user);
   const pendingReviews = useReviewStore((s) => s.pendingReviews);
   const addPendingReview = useReviewStore((s) => s.addPendingReview);
   const { isAuthenticated, requireAuth } = useAuth();
-  
+  const isDark = resolvedTheme === 'dark';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
@@ -146,7 +147,9 @@ export default function HomeScreen({ navigation }) {
   const hasActiveFilter = Object.values(filters).some(
     (v) => v && v !== 'all' && v !== 'recommended' && (!Array.isArray(v) || v.length > 0),
   );
-
+  const handleThemeToggle = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
   const notificationCount = 3;
 
   // 🆕 اضافه کردن نوبت‌های انجام‌شده به لیست pendingReviews (شبیه‌سازی)
@@ -191,10 +194,14 @@ export default function HomeScreen({ navigation }) {
         onSearchSubmit={() =>
           navigation?.navigate('SearchFilter', { query: searchQuery })
         }
-        onNotificationPress={() => setNotificationModalVisible(true)}
-        notificationCount={notificationCount}
+        // ❌ کامنت شد
+        // onNotificationPress={() => setNotificationModalVisible(true)}
+        // notificationCount={notificationCount}
         onFilterPress={() => setFilterModalVisible(true)}
         hasActiveFilter={hasActiveFilter}
+        // 🎯 props جدید تم
+        isDark={isDark}
+        onThemeToggle={handleThemeToggle}
       />
 
       {/* 🆕 بنر دعوت به ثبت‌نام - فقط برای کاربران لاگین نشده */}

@@ -1,12 +1,11 @@
 // src/components/home/HomeHeader.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
 import SearchBar from '../common/SearchBar';
 import Avatar from '../common/Avatar';
-import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 export default function HomeHeader({
   userName,
@@ -14,13 +13,36 @@ export default function HomeHeader({
   searchQuery,
   onSearchChange,
   onSearchSubmit,
-  onNotificationPress,
-  notificationCount = 0,
   onFilterPress,
   hasActiveFilter = false,
+  isDark = false,
+  onThemeToggle,
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+
+  // 🎯 انیمیشن چرخش آیکون تم
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(rotateAnim, {
+        toValue: isDark ? 1 : 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.7, duration: 150, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, bounciness: 12, useNativeDriver: true }),
+      ]),
+    ]).start();
+  }, [isDark]);
+
+  const rotateInterpolation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
 
   return (
     <View
@@ -35,7 +57,6 @@ export default function HomeHeader({
       {/* دایره‌های تزئینی پس‌زمینه */}
       <View style={[s.decorCircle1, { borderColor: 'rgba(255,255,255,0.12)' }]} />
       <View style={[s.decorCircle2, { borderColor: 'rgba(255,255,255,0.08)' }]} />
-
       <View style={s.headerContent}>
         {/* ردیف بالا: آواتار + خوشامدگویی + اکشن‌ها */}
         <View style={s.topRow}>
@@ -54,8 +75,7 @@ export default function HomeHeader({
               </Text>
             </View>
           </View>
-
-          {/* دکمه‌های فیلتر و زنگوله */}
+          {/* دکمه‌های فیلتر و تم */}
           <View style={s.actionsRow}>
             {/* فیلتر */}
             <TouchableOpacity
@@ -72,8 +92,29 @@ export default function HomeHeader({
               )}
             </TouchableOpacity>
 
-            {/* زنگوله با Badge */}
+            {/* 🎯 آیکون تغییر تم (ماه/خورشید) */}
             <TouchableOpacity
+              style={s.actionBtn}
+              onPress={onThemeToggle}
+              activeOpacity={0.7}
+            >
+              <Animated.View
+                style={{
+                  transform: [
+                    { scale: scaleAnim },
+                  ],
+                }}
+              >
+                <Icon
+                  name={isDark ? 'dark-mode' : 'light-mode'}
+                  size={22}
+                  color={isDark ? "#f4f6f8" : "#f5ca5b"}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+
+            {/* ❌ زنگوله کامنت شد */}
+            {/* <TouchableOpacity
               style={s.actionBtn}
               onPress={onNotificationPress}
               activeOpacity={0.7}
@@ -86,10 +127,9 @@ export default function HomeHeader({
                   </Text>
                 </View>
               )}
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
-
         {/* نوار جستجو */}
         <View style={s.searchWrapper}>
           <SearchBar
@@ -110,7 +150,6 @@ const s = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     position: 'relative',
-    // overflow: 'hidden',
   },
   decorCircle1: {
     position: 'absolute',
@@ -193,25 +232,26 @@ const s = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#A88B7D',
   },
-  notificationBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: '#E53935',
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: '#A88B7D',
-  },
-  notificationBadgeText: {
-    fontSize: 10,
-    fontFamily: 'Vazir-Bold',
-    color: '#fff',
-  },
+  // ❌ استایل‌های زنگوله کامنت شدند
+  // notificationBadge: {
+  //   position: 'absolute',
+  //   top: 4,
+  //   right: 4,
+  //   backgroundColor: '#E53935',
+  //   minWidth: 18,
+  //   height: 18,
+  //   borderRadius: 9,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   paddingHorizontal: 4,
+  //   borderWidth: 2,
+  //   borderColor: '#A88B7D',
+  // },
+  // notificationBadgeText: {
+  //   fontSize: 10,
+  //   fontFamily: 'Vazir-Bold',
+  //   color: '#fff',
+  // },
   searchWrapper: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
