@@ -14,17 +14,20 @@ import Avatar from '../../common/Avatar';
 import Button from '../../common/Button';
 import InfoRow from '../../common/InfoRow';
 import PriceBreakdown from '../../common/PriceBreakdown';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { formatPrice } from '../../../utils/numberUtils';
 import { APPOINTMENT_STATUS_META } from '../../../constants/meta';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 export default function InvoiceModal({ visible, payment, onClose, onShare }) {
   const { colors } = useTheme();
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
+
   if (!payment) return null;
 
   const aptMeta = APPOINTMENT_STATUS_META[payment.appointmentStatus];
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onRequestClose}>
       <TouchableOpacity style={s.backdrop} activeOpacity={1} onPress={onClose}>
         <View style={s.spacer} />
         <TouchableOpacity activeOpacity={1}>

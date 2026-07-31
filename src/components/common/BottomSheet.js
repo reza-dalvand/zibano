@@ -8,6 +8,8 @@ import {
   StyleSheet,
   PanResponder,
   useWindowDimensions,
+  BackHandler,
+  Keyboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
@@ -24,6 +26,7 @@ export default function BottomSheet({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const topOffset = windowHeight * (1 - snapPoint);
   const translateY = useRef(new Animated.Value(windowHeight)).current;
@@ -32,6 +35,41 @@ export default function BottomSheet({
   // 🎯 کنترل رندر: فقط وقتی لازمه
   const [shouldRender, setShouldRender] = useState(visible);
 
+
+    // 🎯 ردیابی کیبورد
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  // 🎯 مدیریت دکمه بک
+  useEffect(() => {
+    if (!visible) return;
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (isKeyboardVisible) {
+          Keyboard.dismiss();
+          return true;
+        }
+        onClose?.();
+        return true;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [visible, onClose, isKeyboardVisible]);
+
+  
   useEffect(() => {
     if (visible) {
       // ✅ باز کردن: اول render کن، بعد انیمیشن

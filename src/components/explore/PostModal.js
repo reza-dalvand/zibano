@@ -4,7 +4,6 @@ import {
   View,
   Text,
   Modal,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   Share,
@@ -21,6 +20,7 @@ import StarRating from '../common/StarRating';
 import GallerySlider from './GallerySlider';
 import { toPersianDigit } from '../../utils/numberUtils';
 import FavoriteButton from '../common/FavoriteButton';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.92;
@@ -48,6 +48,7 @@ export default function PostModal({
 
   const [isSaved, setIsSaved] = useState(post?.saved || false);
   const isMagazine = post?.source === 'magazine';
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   useEffect(() => {
     if (post) {
@@ -148,7 +149,7 @@ export default function PostModal({
       visible={visible}
       transparent
       animationType="none"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <TouchableWithoutFeedback onPress={onClose}>

@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 export default function SuccessModal({
   visible,
@@ -13,13 +14,14 @@ export default function SuccessModal({
   emoji = '🎉',
 }) {
   const { colors } = useTheme();
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <TouchableOpacity

@@ -6,6 +6,7 @@ import { useTheme } from '../../stores/useThemeStore';
 import { useAppVersionStore } from '../../stores/useAppVersionStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 
 // 🎯 آیکون مناسب برای هر نوع تغییر
@@ -34,6 +35,7 @@ export default function UpdateModal() {
 
   const isForce = updateInfo.isForceUpdate;
   const changelog = updateInfo.changelog || [];
+  const { onRequestClose } = useModalBackHandler(!!updateInfo, handleClose);
 
   // 🎯 فقط ۳ تغییر اول نمایش داده شود (جمع‌وجور)
   const visibleChanges = changelog.slice(0, 3);
@@ -72,9 +74,7 @@ export default function UpdateModal() {
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={() => {
-        if (!isForce) handleLater();
-      }}
+      onRequestClose={onRequestClose}
     >
       <View style={s.backdrop}>
         <View

@@ -6,6 +6,7 @@ import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Avatar from '../common/Avatar';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const REASON_SUGGESTIONS = [
   'سالن در این تاریخ تعطیل است',
@@ -18,6 +19,7 @@ const REASON_SUGGESTIONS = [
 export default function CancelReasonModal({ visible, appointment, onClose, onConfirm }) {
   const { colors } = useTheme();
   const [reason, setReason] = useState('');
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   // 🎯 reset کردن reason وقتی مدال باز می‌شود
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function CancelReasonModal({ visible, appointment, onClose, onCon
       visible={visible && !!appointment}  // ✅ شرط داخل visible
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       {appointment && (  // ✅ شرط داخل JSX

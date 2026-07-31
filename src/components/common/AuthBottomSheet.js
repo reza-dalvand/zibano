@@ -22,6 +22,7 @@ import Button from './Button';
 import Toast from './Toast';
 import { validatePhone } from '../../utils/phoneUtils';
 import { toPersianDigit } from '../../utils/numberUtils';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const OTP_LENGTH = 5;
 const RESEND_SECONDS = 60;
@@ -49,6 +50,7 @@ export default function AuthBottomSheet({ visible, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   const inputRefs = useRef([]);
 
@@ -419,7 +421,7 @@ export default function AuthBottomSheet({ visible, onClose }) {
         visible={visible}
         transparent
         animationType="none"
-        onRequestClose={onClose}
+        onRequestClose={onRequestClose}
         statusBarTranslucent
       >
         <View style={StyleSheet.absoluteFillObject}>

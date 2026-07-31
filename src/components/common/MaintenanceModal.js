@@ -5,10 +5,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import { useMaintenanceStore } from '../../stores/useMaintenanceStore';
 import { useShallow } from 'zustand/react/shallow';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 export default function MaintenanceModal() {
   const { colors } = useTheme();
   const maintenanceInfo = useMaintenanceStore((s) => s.maintenanceInfo);
+  const { onRequestClose } = useModalBackHandler(!!maintenanceInfo, () => {});
 
   if (!maintenanceInfo) return null;
 
@@ -41,7 +43,7 @@ export default function MaintenanceModal() {
       transparent
       animationType="none"
       statusBarTranslucent
-      onRequestClose={() => {}}
+      onRequestClose={onRequestClose}
     >
       <View style={[s.backdrop, { backgroundColor: 'rgba(0,0,0,0.75)' }]}>
         <View

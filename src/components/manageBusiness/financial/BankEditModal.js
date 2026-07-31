@@ -17,6 +17,7 @@ import Input from '../../common/Input';
 import Button from '../../common/Button';
 import Card from '../../common/Card';
 import { toEnglishDigits } from '../../../utils/numberUtils';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 
 export default function BankEditModal({ visible, onClose, onSave, bankInfo, businessOwnerName }) {
@@ -30,6 +31,7 @@ export default function BankEditModal({ visible, onClose, onSave, bankInfo, busi
     bankName: bankInfo.bankName || '',
   });
   const [errors, setErrors] = useState({});
+  const { onRequestClose } = useModalBackHandler(visible, handleClose);
 
   const updateField = (key, val) => {
     setForm(prev => ({ ...prev, [key]: val }));
@@ -104,7 +106,7 @@ export default function BankEditModal({ visible, onClose, onSave, bankInfo, busi
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={closeAndReset}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <View style={modalS.backdrop}>

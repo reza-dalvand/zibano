@@ -5,9 +5,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Button from '../../common/Button';
 import QRCodeSection from './QRCodeSection';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 export default function ShareBookingLinkModal({ visible, onClose, bookingLink }) {
   const { colors } = useTheme();
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   const handleShareWhatsApp = async () => {
     try {
@@ -38,7 +40,7 @@ export default function ShareBookingLinkModal({ visible, onClose, bookingLink })
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
     >
       <TouchableOpacity
         style={s.backdrop}

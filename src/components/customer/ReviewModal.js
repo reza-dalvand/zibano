@@ -17,6 +17,7 @@ import { useTheme } from '../../stores/useThemeStore';
 import Avatar from '../common/Avatar';
 import Button from '../common/Button';
 import { useReviewStore } from '../../stores/useReviewStore';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const MAX_COMMENT_LENGTH = 300;
 
@@ -32,6 +33,7 @@ const REVIEW_TAGS = [
 export default function ReviewModal({ visible, appointment, onClose }) {
   const { colors } = useTheme();
   const submitReview = useReviewStore((s) => s.submitReview);
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   const [selectedTags, setSelectedTags] = useState([]);
   const [comment, setComment] = useState('');
@@ -145,7 +147,7 @@ export default function ReviewModal({ visible, appointment, onClose }) {
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <KeyboardAvoidingView

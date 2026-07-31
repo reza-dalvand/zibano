@@ -14,6 +14,7 @@ import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import Avatar from '../common/Avatar';
 import { toPersianDigit, toEnglishDigits } from '../../utils/numberUtils';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 
 const CODE_LENGTH = 4; // ✅ تغییر از 6 به 4
@@ -24,6 +25,7 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   useEffect(() => {
     if (visible && appointment) {
@@ -89,7 +91,7 @@ export default function VerifyCodeModal({ visible, appointment, onClose, onConfi
       visible={visible && !!appointment}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       {appointment && (

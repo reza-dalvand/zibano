@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 export default function Dropdown({
   label,
@@ -23,6 +24,7 @@ export default function Dropdown({
   const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
   const selectedItem = options.find((opt) => opt.id === value);
+  const { onRequestClose } = useModalBackHandler(visible, handleClose);
 
   // 🎯 هندلر کلیک روی inputBox
   const handleInputPress = () => {
@@ -90,7 +92,7 @@ export default function Dropdown({
         visible={visible}
         transparent
         animationType="slide"
-        onRequestClose={handleClose}
+        onRequestClose={onRequestClose}
         statusBarTranslucent
       >
         {/* 🎯 Container اصلی - تمام صفحه رو می‌گیره */}

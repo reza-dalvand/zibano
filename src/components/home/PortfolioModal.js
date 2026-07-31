@@ -15,6 +15,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Avatar from '../common/Avatar';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.94;
@@ -36,6 +37,7 @@ export default function PortfolioModal({
   const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   // ═══════════ انیمیشن‌ها ═══════════
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -81,7 +83,7 @@ export default function PortfolioModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onRequestClose} statusBarTranslucent>
       {/* Backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View style={[s.backdrop, { opacity: backdropOpacity }]} />

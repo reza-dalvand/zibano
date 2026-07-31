@@ -12,6 +12,7 @@ import { Map, Camera, UserLocation } from '@maplibre/maplibre-react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 const MAPTILER_KEY = 'L73LG8NW7ZJ9HyUyCEZu';
 const MAP_STYLE = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}&language=fa`;
@@ -38,6 +39,7 @@ export default function MapPicker({
   const [tempAddress, setTempAddress] = useState('در حال دریافت آدرس...');
   const [loading, setLoading] = useState(false);
   const [hasValidLocation, setHasValidLocation] = useState(false);
+  const { onRequestClose } = useModalBackHandler(modalVisible, handleClose);
 
   const initialCamera = useMemo(() => {
     const loc = confirmedLocation || DEFAULT_LOCATION;
@@ -201,7 +203,7 @@ export default function MapPicker({
       <Modal
         visible={modalVisible}
         animationType="slide"
-        onRequestClose={handleClose}
+        onRequestClose={onRequestClose}
         statusBarTranslucent
       >
         <View style={[s.modalContainer, { backgroundColor: colors.background }]}>

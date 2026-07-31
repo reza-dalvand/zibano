@@ -12,22 +12,23 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from './Button';
 import {
-  toPersianDigit,
   formatPrice,
   APP_FEE_TIERS,
   getCurrentFeeTier,
 } from '../../utils/numberUtils';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 export default function PriceGuideModal({ visible, onClose, currentPrice }) {
   const { colors } = useTheme();
   const currentTier = currentPrice > 0 ? getCurrentFeeTier(currentPrice) : null;
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <TouchableOpacity

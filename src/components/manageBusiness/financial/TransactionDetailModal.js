@@ -12,18 +12,20 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
 import Button from '../../common/Button';
 import { formatPrice, TX_STATUS_META } from './constants';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 export default function TransactionDetailModal({ visible, onClose, tx }) {
   const { colors } = useTheme();
   if (!tx) return null;
   const meta = TX_STATUS_META[tx.status];
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
 
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
     >
       <TouchableOpacity
         activeOpacity={1}

@@ -7,13 +7,13 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import Button from '../common/Button';
 import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
-import EmptyStateVariants from '../common/EmptyStateVariants';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+
 
 const MOCK_NOTIFICATIONS = [
   {
@@ -81,7 +81,8 @@ const MOCK_NOTIFICATIONS = [
 export default function NotificationModal({ visible, onClose }) {
   const { colors } = useTheme();
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-  
+  const { onRequestClose } = useModalBackHandler(visible, onClose);
+
   const unreadCount = notifications.filter(n => !n.isRead).length;
   
   const markAllAsRead = () => {
@@ -107,7 +108,7 @@ export default function NotificationModal({ visible, onClose }) {
       visible={visible}
       transparent
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={onRequestClose}
       statusBarTranslucent
     >
       <TouchableOpacity
