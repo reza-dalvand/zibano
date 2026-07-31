@@ -28,9 +28,9 @@ export default function AllAdsCard({ ad, onPress }) {
         )}
 
         {/* دکمه ذخیره */}
-        <TouchableOpacity style={s.saveBtn} activeOpacity={0.7}>
+        {/* <TouchableOpacity style={s.saveBtn} activeOpacity={0.7}>
           <Icon name="bookmark-border" size={20} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* محتوا */}
