@@ -15,7 +15,6 @@ import ProfileStackNavigator from './ProfileStackNavigator';
 import HomeStackNavigator from './HomeStackNavigator';
 import ManageStackNavigator from './ManageStackNavigator';
 
-// 🎯 کامپوننت خالی برای تب ورود (فقط مدال باز می‌شود)
 const EmptyAuthScreen = () => <View />;
 
 const Tab = createBottomTabNavigator();
@@ -24,11 +23,8 @@ export default function AppNavigator() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  
-  // 🎯 state برای نمایش مدال ورود/ثبت‌نام
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // 🎯 هندلر بستن مدال
   const handleCloseAuthModal = () => {
     setShowAuthModal(false);
   };
@@ -43,29 +39,38 @@ export default function AppNavigator() {
           tabBarHideOnKeyboard: true,
           tabBarStyle: {
             position: 'absolute',
-            bottom: Math.max(insets.bottom, 25),
-            left: 20,
-            right: 20,
+            bottom: Math.max(insets.bottom, 30),
+            left: 18,
+            right: 18,
             backgroundColor: colors.cardBackground,
-            borderRadius: 30,
-            height: 45 + insets.bottom,
+            borderRadius: 20,
+            height: 65,
             borderTopWidth: 0,
-            elevation: 8,
+            elevation: 10,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 10,
-            paddingTop: 5,
-            paddingBottom: Math.max(insets.bottom, 12),
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            paddingHorizontal: 4,
+            paddingVertical: 0,
           },
           tabBarLabelStyle: {
             fontFamily: 'Vazir-Medium',
-            fontSize: 11,
-            marginTop: 4,
+            fontSize: 10,
+            margin: 0,
+            padding: 0,
+            lineHeight: 14,
+          },
+          tabBarIconStyle: {
+            margin: 0,
+            padding: 0,
+          },
+          tabBarItemStyle: {
+            paddingVertical: 0,
+            marginVertical: 0,
           },
           tabBarIcon: ({ color, size, focused }) => {
             let iconName;
-            
             switch (route.name) {
               case 'Home':
                 iconName = 'home';
@@ -88,12 +93,17 @@ export default function AppNavigator() {
               default:
                 iconName = 'home';
             }
-            
-            return <Icon name={iconName} size={size + 4} color={color} />;
+            return (
+              <Icon 
+                name={iconName} 
+                size={24} 
+                color={color} 
+                style={{ margin: 0, padding: 0 }}
+              />
+            );
           },
         })}
       >
-        {/* ═══════ تب‌های مشترک (همیشه نمایش داده می‌شوند) ═══════ */}
         <Tab.Screen
           name="Home"
           component={HomeStackNavigator}
@@ -110,11 +120,9 @@ export default function AppNavigator() {
             component={CreateBusinessScreen}
             options={{ tabBarLabel: 'اگهی خدمات' }}
           />
-        )} 
-        {/* ═══════ تب‌های شرطی بر اساس وضعیت ورود ═══════ */}
+        )}
         {isAuthenticated ? (
           <>
-            {/* کاربر لاگین شده: مدیریت + پروفایل */}
             <Tab.Screen
               name="ManageBusiness"
               component={ManageStackNavigator}
@@ -127,18 +135,15 @@ export default function AppNavigator() {
             />
           </>
         ) : (
-          /* کاربر مهمان: دکمه ورود/ثبت‌نام (فقط مدال باز می‌شود) */
           <Tab.Screen
             name="AuthTab"
             component={EmptyAuthScreen}
-            options={{ 
+            options={{
               tabBarLabel: 'ورود / ثبت‌نام',
             }}
             listeners={{
               tabPress: (e) => {
-                // 🎯 جلوگیری از نویگیشن به صفحه خالی
                 e.preventDefault();
-                // 🎯 باز کردن مدال ورود/ثبت‌نام
                 setShowAuthModal(true);
               },
             }}
@@ -146,10 +151,9 @@ export default function AppNavigator() {
         )}
       </Tab.Navigator>
 
-      {/* 🎯 مدال سراسری ورود/ثبت‌نام */}
-      <AuthBottomSheet 
-        visible={showAuthModal} 
-        onClose={handleCloseAuthModal} 
+      <AuthBottomSheet
+        visible={showAuthModal}
+        onClose={handleCloseAuthModal}
       />
     </>
   );
