@@ -37,12 +37,16 @@ export default function PostModal({
 }) {
   const { colors, resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
+
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const modalScale = useRef(new Animated.Value(0.85)).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
-  const [isSaved, setIsSaved] = useState(post?.saved || false);
 
+  // 🆕 انیمیشن‌های فلش‌های اسکرول
+  const scrollHintOpacity = useRef(new Animated.Value(0)).current;
+
+  const [isSaved, setIsSaved] = useState(post?.saved || false);
   const isMagazine = post?.source === 'magazine';
 
   useEffect(() => {
@@ -59,6 +63,18 @@ export default function PostModal({
         Animated.timing(modalOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
         Animated.timing(contentTranslateY, { toValue: 0, duration: 400, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       ]).start();
+
+      // 🆕 نمایش فلش‌های اسکرول بعد از باز شدن مدال و سپس محو شدن
+      const media = post?.gallery || post?.images || [];
+      if (media.length > 1) {
+        setTimeout(() => {
+          Animated.sequence([
+            Animated.timing(scrollHintOpacity, { toValue: 0.9, duration: 400, useNativeDriver: true }),
+            Animated.delay(1800),
+            Animated.timing(scrollHintOpacity, { toValue: 0, duration: 600, useNativeDriver: true }),
+          ]).start();
+        }, 500);
+      }
     } else {
       Animated.parallel([
         Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
@@ -66,12 +82,12 @@ export default function PostModal({
         Animated.timing(modalOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
         Animated.timing(contentTranslateY, { toValue: 30, duration: 200, useNativeDriver: true }),
       ]).start();
+      scrollHintOpacity.setValue(0);
     }
-  }, [visible]);
+  }, [visible, post]);
 
   if (!post) return null;
 
-  // 🎯 اصلاح اصلی: fallback ایمن برای gallery یا images
   const media = post.gallery || post.images || [];
 
   const handleShare = async () => {
@@ -97,6 +113,7 @@ export default function PostModal({
     onSave?.(post.id);
   };
 
+  // 🆕 هندلر رزرو - رفتن به صفحه کسب‌وکار
   const handleBooking = () => {
     onClose();
     setTimeout(() => {
@@ -115,7 +132,6 @@ export default function PostModal({
       textStyle: styles.magazineBadgeText,
     });
   }
-  
   if (media.length > 1) {
     heroBadges.push({
       container: styles.imageCounterBadge,
@@ -146,6 +162,7 @@ export default function PostModal({
           ]}
         />
       </TouchableWithoutFeedback>
+
       <Animated.View
         style={[
           styles.modal,
@@ -181,9 +198,7 @@ export default function PostModal({
           >
             <Icon name="close" size={22} color={colors.textMain} />
           </TouchableOpacity>
-
           <View style={{ flex: 1 }} />
-
           <TouchableOpacity
             onPress={handleShare}
             style={[
@@ -194,7 +209,6 @@ export default function PostModal({
           >
             <Icon name="share" size={20} color={colors.textMain} />
           </TouchableOpacity>
-
           <FavoriteButton
             isFavorite={isSaved}
             onPress={handleSave}
@@ -210,16 +224,37 @@ export default function PostModal({
             ]}
           />
         </View>
-        
-        {/* 🎯 استفاده از GallerySlider برای گالری تصاویر */}
+
+        {/* 🆕 گالری تصاویر با فلش‌های اسکرول */}
         <View style={styles.galleryWrapper}>
           <GallerySlider gallery={media} containerWidth={MODAL_WIDTH} />
+
+          {/* 🆕 فلش‌های راهنمای اسکرول - فقط وقتی بیش از یک تصویر وجود دارد */}
+          {media.length > 1 && (
+            <Animated.View
+              style={[styles.scrollHintsContainer, { opacity: scrollHintOpacity }]}
+              pointerEvents="none"
+            >
+              {/* فلش راست (شروع اسکرول) */}
+              <View style={styles.scrollHintRight}>
+                <View style={styles.scrollHintPill}>
+                  <Icon name="chevron-right" size={18} color="#fff" />
+                </View>
+              </View>
+              {/* فلش چپ (ادامه اسکرول) */}
+              <View style={styles.scrollHintLeft}>
+                <View style={styles.scrollHintPill}>
+                  <Icon name="chevron-left" size={18} color="#fff" />
+                </View>
+              </View>
+            </Animated.View>
+          )}
         </View>
-        
+
         {/* اطلاعات کسب‌وکار - فقط برای پست‌های کسب‌وکار */}
+        {/* 🆕 ساختار جدید با دکمه رزرو */}
         {!isMagazine && (
-          <TouchableOpacity
-            onPress={handleProfilePress}
+          <View
             style={[
               styles.businessInfoCard,
               {
@@ -227,24 +262,39 @@ export default function PostModal({
                 borderBottomColor: colors.border,
               },
             ]}
-            activeOpacity={0.85}
           >
-            <Image source={{ uri: post.businessLogo }} style={styles.bizAvatar} />
-            <View style={styles.bizInfoCol}>
-              <View style={styles.bizNameRow}>
-                <Text style={[styles.bizName, { color: colors.textMain }]} numberOfLines={1}>
-                  {post.businessName}
+            {/* قسمت اطلاعات کسب‌وکار (قابل کلیک برای پروفایل) */}
+            <TouchableOpacity
+              onPress={handleProfilePress}
+              activeOpacity={0.85}
+              style={styles.bizInfoTouchable}
+            >
+              <Image source={{ uri: post.businessLogo }} style={styles.bizAvatar} />
+              <View style={styles.bizInfoCol}>
+                <View style={styles.bizNameRow}>
+                  <Text style={[styles.bizName, { color: colors.textMain }]} numberOfLines={1}>
+                    {post.businessName}
+                  </Text>
+                  <Icon name="verified" size={16} color="#4FC3F7" />
+                </View>
+                <Text style={[styles.bizSubtitle, { color: colors.textSecondary }]}>
+                  مشاهده پروفایل
                 </Text>
-                <Icon name="verified" size={16} color="#4FC3F7" />
               </View>
-              <Text style={[styles.bizSubtitle, { color: colors.primary }]}>
-                مشاهده پروفایل کسب‌وکار
-              </Text>
-            </View>
-            <Icon name="chevron-left" size={24} color={colors.textSecondary} />
-          </TouchableOpacity>
+            </TouchableOpacity>
+
+            {/* 🆕 دکمه رزرو نوبت */}
+            <TouchableOpacity
+              onPress={handleBooking}
+              activeOpacity={0.85}
+              style={styles.bookBtn}
+            >
+              <Icon name="event-available" size={16} color="#fff" />
+              <Text style={styles.bookBtnText}>رزرو نوبت</Text>
+            </TouchableOpacity>
+          </View>
         )}
-        
+
         {/* هدر مجله زیبانو - فقط برای مجله */}
         {isMagazine && (
           <View
@@ -271,7 +321,7 @@ export default function PostModal({
             </View>
           </View>
         )}
-        
+
         {/* محتوای اسکرولی */}
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
@@ -301,7 +351,7 @@ export default function PostModal({
               <StarRating value={post.rating} size="md" />
             </View>
           )}
-          
+
           {/* 📝 کپشن / توضیحات */}
           <View style={[styles.captionCard, { borderColor: colors.border }]}>
             <View style={styles.captionHeader}>
@@ -325,46 +375,7 @@ export default function PostModal({
               {post.caption}
             </Text>
           </View>
-          
-          {/* 🏷️ تگ‌های خدمت - فقط برای کسب‌وکار */}
-          {!isMagazine && (
-            <View style={styles.tagsSection}>
-              <Text style={[styles.tagsLabel, { color: colors.textSecondary }]}>
-                خدمات مرتبط
-              </Text>
-              <View style={styles.tagsRow}>
-                <View
-                  style={[
-                    styles.tagChip,
-                    {
-                      backgroundColor: colors.primary + '15',
-                      borderColor: colors.primary + '30',
-                    },
-                  ]}
-                >
-                  <Icon name="spa" size={12} color={colors.primary} />
-                  <Text style={[styles.tagText, { color: colors.primary }]}>
-                    فیشیال تخصصی
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.tagChip,
-                    {
-                      backgroundColor: colors.primary + '15',
-                      borderColor: colors.primary + '30',
-                    },
-                  ]}
-                >
-                  <Icon name="auto-awesome" size={12} color={colors.primary} />
-                  <Text style={[styles.tagText, { color: colors.primary }]}>
-                    ماسک طلا
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )}
-          
+
           {/* 💡 راهنما */}
           <View
             style={[
@@ -386,38 +397,9 @@ export default function PostModal({
                 : 'با رزرو نوبت از این کسب‌وکار، از تخفیف‌های ویژه بهره‌مند شوید'}
             </Text>
           </View>
-          
-          {/* فضای خالی برای دکمه CTA */}
-          {!isMagazine && <View style={{ height: 100 }} />}
         </Animated.ScrollView>
-        
-        {/* 🎯 دکمه CTA پایین - فقط برای کسب‌وکارها نمایش داده می‌شود */}
-        {!isMagazine && (
-          <View
-            style={[
-              styles.ctaContainer,
-              {
-                backgroundColor: colors.background,
-                borderTopColor: colors.border,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              onPress={handleBooking}
-              style={[styles.ctaButton, { backgroundColor: colors.primary }]}
-              activeOpacity={0.9}
-            >
-              <View style={styles.ctaIconBox}>
-                <Icon name="event-available" size={22} color={colors.primary} />
-              </View>
-              <View style={styles.ctaTextCol}>
-                <Text style={styles.ctaTitle}>رزرو نوبت</Text>
-                <Text style={styles.ctaSubtitle}>از {post.businessName}</Text>
-              </View>
-              <Icon name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        )}
+
+        {/* ❌ CTA پایین حذف شد */}
       </Animated.View>
     </Modal>
   );
@@ -459,6 +441,30 @@ const styles = StyleSheet.create({
     height: '40%',
     position: 'relative',
     backgroundColor: '#000',
+  },
+  // 🆕 فلش‌های راهنمای اسکرول
+  scrollHintsContainer: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  scrollHintLeft: {
+    alignItems: 'flex-start',
+  },
+  scrollHintRight: {
+    alignItems: 'flex-end',
+  },
+  scrollHintPill: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
   },
   magazineBadge: {
     position: 'absolute',
@@ -503,12 +509,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Vazir-Bold',
   },
+  // 🆕 کارت کسب‌وکار با دکمه رزرو
   businessInfoCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
     padding: 14,
     borderBottomWidth: 1,
+  },
+  bizInfoTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
   },
   magazineInfoCard: {
     flexDirection: 'row',
@@ -529,9 +542,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Vazir-Medium',
   },
   bizAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 2,
     borderColor: '#fff',
     shadowColor: '#000',
@@ -542,7 +555,7 @@ const styles = StyleSheet.create({
   },
   bizInfoCol: {
     flex: 1,
-    gap: 4,
+    gap: 3,
   },
   bizNameRow: {
     flexDirection: 'row',
@@ -550,13 +563,33 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   bizName: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
     flexShrink: 1,
   },
   bizSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Vazir-Medium',
+  },
+  // 🆕 دکمه رزرو سبز
+  bookBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#43A047',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    shadowColor: '#43A047',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  bookBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontFamily: 'Vazir-Bold',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -652,7 +685,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 14,
     borderWidth: 1,
-    marginBottom: '10%',
+    marginBottom: 16,
   },
   hintText: {
     flex: 1,
@@ -660,60 +693,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Vazir',
     lineHeight: 20,
   },
-  ctaContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  ctaButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  ctaIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  ctaTextCol: {
-    flex: 1,
-    gap: 2,
-  },
-  ctaTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Vazir-Bold',
-  },
-  ctaSubtitle: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 12,
-    fontFamily: 'Vazir',
-  },
+  // ❌ استایل‌های CTA حذف شدند
 });
