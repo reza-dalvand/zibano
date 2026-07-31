@@ -58,7 +58,7 @@ export default function ModelRequestFilterModal({
       visible={visible}
       onClose={onClose}
       title="فیلتر فرصت‌های مدلینگ"
-      snapPoint={0.6}
+      snapPoint={0.8}
       footer={
         <View style={s.footerRow}>
           <Button
