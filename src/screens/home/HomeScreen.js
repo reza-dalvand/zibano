@@ -255,7 +255,6 @@ export default function HomeScreen({ navigation }) {
             icon="category"
             iconColor="#FF9800"
             title="دسته‌بندی خدمات"
-            rightElement={<SeeAllButton onPress={() => {}} count={MOCK_CATEGORIES.length} />}
           />
           <CategoryGrid
             categories={MOCK_CATEGORIES}

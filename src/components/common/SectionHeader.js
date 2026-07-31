@@ -43,7 +43,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 20,
   },
   left: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   iconBox: {

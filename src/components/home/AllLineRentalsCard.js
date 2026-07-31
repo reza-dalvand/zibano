@@ -72,7 +72,7 @@ const s = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   imageGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 70, backgroundColor: 'rgba(0,0,0,0.35)' },
   serviceBadge: {
-    position: 'absolute', top: 12, right: 12,
+    position: 'absolute', top: 12, left: 12,
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 4, elevation: 4,
