@@ -96,7 +96,7 @@ export default function AppNavigator() {
             return (
               <Icon 
                 name={iconName} 
-                size={24} 
+                size={26} 
                 color={color} 
                 style={{ margin: 0, padding: 0 }}
               />
