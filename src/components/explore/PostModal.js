@@ -291,7 +291,7 @@ export default function PostModal({
               style={styles.bookBtn}
             >
               <Icon name="event-available" size={16} color="#fff" />
-              <Text style={styles.bookBtnText}>رزرو نوبت</Text>
+              <Text style={styles.bookBtnText}>رزرو</Text>
             </TouchableOpacity>
           </View>
         )}
