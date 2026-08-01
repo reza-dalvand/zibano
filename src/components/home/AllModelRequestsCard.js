@@ -21,12 +21,12 @@ export default function AllModelRequestsCard({ request, onPress }) {
         <View style={{ position: 'absolute', top: 12, left: 12 }}>
           <CostTypeBadge type={request.costType} variant="solid" />
         </View>
-        {request.isUrgent && (
+        {/* {request.isUrgent && (
           <View style={s.urgentBadge}>
             <Icon name="flash-on" size={10} color="#fff" />
             <Text style={s.urgentText}>فوری</Text>
           </View>
-        )}
+        )} */}
       </View>
 
       <View style={s.content}>

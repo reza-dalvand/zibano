@@ -450,7 +450,6 @@ const s = StyleSheet.create({
   content: {
     padding: 20,
     gap: 16,
-    marginTop: -5,
   },
   title: {
     fontSize: 22,

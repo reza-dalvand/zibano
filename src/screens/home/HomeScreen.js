@@ -191,9 +191,11 @@ export default function HomeScreen({ navigation }) {
         userAvatar={user?.avatar}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onSearchSubmit={() =>
-          navigation?.navigate('SearchFilter', { query: searchQuery })
-        }
+        onSearchSubmit={() => {
+          if (searchQuery.trim()) {
+            navigation.navigate('SearchScreen', { query: searchQuery });
+          }
+        }}
         // ❌ کامنت شد
         // onNotificationPress={() => setNotificationModalVisible(true)}
         // notificationCount={notificationCount}

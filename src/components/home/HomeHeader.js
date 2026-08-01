@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../stores/useThemeStore';
 import SearchBar from '../common/SearchBar';
 import Avatar from '../common/Avatar';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeHeader({
   userName,
@@ -24,6 +25,7 @@ export default function HomeHeader({
   // 🎯 انیمیشن چرخش آیکون تم
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const navigation = useNavigation(); // ✅ این خط را اضافه کنید
 
   useEffect(() => {
     Animated.parallel([
@@ -132,12 +134,21 @@ export default function HomeHeader({
         </View>
         {/* نوار جستجو */}
         <View style={s.searchWrapper}>
-          <SearchBar
-            value={searchQuery}
-            onChangeText={onSearchChange}
-            placeholder="جستجوی خدمات، سالن‌ها..."
-            onSubmit={onSearchSubmit}
-          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              navigation.navigate('SearchScreen', { query: searchQuery });
+            }}
+          >
+            <View pointerEvents="none">
+              <SearchBar
+                value={searchQuery}
+                onChangeText={onSearchChange}
+                placeholder="جستجوی خدمات، سالن‌ها..."
+                onSubmit={onSearchSubmit}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
