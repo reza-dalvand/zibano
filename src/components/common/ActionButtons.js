@@ -39,7 +39,7 @@ export default function ActionButtons({ phone, shareMessage, shareUrl }) {
             <Icon name="call" size={20} color="#fff" />
           </View>
           <View style={s.textCol}>
-            <Text style={s.callTitle}>تماس</Text>
+            <Text style={s.callTitle}>تلفن تماس</Text>
             <Text style={s.callSubtitle}>{toPersianDigit(phone)}</Text>
           </View>
           <Icon name="arrow-back" size={22} color="#fff" />

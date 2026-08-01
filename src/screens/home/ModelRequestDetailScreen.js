@@ -213,53 +213,6 @@ export default function ModelRequestDetailScreen({ navigation, route }) {
             </Card>
           </TouchableOpacity>
 
-          {/* ═══════════ کارت وضعیت هزینه ═══════════ */}
-          <Card
-            variant="elevated"
-            padding={16}
-            radius={18}
-            style={[s.costCard, { borderColor: costMeta.color + '30' }]}
-          >
-            <SectionHeader
-              icon={costMeta.icon}
-              iconColor={costMeta.color}
-              title="وضعیت هزینه"
-            />
-            <View style={s.costBadgeWrapper}>
-              <CostTypeBadge type={request.costType} variant="solid" />
-            </View>
-            <View
-              style={[
-                s.costDescBox,
-                {
-                  backgroundColor: costMeta.color + '08',
-                  borderColor: costMeta.color + '25',
-                },
-              ]}
-            >
-              <Icon name="info-outline" size={14} color={costMeta.color} />
-              <Text
-                style={[s.costDescText, { color: colors.textSecondary }]}
-              >
-                {costMeta.description}
-              </Text>
-            </View>
-
-            {request.discount > 0 && (
-              <View
-                style={[
-                  s.discountBox,
-                  { backgroundColor: '#E5393510', borderColor: '#E5393530' },
-                ]}
-              >
-                <Icon name="local-offer" size={16} color="#E53935" />
-                <Text style={[s.discountText, { color: '#E53935' }]}>
-                  {toPersianDigit(request.discount)}٪ تخفیف ویژه برای مدل
-                </Text>
-              </View>
-            )}
-          </Card>
-
           {/* ═══════════ کارت توضیحات ═══════════ */}
           <Card variant="elevated" padding={16} radius={18}>
             <SectionHeader
