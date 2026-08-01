@@ -170,8 +170,8 @@ export default function FilterModal({
           {/* 🆕 Dropdown زیردسته - فقط اگر دسته اصلی انتخاب شده باشد */}
           {mainCategory !== 'all' && availableSubCategories.length > 0 && (
             <Dropdown
-              label="زیردسته"
-              placeholder="انتخاب زیردسته"
+              label="نوع خدمت"
+              placeholder="همه"
               value={subCategory}
               options={availableSubCategories.map(c => ({ id: c.id, label: c.label }))}
               onSelect={setSubCategory}
@@ -210,30 +210,6 @@ export default function FilterModal({
             onSelect={setCity}
           />
         </View>
-
-        <Divider spacing={16} />
-
-        {/* ═══════ بخش ۴: نوع کسب‌وکار ═══════ */}
-        <View style={s.section}>
-          <View style={s.sectionHeader}>
-            <View style={[s.sectionIconBox, { backgroundColor: '#4CAF5018' }]}>
-              <Icon name="store" size={18} color="#4CAF50" />
-            </View>
-            <Text style={[s.sectionTitle, { color: '#333' }]}>
-              نوع کسب‌وکار
-            </Text>
-          </View>
-          
-          <Dropdown
-            label="نوع کسب‌وکار"
-            placeholder="انتخاب نوع کسب‌وکار"
-            value={businessType}
-            options={BUSINESS_TYPES}
-            onSelect={setBusinessType}
-          />
-        </View>
-
-        <Divider spacing={20} />
       </ScrollView>
     </BottomSheet>
   );
