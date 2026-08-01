@@ -242,16 +242,6 @@ export default function LineRentalScreen({ navigation }) {
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {myAds.length === 0 && (
-        <TouchableOpacity
-          style={[s.fab, { backgroundColor: colors.primary }]}
-          onPress={handleCreate}
-          activeOpacity={0.85}
-        >
-          <Icon name="add" size={28} color="#fff" />
-        </TouchableOpacity>
-      )}
-
       <CreateLineRentalAdSheet
         visible={createSheetVisible}
         onClose={() => {
