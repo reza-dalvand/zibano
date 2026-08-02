@@ -11,13 +11,11 @@ import {
   Image,
   Animated,
   TouchableWithoutFeedback,
-  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { toPersianDigit } from '../../../utils/numberUtils';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
-
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_WIDTH = SCREEN_WIDTH * 0.94;
@@ -33,8 +31,12 @@ export default function PortfolioDetailModal({
 }) {
   const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const flatListRef = useRef(null);
+  const scrollViewRef = useRef(null);
   const { onRequestClose } = useModalBackHandler(visible, onClose);
+
+  // 🎯 Flag برای جلوگیری از تداخل اسکرول دستی و فلش‌ها
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef(null);
 
   // انیمیشن‌ها
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -43,51 +45,161 @@ export default function PortfolioDetailModal({
 
   useEffect(() => {
     setCurrentIndex(0);
+    isScrollingRef.current = false;
   }, [portfolio, visible]);
 
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-        Animated.spring(modalScale, { toValue: 1, bounciness: 8, speed: 18, useNativeDriver: true }),
-        Animated.timing(modalOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(modalScale, {
+          toValue: 1,
+          bounciness: 8,
+          speed: 18,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(backdropOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-        Animated.timing(modalScale, { toValue: 0.85, duration: 200, useNativeDriver: true }),
-        Animated.timing(modalOpacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+          toValue: 0.85,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
       ]).start();
     }
   }, [visible]);
+
+  // Cleanup timeout
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!portfolio || !visible) return null;
 
   const images = portfolio.images || [portfolio.coverImage];
 
-  // 🎯 معکوس کردن آرایه برای حل مشکل RTL
-  const reversedImages = [...images].reverse();
-
   // پیدا کردن نام خدمت مرتبط
   const getServiceName = () => {
     if (!portfolio.serviceId || !services) return null;
-    const service = services.find(s => s.id === portfolio.serviceId);
+    const service = services.find((s) => s.id === portfolio.serviceId);
     return service?.name || null;
   };
-
   const serviceName = getServiceName();
 
-  // 🎯 هندلر اسکرول - تبدیل ایندکس معکوس به ایندکس واقعی
+  // 🎯 هندلر اسکرول - فقط وقتی کاربر دستی اسکرول می‌کند
   const handleScroll = (event) => {
-    const slideSize = event.nativeEvent.layoutMeasurement?.width || MODAL_WIDTH;
-    if (slideSize === 0) return;
-    const reversedIndex = Math.round(event.nativeEvent.contentOffset.x / slideSize);
-    const actualIndex = reversedImages.length - 1 - reversedIndex;
-    setCurrentIndex(Math.max(0, Math.min(actualIndex, images.length - 1)));
+    // اگر اسکرول از طرف فلش‌هاست، ignore کن
+    if (isScrollingRef.current) return;
+
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / MODAL_WIDTH);
+    const clampedIndex = Math.max(0, Math.min(newIndex, images.length - 1));
+
+    if (clampedIndex !== currentIndex) {
+      setCurrentIndex(clampedIndex);
+    }
+  };
+
+  // 🎯 هندلر پایان اسکرول دستی
+  const handleMomentumScrollEnd = (event) => {
+    if (isScrollingRef.current) {
+      // اسکرول از فلش‌ها بود، flag را ریست کن
+      isScrollingRef.current = false;
+      return;
+    }
+
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / MODAL_WIDTH);
+    const clampedIndex = Math.max(0, Math.min(newIndex, images.length - 1));
+    setCurrentIndex(clampedIndex);
+  };
+
+  // 🎯 فلش قبلی - در RTL سمت راست
+  const goToPrev = () => {
+    if (currentIndex <= 0 || isScrollingRef.current) return;
+
+    const prevIndex = currentIndex - 1;
+    const offsetX = prevIndex * MODAL_WIDTH;
+
+    // ست کردن flag قبل از اسکرول
+    isScrollingRef.current = true;
+    setCurrentIndex(prevIndex);
+
+    // اسکرول با انیمیشن
+    scrollViewRef.current?.scrollTo({
+      x: offsetX,
+      y: 0,
+      animated: true,
+    });
+
+    // ریست flag بعد از اتمام انیمیشن
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 400);
+  };
+
+  // 🎯 فلش بعدی - در RTL سمت چپ
+  const goToNext = () => {
+    if (currentIndex >= images.length - 1 || isScrollingRef.current) return;
+
+    const nextIndex = currentIndex + 1;
+    const offsetX = nextIndex * MODAL_WIDTH;
+
+    // ست کردن flag قبل از اسکرول
+    isScrollingRef.current = true;
+    setCurrentIndex(nextIndex);
+
+    // اسکرول با انیمیشن
+    scrollViewRef.current?.scrollTo({
+      x: offsetX,
+      y: 0,
+      animated: true,
+    });
+
+    // ریست flag بعد از اتمام انیمیشن
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 400);
   };
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onRequestClose} statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onRequestClose}
+      statusBarTranslucent
+    >
       {/* Backdrop */}
       <TouchableWithoutFeedback onPress={onClose}>
         <Animated.View style={[s.backdrop, { opacity: backdropOpacity }]} />
@@ -109,58 +221,99 @@ export default function PortfolioDetailModal({
           },
         ]}
       >
-        {/* ═══ هدر ═══ */}
-        <View style={[s.header, { backgroundColor: colors.cardBackground, borderBottomColor: colors.border }]}>
+        {/* ═══ هدر - با دکمه‌های بزرگ‌تر ═══ */}
+        <View
+          style={[
+            s.header,
+            {
+              backgroundColor: colors.cardBackground,
+              borderBottomColor: colors.border,
+            },
+          ]}
+        >
           <TouchableOpacity
             onPress={onClose}
-            style={[s.headerBtn, { backgroundColor: colors.background, borderColor: colors.border }]}
+            style={[
+              s.headerBtn,
+              { backgroundColor: colors.background, borderColor: colors.border },
+            ]}
           >
-            <Icon name="close" size={20} color={colors.textMain} />
+            <Icon name="close" size={22} color={colors.textMain} />
           </TouchableOpacity>
-
           <View style={s.headerCenter}>
-            <Text style={[s.headerTitle, { color: colors.textMain }]} numberOfLines={1}>
+            <Text
+              style={[s.headerTitle, { color: colors.textMain }]}
+              numberOfLines={1}
+            >
               {portfolio.title || 'نمونه‌کار'}
             </Text>
             <Text style={[s.headerSubtitle, { color: colors.textSecondary }]}>
               {toPersianDigit(currentIndex + 1)} از {toPersianDigit(images.length)}
             </Text>
           </View>
-
           <TouchableOpacity
-            onPress={() => { onClose(); setTimeout(() => onEdit?.(portfolio), 300); }}
-            style={[s.headerBtn, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '40' }]}
+            onPress={() => {
+              onClose();
+              setTimeout(() => onEdit?.(portfolio), 300);
+            }}
+            style={[
+              s.headerBtn,
+              {
+                backgroundColor: colors.primary + '15',
+                borderColor: colors.primary + '40',
+              },
+            ]}
           >
-            <Icon name="edit" size={18} color={colors.primary} />
+            <Icon name="edit" size={20} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
-        {/* ═══ گالری تصاویر - با FlatList معکوس شده برای حل RTL ═══ */}
+        {/* ═══ گالری تصاویر - با ScrollView ═══ */}
         <View style={s.galleryWrapper}>
-          <FlatList
-            ref={flatListRef}
-            data={reversedImages}
-            keyExtractor={(_, i) => `img-${i}`}
+          <ScrollView
+            ref={scrollViewRef}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
             scrollEventThrottle={16}
-            // 🎯 شروع از انتهای لیست معکوس (= ابتدای لیست واقعی)
-            initialScrollIndex={reversedImages.length - 1}
-            getItemLayout={(data, index) => ({
-              length: MODAL_WIDTH,
-              offset: MODAL_WIDTH * index,
-              index,
-            })}
-            renderItem={({ item }) => (
+            decelerationRate="fast"
+            snapToInterval={MODAL_WIDTH}
+            disableIntervalMomentum={false}
+            contentContainerStyle={s.galleryContent}
+          >
+            {images.map((img, index) => (
               <Image
-                source={{ uri: item }}
+                key={`img-${index}`}
+                source={{ uri: img }}
                 style={s.galleryImage}
                 resizeMode="cover"
               />
-            )}
-          />
+            ))}
+          </ScrollView>
+
+          {/* 🎯 فلش قبلی - سمت راست (در RTL) - آیکون chevron-right */}
+          {images.length > 1 && currentIndex > 0 && (
+            <TouchableOpacity
+              onPress={goToPrev}
+              activeOpacity={0.85}
+              style={[s.arrowBtn, s.arrowRight]}
+            >
+              <Icon name="chevron-left" size={28} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          {/* 🎯 فلش بعدی - سمت چپ (در RTL) - آیکون chevron-left */}
+          {images.length > 1 && currentIndex < images.length - 1 && (
+            <TouchableOpacity
+              onPress={goToNext}
+              activeOpacity={0.85}
+              style={[s.arrowBtn, s.arrowLeft]}
+            >
+              <Icon name="chevron-right" size={28} color="#fff" />
+            </TouchableOpacity>
+          )}
 
           {/* شمارنده تصاویر */}
           {images.length > 1 && (
@@ -182,7 +335,8 @@ export default function PortfolioDetailModal({
                 style={[
                   s.dot,
                   {
-                    backgroundColor: i === currentIndex ? colors.primary : colors.border,
+                    backgroundColor:
+                      i === currentIndex ? colors.primary : colors.border,
                     width: i === currentIndex ? 20 : 6,
                   },
                 ]}
@@ -197,9 +351,19 @@ export default function PortfolioDetailModal({
           contentContainerStyle={s.scrollContent}
         >
           {/* عنوان و دسته‌بندی */}
-          <View style={[s.contentCard, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}>
+          <View
+            style={[
+              s.contentCard,
+              { backgroundColor: colors.cardBackground, borderColor: colors.border },
+            ]}
+          >
             <View style={s.contentHeader}>
-              <View style={[s.contentIconBox, { backgroundColor: colors.primary + '15' }]}>
+              <View
+                style={[
+                  s.contentIconBox,
+                  { backgroundColor: colors.primary + '15' },
+                ]}
+              >
                 <Icon name="photo-library" size={18} color={colors.primary} />
               </View>
               <View style={s.contentTitleCol}>
@@ -216,7 +380,6 @@ export default function PortfolioDetailModal({
                 )}
               </View>
             </View>
-
             {portfolio.description ? (
               <Text style={[s.descriptionText, { color: colors.textSecondary }]}>
                 {portfolio.description}
@@ -229,7 +392,15 @@ export default function PortfolioDetailModal({
           </View>
 
           {/* راهنما */}
-          <View style={[s.hintCard, { backgroundColor: colors.primary + '08', borderColor: colors.primary + '25' }]}>
+          <View
+            style={[
+              s.hintCard,
+              {
+                backgroundColor: colors.primary + '08',
+                borderColor: colors.primary + '25',
+              },
+            ]}
+          >
             <Icon name="info-outline" size={16} color={colors.primary} />
             <Text style={[s.hintText, { color: colors.textSecondary }]}>
               برای ویرایش این نمونه‌کار، روی آیکون ویرایش در بالای صفحه ضربه بزنید
@@ -257,20 +428,21 @@ const s = StyleSheet.create({
     shadowRadius: 25,
     elevation: 15,
   },
+
   // ═══ هدر ═══
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    gap: 8,
+    gap: 10,
   },
   headerBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -281,19 +453,23 @@ const s = StyleSheet.create({
     gap: 2,
   },
   headerTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Vazir-Bold',
   },
   headerSubtitle: {
     fontSize: 11,
     fontFamily: 'Vazir',
   },
+
   // ═══ گالری ═══
   galleryWrapper: {
     width: '100%',
     height: GALLERY_HEIGHT,
     backgroundColor: '#000',
     position: 'relative',
+  },
+  galleryContent: {
+    // هیچ padding ای نمی‌خوایم
   },
   galleryImage: {
     width: MODAL_WIDTH,
@@ -310,12 +486,36 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
+    zIndex: 5,
   },
   imageCounterText: {
     color: '#fff',
     fontSize: 11,
     fontFamily: 'Vazir-Bold',
   },
+
+  // 🎯 فلش‌های navigation
+  arrowBtn: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -24,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  arrowLeft: {
+    left: 12,
+  },
+  arrowRight: {
+    right: 12,
+  },
+
   // ═══ Indicators ═══
   indicators: {
     flexDirection: 'row',
@@ -329,6 +529,7 @@ const s = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
+
   // ═══ محتوا ═══
   scrollContent: {
     padding: 14,

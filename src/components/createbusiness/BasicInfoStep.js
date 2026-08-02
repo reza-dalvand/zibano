@@ -445,10 +445,6 @@ export default function BasicInfoStep({ formData, onUpdate, onValidationChange }
           iconColor="#E53935"
         />
 
-        <Text style={[s.sectionHint, { color: colors.textSecondary }]}>
-          استان و شهر را انتخاب کنید و موقعیت دقیق سالن را روی نقشه مشخص کنید
-        </Text>
-
         <Dropdown
           label="استان *"
           placeholder="انتخاب استان"

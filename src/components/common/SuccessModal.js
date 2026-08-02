@@ -383,7 +383,7 @@ const s = StyleSheet.create({
     gap: 10,
     width: '100%',
     paddingVertical: 15,
-    paddingHorizontal: 17,
+    paddingHorizontal: 25,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },

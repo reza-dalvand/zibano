@@ -3,18 +3,26 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../stores/useThemeStore';
-import { toPersianDigit, formatPrice } from '../../../utils/numberUtils';
+import { toPersianDigit } from '../../../utils/numberUtils';
 
-export default function PortfolioCard({ portfolio, onPress, onEdit, onDelete, serviceName }) {
+export default function PortfolioCard({
+  portfolio,
+  onPress,
+  onEdit,
+  onDelete,
+  serviceName,
+}) {
   const { colors } = useTheme();
-
   const imageCount = portfolio.images?.length || 1;
 
   return (
     <TouchableOpacity
       activeOpacity={0.88}
       onPress={() => onPress(portfolio)}
-      style={[s.card, { backgroundColor: colors.cardBackground, borderColor: colors.border }]}
+      style={[
+        s.card,
+        { backgroundColor: colors.cardBackground, borderColor: colors.border },
+      ]}
     >
       {/* تصویر کاور */}
       <View style={s.imageContainer}>
@@ -23,24 +31,24 @@ export default function PortfolioCard({ portfolio, onPress, onEdit, onDelete, se
           style={s.image}
           resizeMode="cover"
         />
-
-        {/* گرادیان پایین */}
         <View style={s.imageGradient} />
 
         {/* Badge تعداد تصاویر */}
         {imageCount > 1 && (
           <View style={s.imageCountBadge}>
-            <Icon name="collections" size={11} color="#fff" />
-            <Text style={s.imageCountText}>
-              {toPersianDigit(imageCount)}
-            </Text>
+            <Icon name="collections" size={10} color="#fff" />
+            <Text style={s.imageCountText}>{toPersianDigit(imageCount)}</Text>
           </View>
         )}
 
-        {/* عنوان روی تصویر */}
+        {/* 🎯 عنوان روی تصویر - فقط یک خط */}
         {portfolio.title && (
           <View style={s.titleOverlay}>
-            <Text style={s.titleText} numberOfLines={1}>
+            <Text
+              style={s.titleText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {portfolio.title}
             </Text>
           </View>
@@ -52,8 +60,12 @@ export default function PortfolioCard({ portfolio, onPress, onEdit, onDelete, se
         {/* نام خدمت مرتبط */}
         {serviceName && (
           <View style={[s.serviceRow, { backgroundColor: colors.primary + '10' }]}>
-            <Icon name="spa" size={11} color={colors.primary} />
-            <Text style={[s.serviceName, { color: colors.primary }]} numberOfLines={1}>
+            <Icon name="spa" size={10} color={colors.primary} />
+            <Text
+              style={[s.serviceName, { color: colors.primary }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {serviceName}
             </Text>
           </View>
@@ -61,7 +73,10 @@ export default function PortfolioCard({ portfolio, onPress, onEdit, onDelete, se
 
         {/* توضیحات کوتاه */}
         {portfolio.description && (
-          <Text style={[s.description, { color: colors.textSecondary }]} numberOfLines={2}>
+          <Text
+            style={[s.description, { color: colors.textSecondary }]}
+            numberOfLines={2}
+          >
             {portfolio.description}
           </Text>
         )}
@@ -69,14 +84,20 @@ export default function PortfolioCard({ portfolio, onPress, onEdit, onDelete, se
         {/* دکمه‌های اکشن */}
         <View style={s.actions}>
           <TouchableOpacity
-            onPress={(e) => { e.stopPropagation?.(); onEdit(portfolio); }}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              onEdit(portfolio);
+            }}
             style={[s.actionBtn, { backgroundColor: colors.primary + '15' }]}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Icon name="edit" size={14} color={colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={(e) => { e.stopPropagation?.(); onDelete(portfolio); }}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              onDelete(portfolio);
+            }}
             style={[s.actionBtn, { backgroundColor: '#E5393515' }]}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
@@ -134,6 +155,7 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Vazir-Bold',
   },
+  // 🎯 اصلاح استایل عنوان - یک خط با ellipsis
   titleOverlay: {
     position: 'absolute',
     bottom: 0,
@@ -144,8 +166,9 @@ const s = StyleSheet.create({
   },
   titleText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: 'Vazir-Bold',
+    // یک خط با ellipsis
   },
   info: {
     padding: 10,
@@ -159,10 +182,12 @@ const s = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
     alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   serviceName: {
     fontSize: 10,
     fontFamily: 'Vazir-Bold',
+    flexShrink: 1,
   },
   description: {
     fontSize: 10,
