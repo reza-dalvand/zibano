@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../stores/useThemeStore';
 import SeeAllButton from './SeeAllButton';
 import { useNavigation } from '@react-navigation/native';
-
+import { toPersianDigit, formatPrice } from '../../utils/numberUtils';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 60;
@@ -27,6 +27,8 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
   const flatListRef = useRef(null);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const autoPlayRef = useRef(null);
+  // 🎯 Flag برای جلوگیری از تداخل auto-play و scroll دستی
+  const isAutoScrollingRef = useRef(false);
 
   // 🎯 اسکرول به اولین آیتم بعد از mount
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     return () => clearTimeout(timer);
   }, []);
 
-  // 🎯 AutoPlay با scrollToIndex - حل مشکل بازگشت به اول
+  // 🎯 AutoPlay با حل مشکل بازگشت به اول
   useEffect(() => {
     if (ads.length > 1) {
       autoPlayRef.current = setInterval(() => {
@@ -44,11 +46,34 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
           const nextIndex = (prev + 1) % ads.length;
           const offset = nextIndex * (CARD_WIDTH + CARD_SPACING);
 
-          // استفاده از scrollToOffset با محاسبه دقیق
-          flatListRef.current?.scrollToOffset({
-            offset,
-            animated: true,
-          });
+          // 🎯 تشخیص: آیا از آخرین به اولین می‌رویم؟
+          const isLoopingBack = prev === ads.length - 1 && nextIndex === 0;
+
+          isAutoScrollingRef.current = true;
+
+          if (isLoopingBack) {
+            // ═══════════════════════════════════════════
+            //    🔄 بازگشت به اول (حلقه بی‌نهایت)
+            // ═══════════════════════════════════════════
+            // مرحله ۱: بدون انیمیشن به ابتدای لیست برویم
+            flatListRef.current?.scrollToOffset({
+              offset: 0,
+              animated: false,
+            });
+          } else {
+            // ═══════════════════════════════════════════
+            //    ➡️ حرکت عادی به اسلاید بعدی
+            // ═══════════════════════════════════════════
+            flatListRef.current?.scrollToOffset({
+              offset,
+              animated: true,
+            });
+          }
+
+          // ریست flag بعد از اتمام انیمیشن
+          setTimeout(() => {
+            isAutoScrollingRef.current = false;
+          }, 400);
 
           return nextIndex;
         });
@@ -71,6 +96,19 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
 
   // 🎯 محاسبه index از روی scroll position
   const onScroll = (e) => {
+    // اگر scroll از طرف auto-play است، ignore کن
+    if (isAutoScrollingRef.current) return;
+
+    const slideSize = CARD_WIDTH + CARD_SPACING;
+    const contentOffsetX = e.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / slideSize);
+    setActiveIndex(Math.max(0, Math.min(currentIndex, ads.length - 1)));
+  };
+
+  // 🎯 هندلر پایان momentum scroll (بعد از drag دستی)
+  const onMomentumScrollEnd = (e) => {
+    if (isAutoScrollingRef.current) return;
+
     const slideSize = CARD_WIDTH + CARD_SPACING;
     const contentOffsetX = e.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / slideSize);
@@ -79,12 +117,57 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
 
   // 🎯 کلیک روی dot - رفتن به اسلاید مشخص
   const goToSlide = (index) => {
+    // 🎯 توقف موقت auto-play
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = null;
+    }
+
     const offset = index * (CARD_WIDTH + CARD_SPACING);
+
+    // 🎯 اگر از آخر به اول می‌رویم، بدون انیمیشن
+    const isLoopingBack =
+      activeIndex === ads.length - 1 && index === 0;
+
     flatListRef.current?.scrollToOffset({
       offset,
-      animated: true,
+      animated: !isLoopingBack,
     });
+
     setActiveIndex(index);
+
+    // 🎯 شروع مجدد auto-play بعد از ۲ ثانیه
+    setTimeout(() => {
+      if (ads.length > 1 && !autoPlayRef.current) {
+        autoPlayRef.current = setInterval(() => {
+          setActiveIndex((prev) => {
+            const nextIndex = (prev + 1) % ads.length;
+            const nextOffset = nextIndex * (CARD_WIDTH + CARD_SPACING);
+            const isLoop = prev === ads.length - 1 && nextIndex === 0;
+
+            isAutoScrollingRef.current = true;
+
+            if (isLoop) {
+              flatListRef.current?.scrollToOffset({
+                offset: 0,
+                animated: false,
+              });
+            } else {
+              flatListRef.current?.scrollToOffset({
+                offset: nextOffset,
+                animated: true,
+              });
+            }
+
+            setTimeout(() => {
+              isAutoScrollingRef.current = false;
+            }, 400);
+
+            return nextIndex;
+          });
+        }, autoPlayInterval);
+      }
+    }, 2000);
   };
 
   // 🎯 هندلر کلیک روی کارت
@@ -107,6 +190,49 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
     });
   };
 
+  // 🎯 توقف auto-play وقتی کاربر دستی اسکرول می‌کند
+  const onTouchStart = () => {
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+      autoPlayRef.current = null;
+    }
+  };
+
+  // 🎯 شروع مجدد auto-play بعد از رها کردن
+  const onTouchEnd = () => {
+    setTimeout(() => {
+      if (ads.length > 1 && !autoPlayRef.current) {
+        autoPlayRef.current = setInterval(() => {
+          setActiveIndex((prev) => {
+            const nextIndex = (prev + 1) % ads.length;
+            const nextOffset = nextIndex * (CARD_WIDTH + CARD_SPACING);
+            const isLoop = prev === ads.length - 1 && nextIndex === 0;
+
+            isAutoScrollingRef.current = true;
+
+            if (isLoop) {
+              flatListRef.current?.scrollToOffset({
+                offset: 0,
+                animated: false,
+              });
+            } else {
+              flatListRef.current?.scrollToOffset({
+                offset: nextOffset,
+                animated: true,
+              });
+            }
+
+            setTimeout(() => {
+              isAutoScrollingRef.current = false;
+            }, 400);
+
+            return nextIndex;
+          });
+        }, autoPlayInterval);
+      }
+    }, 3000); // ۳ ثانیه بعد از رها کردن
+  };
+
   if (!ads || ads.length === 0) return null;
 
   return (
@@ -125,7 +251,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
           count={ads.length}
         />
       </View>
-
       <FlatList
         ref={flatListRef}
         data={ads}
@@ -146,11 +271,15 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
             >
               <Image source={{ uri: item.imageUrl }} style={s.image} />
               <View style={s.gradientOverlay} />
-
               {/* Progress Bar */}
               {isActive && (
                 <View style={s.progressContainer}>
-                  <View style={[s.progressBg, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
+                  <View
+                    style={[
+                      s.progressBg,
+                      { backgroundColor: 'rgba(255,255,255,0.25)' },
+                    ]}
+                  >
                     <Animated.View
                       style={[
                         s.progressFill,
@@ -166,7 +295,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
                   </View>
                 </View>
               )}
-
               <View style={s.contentOverlay}>
                 <Text style={s.title} numberOfLines={2}>
                   {item.title}
@@ -198,8 +326,11 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         snapToInterval={CARD_WIDTH + CARD_SPACING}
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
+        onMomentumScrollEnd={onMomentumScrollEnd}
         scrollEventThrottle={16}
         onScrollToIndexFailed={onScrollToIndexFailed}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         getItemLayout={(data, index) => ({
           length: CARD_WIDTH + CARD_SPACING,
           offset: (CARD_WIDTH + CARD_SPACING) * index,
@@ -207,7 +338,6 @@ export default function AdSlider({ ads = [], onPress, autoPlayInterval = 4000 })
         })}
         contentContainerStyle={s.flatListContent}
       />
-
       {/* Dots */}
       <View style={s.dotsContainer}>
         {ads.map((_, i) => (
