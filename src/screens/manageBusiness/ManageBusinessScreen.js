@@ -170,8 +170,8 @@ export default function ManageBusinessScreen({ navigation }) {
     },
     {
       id: 'lineRental',
-      label: 'اجاره لاین',
-      subtitle: 'اجاره لاین و جذب همکار متخصص',
+      label: 'اگهی همکاری',
+      subtitle: 'اجاره محیط کاری و یا جذب متخصص',
       icon: 'storefront',
       route: 'LineRental',
       gradient: ['#667eea', '#764ba2'],

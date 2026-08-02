@@ -199,7 +199,7 @@ export default function LineRentalScreen({ navigation }) {
           <View style={[s.heroIconBox, { backgroundColor: colors.primary + '15' }]}>
             <Icon name="storefront" size={32} color={colors.primary} />
           </View>
-          <Text style={[s.heroTitle, { color: colors.textMain }]}>اجاره لاین سالن</Text>
+          <Text style={[s.heroTitle, { color: colors.textMain }]}>اگهی همکاری</Text>
           <Text style={[s.heroSubtitle, { color: colors.textSecondary }]}>
             برای مشاهده جزئیات، روی هر آگهی ضربه بزنید
           </Text>
@@ -219,9 +219,9 @@ export default function LineRentalScreen({ navigation }) {
               <Icon name="add" size={22} color="#fff" />
             </View>
             <View style={s.createBtnTextCol}>
-              <Text style={s.createBtnTitle}>ثبت آگهی لاین جدید</Text>
+              <Text style={s.createBtnTitle}>ثبت آگهی همکاری </Text>
               <Text style={s.createBtnSubtitle}>
-                لاین خالی سالن خود را به متخصصان اجاره دهید
+                جذب متخصص برای محیط کاری  
               </Text>
             </View>
             <Icon name="chevron-left" size={24} color="#fff" />
