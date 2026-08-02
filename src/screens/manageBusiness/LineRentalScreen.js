@@ -19,6 +19,7 @@ import {
   LineRentalStats,
   LineRentalEmptyState,
 } from '../../components/manageBusiness/lineRental';
+import LineRentalDetailModal from '../../components/manageBusiness/lineRental/LineRentalDetailModal';
 import { toJalaali } from '../../utils/dateUtils';
 
 // ═══════════ داده‌های موقت با تاریخ‌های شمسی کامل ═══════════
@@ -38,8 +39,8 @@ const MOCK_MY_ADS = [
     description: 'لاین ناخن کامل با میز حرفه‌ای، دستگاه UV/LED، و مجموعه کامل لاک ژل. مناسب ناخن‌کار حرفه‌ای با سابقه کار حداقل ۲ سال.',
     lineImage: 'https://picsum.photos/400/400?random=70',
     status: 'active',
-    createdAt: '1405/04/11',   // 🎯 تاریخ ایجاد
-    expiresAt: '1405/05/11',   // 🎯 تاریخ انقضا (یک ماه بعد)
+    createdAt: '1405/04/11',
+    expiresAt: '1405/05/11',
     isOwner: true,
     businessName: 'سالن زیبایی نیلارام',
     city: 'تهران، سعادت‌آباد',
@@ -102,7 +103,7 @@ const MOCK_MY_ADS = [
     priceDisplay: '۸,۰۰۰,۰۰۰ تومان',
     description: 'لاین لیزر با دستگاه الکساندرایت ۲۰۲۴، اتاق اختصاصی با تهویه مناسب و تجهیزات استریل. مناسب پزشکان و متخصصان پوست.',
     lineImage: 'https://picsum.photos/400/400?random=73',
-    status: 'active',
+    status: 'inactive',
     createdAt: '1405/03/11',
     expiresAt: '1405/04/11',
     isOwner: true,
@@ -118,6 +119,10 @@ export default function LineRentalScreen({ navigation }) {
   const [createSheetVisible, setCreateSheetVisible] = useState(false);
   const [editingAd, setEditingAd] = useState(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
+  
+  // 🆕 state برای مدال جزئیات
+  const [selectedAd, setSelectedAd] = useState(null);
+  const [detailVisible, setDetailVisible] = useState(false);
 
   const handleCreate = () => {
     setEditingAd(null);
@@ -130,25 +135,14 @@ export default function LineRentalScreen({ navigation }) {
   };
 
   const handleDelete = (ad) => {
-    Alert.alert(
-      'حذف آگهی لاین',
-      `آیا از حذف "${ad.title}" مطمئن هستید؟`,
-      [
-        { text: 'انصراف', style: 'cancel' },
-        {
-          text: 'حذف',
-          style: 'destructive',
-          onPress: () => {
-            setMyAds((prev) => prev.filter((a) => a.id !== ad.id));
-            setToast({
-              visible: true,
-              message: 'آگهی لاین با موفقیت حذف شد',
-              type: 'success',
-            });
-          },
-        },
-      ]
-    );
+    setMyAds((prev) => prev.filter((a) => a.id !== ad.id));
+    setDetailVisible(false);
+    setSelectedAd(null);
+    setToast({
+      visible: true,
+      message: 'آگهی لاین با موفقیت حذف شد',
+      type: 'success',
+    });
   };
 
   const handleSave = (adData) => {
@@ -162,18 +156,14 @@ export default function LineRentalScreen({ navigation }) {
         type: 'success',
       });
     } else {
-      // 🎯 اضافه کردن تاریخ ایجاد و انقضا خودکار برای آگهی جدید
       const now = new Date();
       const jalaali = toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
       const createdAt = `${jalaali.jy}/${String(jalaali.jm).padStart(2, '0')}/${String(jalaali.jd).padStart(2, '0')}`;
-      
-      // محاسبه تاریخ انقضا (30 روز بعد)
       const expireDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
       const expireJalaali = toJalaali(expireDate.getFullYear(), expireDate.getMonth() + 1, expireDate.getDate());
       const expiresAt = `${expireJalaali.jy}/${String(expireJalaali.jm).padStart(2, '0')}/${String(expireJalaali.jd).padStart(2, '0')}`;
-      
-      setMyAds((prev) => [{ 
-        ...adData, 
+      setMyAds((prev) => [{
+        ...adData,
         isOwner: true,
         createdAt,
         expiresAt,
@@ -184,6 +174,17 @@ export default function LineRentalScreen({ navigation }) {
         type: 'success',
       });
     }
+  };
+
+  // 🆕 handlers مدال
+  const openDetail = (ad) => {
+    setSelectedAd(ad);
+    setDetailVisible(true);
+  };
+
+  const closeDetail = () => {
+    setDetailVisible(false);
+    setTimeout(() => setSelectedAd(null), 300);
   };
 
   return (
@@ -200,12 +201,14 @@ export default function LineRentalScreen({ navigation }) {
           </View>
           <Text style={[s.heroTitle, { color: colors.textMain }]}>اجاره لاین سالن</Text>
           <Text style={[s.heroSubtitle, { color: colors.textSecondary }]}>
-            لاین‌های خالی سالن خود را به متخصصان اجاره دهید و درآمد خود را افزایش دهید
+            برای مشاهده جزئیات، روی هر آگهی ضربه بزنید
           </Text>
         </View>
+        
         <View style={s.lineState}>
           {myAds.length > 0 && <LineRentalStats ads={myAds} />}
         </View>
+        
         {myAds.length > 0 && (
           <TouchableOpacity
             onPress={handleCreate}
@@ -224,15 +227,14 @@ export default function LineRentalScreen({ navigation }) {
             <Icon name="chevron-left" size={24} color="#fff" />
           </TouchableOpacity>
         )}
-
+        
         <View style={s.listContainer}>
           {myAds.length > 0 ? (
             myAds.map((ad) => (
               <LineRentalAdCard
                 key={ad.id}
                 ad={ad}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                onPress={openDetail}
               />
             ))
           ) : (
@@ -241,7 +243,17 @@ export default function LineRentalScreen({ navigation }) {
         </View>
         <View style={{ height: 120 }} />
       </ScrollView>
-
+      
+      {myAds.length === 0 && (
+        <TouchableOpacity
+          style={[s.fab, { backgroundColor: colors.primary }]}
+          onPress={handleCreate}
+          activeOpacity={0.85}
+        >
+          <Icon name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
+      
       <CreateLineRentalAdSheet
         visible={createSheetVisible}
         onClose={() => {
@@ -251,7 +263,16 @@ export default function LineRentalScreen({ navigation }) {
         onSave={handleSave}
         editingAd={editingAd}
       />
-
+      
+      {/* 🆕 مدال جزئیات */}
+      <LineRentalDetailModal
+        visible={detailVisible}
+        ad={selectedAd}
+        onClose={closeDetail}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+      
       <Toast
         visible={toast.visible}
         message={toast.message}
@@ -262,7 +283,6 @@ export default function LineRentalScreen({ navigation }) {
     </ScreenWrapper>
   );
 }
-
 
 const s = StyleSheet.create({
   scrollContent: {
@@ -311,7 +331,7 @@ const s = StyleSheet.create({
   },
   lineState: {
     borderRadius: 14,
-    paddingHorizontal:16,
+    paddingHorizontal: 16,
   },
   createBtnIconBox: {
     width: 44,
@@ -337,7 +357,7 @@ const s = StyleSheet.create({
   },
   listContainer: {
     paddingHorizontal: 16,
-    gap: 14,
+    gap: 4,
   },
   fab: {
     position: 'absolute',
